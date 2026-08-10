@@ -4,8 +4,9 @@ import { loadEnv } from 'vite';
 
 import sanity from '@sanity/astro';
 import netlify from '@astrojs/netlify';
+import react from '@astrojs/react';
 
-const { SANITY_STUDIO_PROJECT_ID, SANITY_STUDIO_DATASET } = loadEnv(
+const { PUBLIC_SANITY_STUDIO_PROJECT_ID, PUBLIC_SANITY_STUDIO_DATASET } = loadEnv(
   process.env.NODE_ENV ?? 'development',
   process.cwd(),
   ''
@@ -17,10 +18,12 @@ export default defineConfig({
   adapter: netlify(),
   integrations: [
     sanity({
-      projectId: SANITY_STUDIO_PROJECT_ID,
-      dataset: SANITY_STUDIO_DATASET,
+      projectId: PUBLIC_SANITY_STUDIO_PROJECT_ID,
+      dataset: PUBLIC_SANITY_STUDIO_DATASET,
       apiVersion: '2026-08-10',
       useCdn: true,
+      studioBasePath: '/admin',
     }),
+    react(),
   ],
 });
