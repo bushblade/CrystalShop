@@ -1,17 +1,30 @@
 ---
+import { sanityClient } from 'sanity:client'
 
+interface Product {
+	_id: string
+	name: string
+	price: number
+}
+
+const products = await sanityClient.fetch<Product[]>(
+	`*[_type == "product"]{_id, name, price} | order(name asc)`
+)
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>Crystal Shop</title>
 	</head>
 	<body>
-		<h1>Astro</h1>
+		<h1>Crystal Shop</h1>
+		<p>Products loaded from Sanity:</p>
+		<ul>
+			{products.map((product) => <li>{product.name} — £{product.price}</li>)}
+		</ul>
 	</body>
 </html>

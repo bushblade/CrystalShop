@@ -12,6 +12,20 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.2.0"
+    "@astrojs/netlify": "^8.2.0",
+    "@sanity/astro": "^3.5.0",
+    "@sanity/client": "^7.26.2",
+    "astro": "^7.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-is": "^19.2.8",
+    "sanity": "^6.9.1",
+    "styled-components": "^6.5.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.2.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1"
   }
 }

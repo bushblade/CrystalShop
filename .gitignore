@@ -1,5 +1,9 @@
 # build output
 dist/
+# netlify output
+.netlify/
+# database backups
+backups/
 # generated types
 .astro/
 
