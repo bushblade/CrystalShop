@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "lint": "biome check .",
     "typegen": "sanity schemas extract --force --enforce-required-fields && sanity typegen generate"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@biomejs/biome": "^2.5.7",
     "@types/node": "^26.2.0",
     "typescript": "^6.0.3",
     "vite": "^8.2.1"
