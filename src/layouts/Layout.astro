@@ -9,11 +9,14 @@ import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
 import '../styles/global.css'
 
-interface LayoutProps {
+interface Props {
 	title?: string
+	description?: string
 }
 
-const { title = 'Eclipsia Crystals' } = Astro.props
+const { title = 'Eclipsia Crystals', description = 'Natural crystals, handpicked for you.' } =
+	Astro.props
+const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 ---
 
 <!doctype html>
@@ -23,9 +26,55 @@ const { title = 'Eclipsia Crystals' } = Astro.props
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+		<meta name="description" content={description} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:type" content="website" />
 		<title>{title}</title>
+		{snipcartApiKey ? (
+			<>
+				<link rel="preconnect" href="https://app.snipcart.com" />
+				<link rel="preconnect" href="https://cdn.snipcart.com" />
+				<link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.css" />
+				<script
+					is:inline
+					async
+					src="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.js"
+					data-api-key={snipcartApiKey}
+				/>
+			</>
+		) : null}
 	</head>
-	<body>
+	<body class="flex min-h-screen flex-col">
+		<header class="border-b border-stone-200">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+				<a href="/" class="font-display text-2xl font-semibold text-stone-900">Eclipsia Crystals</a>
+				<div class="flex items-center gap-6 text-sm font-medium text-stone-700">
+					<a href="/shop" class="transition-colors hover:text-violet-700">Shop</a>
+					<a href="/about" class="transition-colors hover:text-violet-700">About</a>
+					<a href="/contact" class="transition-colors hover:text-violet-700">Contact</a>
+					{snipcartApiKey ? (
+						<button
+							type="button"
+							class="snipcart-checkout rounded-full bg-violet-700 px-4 py-1.5 text-white transition-colors hover:bg-violet-800"
+						>
+							Cart <span class="snipcart-items-count">0</span>
+						</button>
+					) : null}
+				</div>
+			</nav>
+		</header>
 		<slot />
+		<footer class="mt-auto border-t border-stone-200 py-8">
+			<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-stone-500 sm:flex-row">
+				<p>© {new Date().getFullYear()} Eclipsia Crystals</p>
+				<nav class="flex gap-6">
+					<a href="/shop" class="transition-colors hover:text-violet-700">Shop</a>
+					<a href="/about" class="transition-colors hover:text-violet-700">About</a>
+					<a href="/contact" class="transition-colors hover:text-violet-700">Contact</a>
+					<a href="/terms" class="transition-colors hover:text-violet-700">Terms</a>
+				</nav>
+			</div>
+		</footer>
 	</body>
 </html>

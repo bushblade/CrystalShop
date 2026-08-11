@@ -1,0 +1,37 @@
+---
+import type { CATEGORIES_QUERY_RESULT } from '../../../sanity.types'
+
+interface Props {
+	categories: CATEGORIES_QUERY_RESULT
+	activeSlug?: string | null
+}
+
+const { categories, activeSlug = null } = Astro.props
+---
+
+<nav class="flex flex-wrap gap-2" aria-label="Categories">
+	<a
+		href="/shop"
+		class:list={[
+			'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+			activeSlug === null
+				? 'border-violet-700 bg-violet-700 text-white'
+				: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
+		]}
+	>
+		All
+	</a>
+	{categories.map((category) => (
+		<a
+			href={`/shop/categories/${category.slug}`}
+			class:list={[
+				'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+				activeSlug === category.slug
+					? 'border-violet-700 bg-violet-700 text-white'
+					: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
+			]}
+		>
+			{category.name}
+		</a>
+	))}
+</nav>

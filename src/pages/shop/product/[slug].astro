@@ -1,0 +1,122 @@
+---
+import { sanityClient } from 'sanity:client'
+import Layout from '../../../layouts/Layout.astro'
+import { formatPrice } from '../../../lib/format'
+import { imageUrl } from '../../../lib/images'
+import { PRODUCT_BY_SLUG_QUERY } from '../../../queries/sanity'
+
+const { slug } = Astro.params
+
+const product = await sanityClient.fetch(PRODUCT_BY_SLUG_QUERY, { slug })
+
+if (!product) {
+	return Astro.redirect('/shop')
+}
+
+const isSoldOut = (product.stockLevel ?? 0) === 0
+const productUrl = new URL(`/shop/product/${product.slug}`, Astro.site ?? Astro.url).href
+const heroImage = product.images?.[0]
+---
+
+<Layout title={`${product.name} | Eclipsia Crystals`} description={product.description ?? undefined}>
+	<main class="mx-auto max-w-6xl flex-1 px-4 py-10">
+		<nav class="text-sm text-stone-500" aria-label="Breadcrumb">
+			<a href="/shop" class="transition-colors hover:text-violet-700">Shop</a>
+			<span aria-hidden="true"> / </span>
+			<a
+				href={`/shop/categories/${product.category.slug}`}
+				class="transition-colors hover:text-violet-700"
+			>
+				{product.category.name}
+			</a>
+			<span aria-hidden="true"> / </span>
+			<span class="text-stone-800">{product.name}</span>
+		</nav>
+
+		<div class="mt-8 grid gap-10 lg:grid-cols-2">
+			<div class="space-y-4">
+				{heroImage?.url ? (
+					<img
+						src={imageUrl(heroImage.url, 1000) ?? undefined}
+						alt={heroImage.alt ?? product.name}
+						width={heroImage.width ?? undefined}
+						height={heroImage.height ?? undefined}
+						class="aspect-square w-full rounded-lg bg-stone-100 object-cover"
+					/>
+				) : null}
+				{product.images && product.images.length > 1 ? (
+					<div class="grid grid-cols-4 gap-4">
+						{product.images.slice(1).map((image) =>
+							image.url ? (
+								<img
+									src={imageUrl(image.url, 300) ?? undefined}
+									alt={image.alt ?? product.name}
+									width={image.width ?? undefined}
+									height={image.height ?? undefined}
+									loading="lazy"
+									class="aspect-square w-full rounded-md bg-stone-100 object-cover"
+								/>
+							) : null,
+						)}
+					</div>
+				) : null}
+			</div>
+
+			<div>
+				{product.isUniquePiece ? (
+					<p class="text-sm font-medium text-violet-700">Unique 1-of-1 piece</p>
+				) : null}
+				<h1 class="mt-2 text-3xl font-semibold text-stone-900">{product.name}</h1>
+				<p class="mt-3 text-2xl font-medium text-stone-900">{formatPrice(product.price)}</p>
+
+				{product.description ? (
+					<p class="mt-6 whitespace-pre-line text-stone-700">{product.description}</p>
+				) : null}
+
+				<dl class="mt-8 space-y-2 text-sm text-stone-600">
+					{product.weightInGrams ? (
+						<div class="flex justify-between border-b border-stone-100 py-2">
+							<dt>Weight</dt>
+							<dd class="text-stone-800">{product.weightInGrams} g</dd>
+						</div>
+					) : null}
+					{product.countryOfOrigin ? (
+						<div class="flex justify-between border-b border-stone-100 py-2">
+							<dt>Country of origin</dt>
+							<dd class="text-stone-800">{product.countryOfOrigin}</dd>
+						</div>
+					) : null}
+					{product.localPickupAvailable ? (
+						<div class="flex justify-between border-b border-stone-100 py-2">
+							<dt>Local pickup</dt>
+							<dd class="text-stone-800">Available</dd>
+						</div>
+					) : null}
+				</dl>
+
+				<div class="mt-8">
+					{isSoldOut ? (
+						<span class="inline-block rounded-full bg-stone-200 px-6 py-3 font-medium text-stone-600">
+							Sold out
+						</span>
+					) : (
+						<button
+							type="button"
+							class="snipcart-add-item rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800"
+							data-item-id={product._id}
+							data-item-name={product.name}
+							data-item-price={product.price}
+							data-item-url={productUrl}
+							data-item-image={imageUrl(heroImage?.url, 600) ?? undefined}
+							data-item-description={product.description ?? ''}
+							data-item-weight={product.weightInGrams}
+							data-item-max-quantity={product.isUniquePiece ? '1' : String(product.stockLevel ?? 1)}
+						>
+							Add to cart
+						</button>
+					)}
+				</div>
+			</div>
+		</div>
+	</main>
+</Layout>

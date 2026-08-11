@@ -1,5 +1,5 @@
-import { defineType, defineField, defineArrayMember } from 'sanity'
 import { PackageIcon } from '@sanity/icons/Package'
+import { defineArrayMember, defineField, defineType } from 'sanity'
 
 const PACKAGING_GROUP = 'packaging'
 const INVENTORY_GROUP = 'inventory'
@@ -73,17 +73,15 @@ export const product = defineType({
 			title: 'Price (£)',
 			type: 'number',
 			validation: (rule) =>
-				rule
-					.required()
-					.positive()
-					.precision(2)
-					.error('Enter a price greater than 0'),
+				rule.required().positive().precision(2).error('Enter a price greater than 0'),
 		}),
 		defineField({
-			name: 'categories',
-			title: 'Categories',
-			type: 'array',
-			of: [defineArrayMember({ type: 'reference', to: [{ type: 'category' }] })],
+			name: 'category',
+			title: 'Category',
+			type: 'reference',
+			to: [{ type: 'category' }],
+			description: 'The type of gemstone this piece is made from',
+			validation: (rule) => rule.required(),
 		}),
 		defineField({
 			name: 'weightInGrams',
@@ -91,8 +89,7 @@ export const product = defineType({
 			type: 'number',
 			group: PACKAGING_GROUP,
 			description: 'Used by Snipcart to calculate shipping costs',
-			validation: (rule) =>
-				rule.required().positive().error('Enter the product weight in grams'),
+			validation: (rule) => rule.required().positive().error('Enter the product weight in grams'),
 		}),
 		defineField({
 			name: 'localPickupAvailable',

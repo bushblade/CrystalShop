@@ -31,6 +31,17 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`. After any schema change, run `pnpm typegen` to regenerate `sanity.types.ts` (and `schema.json`) before committing.
 3. **Product Queries:** Use `src/queries/sanity.ts` for type-safe GROQ queries.
 
+## Routing
+
+- **`/`** — Home. Featured products only (`isFeatured == true`, in stock, max 6), server-rendered with `ProductCard`; "Shop all" CTA → `/shop`.
+- **`/shop`** — All in-stock products, server-rendered, embedding the `CatalogExplorer` React island (`src/components/CatalogExplorer.tsx`). Search / sort / pagination are client-side; state syncs to the URL via `history.replaceState` (`?q=&sort=&page=`).
+- **`/shop/categories/[slug]`** — Server-rendered filtered list for one category (`PRODUCTS_BY_CATEGORY_QUERY`), embedding the same island. Category is a **path**, never a query param. Unknown slug → `Astro.redirect('/shop')`.
+- **`/shop/product/[slug]`** — PDP: gallery, specs, Snipcart buy button (or "Sold out" badge when `stockLevel === 0`). Sold-out items stay reachable here but are filtered out of listings. Unknown slug → redirect to `/shop`.
+- **`/about`, `/contact`, `/terms`** — Hardcoded static Astro pages.
+- **`/admin`** — Embedded Sanity Studio (reserved, from the sanity integration).
+
+Routing rules: product URLs are flat (never nested under category), so re-categorising never breaks links. All listing queries must filter `coalesce(stockLevel, 0) > 0`.
+
 ## Code Style
 
 - **Conditional rendering**: Use ternary operators with `null` over logical AND (`&&`).

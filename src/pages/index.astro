@@ -1,22 +1,41 @@
 ---
 import { sanityClient } from 'sanity:client'
+import ProductCard from '../components/ui/ProductCard'
 import Layout from '../layouts/Layout.astro'
-import { PRODUCTS_QUERY } from '../queries/sanity'
+import { FEATURED_PRODUCTS_QUERY } from '../queries/sanity'
 
-const products = await sanityClient.fetch(PRODUCTS_QUERY)
+const featured = await sanityClient.fetch(FEATURED_PRODUCTS_QUERY)
 ---
 
-<Layout>
-	<main class="mx-auto max-w-4xl px-4 py-12">
-		<h1 class="text-4xl font-semibold text-stone-900">Eclipsia Crystals</h1>
-		<p class="mt-2 text-stone-600">Products loaded from Sanity:</p>
-		<ul class="mt-6 space-y-2">
-			{products.map((product) => (
-				<li class="flex justify-between gap-4 border-b border-stone-200 py-2">
-					<span>{product.name}</span>
-					<span class="font-medium text-stone-800">£{product.price}</span>
-				</li>
-			))}
-		</ul>
+<Layout
+	title="Eclipsia Crystals | Natural Crystals"
+	description="Handpicked natural crystals, each piece unique and ready to be yours."
+>
+	<main class="mx-auto max-w-6xl flex-1 px-4">
+		<section class="py-16 text-center sm:py-24">
+			<h1 class="text-4xl font-semibold text-stone-900 sm:text-5xl">Eclipsia Crystals</h1>
+			<p class="mx-auto mt-4 max-w-xl text-lg text-stone-600">
+				Handpicked natural crystals — clusters, points and one-of-a-kind pieces, each with its own story.
+			</p>
+			<a
+				href="/shop"
+				class="mt-8 inline-block rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800"
+			>
+				Shop all crystals
+			</a>
+		</section>
+
+		{featured.length > 0 ? (
+			<section class="pb-16">
+				<h2 class="font-display text-2xl font-semibold text-stone-900">Featured pieces</h2>
+				<ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
+					{featured.map((product) => (
+						<li>
+							<ProductCard product={product} />
+						</li>
+					))}
+				</ul>
+			</section>
+		) : null}
 	</main>
 </Layout>

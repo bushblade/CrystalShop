@@ -1,0 +1,25 @@
+---
+import { sanityClient } from 'sanity:client'
+import CatalogExplorer from '../../components/CatalogExplorer'
+import CategoryNav from '../../components/ui/CategoryNav.astro'
+import Layout from '../../layouts/Layout.astro'
+import { CATEGORIES_QUERY, IN_STOCK_PRODUCTS_QUERY } from '../../queries/sanity'
+
+const [products, categories] = await Promise.all([
+	sanityClient.fetch(IN_STOCK_PRODUCTS_QUERY),
+	sanityClient.fetch(CATEGORIES_QUERY),
+])
+---
+
+<Layout
+	title="Shop Crystals | Eclipsia Crystals"
+	description="Browse our collection of natural crystals — clusters, points and one-of-a-kind pieces."
+>
+	<main class="mx-auto max-w-6xl flex-1 px-4 py-10">
+		<header class="mb-8">
+			<h1 class="text-3xl font-semibold text-stone-900">All Crystals</h1>
+			<CategoryNav categories={categories} />
+		</header>
+		<CatalogExplorer client:load products={products} initialQuery={Astro.url.search} />
+	</main>
+</Layout>

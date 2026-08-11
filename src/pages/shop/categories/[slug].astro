@@ -1,0 +1,37 @@
+---
+import { sanityClient } from 'sanity:client'
+import CatalogExplorer from '../../../components/CatalogExplorer'
+import CategoryNav from '../../../components/ui/CategoryNav.astro'
+import Layout from '../../../layouts/Layout.astro'
+import {
+	CATEGORIES_QUERY,
+	CATEGORY_BY_SLUG_QUERY,
+	PRODUCTS_BY_CATEGORY_QUERY,
+} from '../../../queries/sanity'
+
+const { slug } = Astro.params
+
+const category = await sanityClient.fetch(CATEGORY_BY_SLUG_QUERY, { slug })
+
+if (!category) {
+	return Astro.redirect('/shop')
+}
+
+const [products, categories] = await Promise.all([
+	sanityClient.fetch(PRODUCTS_BY_CATEGORY_QUERY, { slug }),
+	sanityClient.fetch(CATEGORIES_QUERY),
+])
+---
+
+<Layout
+	title={`${category.name} Crystals | Eclipsia Crystals`}
+	description={`Browse our ${category.name} crystals — handpicked natural pieces.`}
+>
+	<main class="mx-auto max-w-6xl flex-1 px-4 py-10">
+		<header class="mb-8">
+			<h1 class="text-3xl font-semibold text-stone-900">{category.name} Crystals</h1>
+			<CategoryNav categories={categories} activeSlug={category.slug} />
+		</header>
+		<CatalogExplorer client:load products={products} initialQuery={Astro.url.search} />
+	</main>
+</Layout>

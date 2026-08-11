@@ -15,22 +15,6 @@
 export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: schema.json
-export type Category = {
-  _id: string;
-  _type: "category";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  name: string;
-  slug: Slug;
-};
-
-export type Slug = {
-  _type: "slug";
-  current: string;
-  source?: string;
-};
-
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -64,17 +48,29 @@ export type Product = {
     _key: string;
   }>;
   price: number;
-  categories?: Array<
-    {
-      _key: string;
-    } & CategoryReference
-  >;
+  category: CategoryReference;
   weightInGrams: number;
   localPickupAvailable?: boolean;
   countryOfOrigin?: string;
   isUniquePiece?: boolean;
   stockLevel?: number;
   isFeatured?: boolean;
+};
+
+export type Category = {
+  _id: string;
+  _type: "category";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name: string;
+  slug: Slug;
+};
+
+export type Slug = {
+  _type: "slug";
+  current: string;
+  source?: string;
 };
 
 export type SanityImageCrop = {
@@ -191,11 +187,11 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
-  | Category
-  | Slug
   | SanityImageAssetReference
   | CategoryReference
   | Product
+  | Category
+  | Slug
   | SanityImageCrop
   | SanityImageHotspot
   | SanityImagePaletteSwatch
@@ -208,18 +204,133 @@ export type AllSanitySchemaTypes =
   | Geopoint;
 
 // Source: src/queries/sanity.ts
-// Variable: PRODUCTS_QUERY
-// Query: *[_type == "product"]{_id, name, price} | order(name asc)
-export type PRODUCTS_QUERY_RESULT = Array<{
+// Variable: IN_STOCK_PRODUCTS_QUERY
+// Query: *[_type == "product" && defined(slug.current) && coalesce(stockLevel, 0) > 0]{			_id,	name,	"slug": slug.current,	price,	weightInGrams,	isUniquePiece,	stockLevel,	isFeatured,	_createdAt,	"category": category->{ name, "slug": slug.current },	"image": images[0]{		"url": asset->url,		"alt": alt,		"width": asset->metadata.dimensions.width,		"height": asset->metadata.dimensions.height	}	}
+export type IN_STOCK_PRODUCTS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
+  slug: string;
   price: number;
+  weightInGrams: number;
+  isUniquePiece: boolean | null;
+  stockLevel: number | null;
+  isFeatured: boolean | null;
+  _createdAt: string;
+  category: {
+    name: string;
+    slug: string;
+  };
+  image: {
+    url: string | null;
+    alt: string | null;
+    width: number | null;
+    height: number | null;
+  } | null;
 }>;
+
+// Source: src/queries/sanity.ts
+// Variable: FEATURED_PRODUCTS_QUERY
+// Query: *[_type == "product" && isFeatured == true && defined(slug.current) && coalesce(stockLevel, 0) > 0]		| order(_createdAt desc)[0...6]{			_id,	name,	"slug": slug.current,	price,	weightInGrams,	isUniquePiece,	stockLevel,	isFeatured,	_createdAt,	"category": category->{ name, "slug": slug.current },	"image": images[0]{		"url": asset->url,		"alt": alt,		"width": asset->metadata.dimensions.width,		"height": asset->metadata.dimensions.height	}	}
+export type FEATURED_PRODUCTS_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  weightInGrams: number;
+  isUniquePiece: boolean | null;
+  stockLevel: number | null;
+  isFeatured: boolean | null;
+  _createdAt: string;
+  category: {
+    name: string;
+    slug: string;
+  };
+  image: {
+    url: string | null;
+    alt: string | null;
+    width: number | null;
+    height: number | null;
+  } | null;
+}>;
+
+// Source: src/queries/sanity.ts
+// Variable: CATEGORIES_QUERY
+// Query: *[_type == "category" &&		count(*[_type == "product" && category._ref == ^._id && coalesce(stockLevel, 0) > 0]) > 0]{		_id,		name,		"slug": slug.current	} | order(name asc)
+export type CATEGORIES_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+}>;
+
+// Source: src/queries/sanity.ts
+// Variable: CATEGORY_BY_SLUG_QUERY
+// Query: *[_type == "category" && slug.current == $slug][0]{ _id, name, "slug": slug.current }
+export type CATEGORY_BY_SLUG_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+} | null;
+
+// Source: src/queries/sanity.ts
+// Variable: PRODUCTS_BY_CATEGORY_QUERY
+// Query: *[_type == "product" &&		category._ref in *[_type == "category" && slug.current == $slug]._id &&		defined(slug.current) && coalesce(stockLevel, 0) > 0]{			_id,	name,	"slug": slug.current,	price,	weightInGrams,	isUniquePiece,	stockLevel,	isFeatured,	_createdAt,	"category": category->{ name, "slug": slug.current },	"image": images[0]{		"url": asset->url,		"alt": alt,		"width": asset->metadata.dimensions.width,		"height": asset->metadata.dimensions.height	}	}
+export type PRODUCTS_BY_CATEGORY_QUERY_RESULT = Array<{
+  _id: string;
+  name: string;
+  slug: string;
+  price: number;
+  weightInGrams: number;
+  isUniquePiece: boolean | null;
+  stockLevel: number | null;
+  isFeatured: boolean | null;
+  _createdAt: string;
+  category: {
+    name: string;
+    slug: string;
+  };
+  image: {
+    url: string | null;
+    alt: string | null;
+    width: number | null;
+    height: number | null;
+  } | null;
+}>;
+
+// Source: src/queries/sanity.ts
+// Variable: PRODUCT_BY_SLUG_QUERY
+// Query: *[_type == "product" && slug.current == $slug][0]{		_id,		name,		"slug": slug.current,		description,		price,		weightInGrams,		localPickupAvailable,		countryOfOrigin,		isUniquePiece,		stockLevel,		"category": category->{ name, "slug": slug.current },		"images": images[]{			"url": asset->url,			"alt": alt,			"width": asset->metadata.dimensions.width,			"height": asset->metadata.dimensions.height		}	}
+export type PRODUCT_BY_SLUG_QUERY_RESULT = {
+  _id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  weightInGrams: number;
+  localPickupAvailable: boolean | null;
+  countryOfOrigin: string | null;
+  isUniquePiece: boolean | null;
+  stockLevel: number | null;
+  category: {
+    name: string;
+    slug: string;
+  };
+  images: Array<{
+    url: string | null;
+    alt: string | null;
+    width: number | null;
+    height: number | null;
+  }> | null;
+} | null;
 
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
   interface SanityQueries {
-    '*[_type == "product"]{_id, name, price} | order(name asc)': PRODUCTS_QUERY_RESULT;
+    '\n\t*[_type == "product" && defined(slug.current) && coalesce(stockLevel, 0) > 0]{\n\t\t\n\t_id,\n\tname,\n\t"slug": slug.current,\n\tprice,\n\tweightInGrams,\n\tisUniquePiece,\n\tstockLevel,\n\tisFeatured,\n\t_createdAt,\n\t"category": category->{ name, "slug": slug.current },\n\t"image": images[0]{\n\t\t"url": asset->url,\n\t\t"alt": alt,\n\t\t"width": asset->metadata.dimensions.width,\n\t\t"height": asset->metadata.dimensions.height\n\t}\n\n\t}\n': IN_STOCK_PRODUCTS_QUERY_RESULT;
+    '\n\t*[_type == "product" && isFeatured == true && defined(slug.current) && coalesce(stockLevel, 0) > 0]\n\t\t| order(_createdAt desc)[0...6]{\n\t\t\n\t_id,\n\tname,\n\t"slug": slug.current,\n\tprice,\n\tweightInGrams,\n\tisUniquePiece,\n\tstockLevel,\n\tisFeatured,\n\t_createdAt,\n\t"category": category->{ name, "slug": slug.current },\n\t"image": images[0]{\n\t\t"url": asset->url,\n\t\t"alt": alt,\n\t\t"width": asset->metadata.dimensions.width,\n\t\t"height": asset->metadata.dimensions.height\n\t}\n\n\t}\n': FEATURED_PRODUCTS_QUERY_RESULT;
+    '\n\t*[_type == "category" &&\n\t\tcount(*[_type == "product" && category._ref == ^._id && coalesce(stockLevel, 0) > 0]) > 0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current\n\t} | order(name asc)\n': CATEGORIES_QUERY_RESULT;
+    '\n\t*[_type == "category" && slug.current == $slug][0]{ _id, name, "slug": slug.current }\n': CATEGORY_BY_SLUG_QUERY_RESULT;
+    '\n\t*[_type == "product" &&\n\t\tcategory._ref in *[_type == "category" && slug.current == $slug]._id &&\n\t\tdefined(slug.current) && coalesce(stockLevel, 0) > 0]{\n\t\t\n\t_id,\n\tname,\n\t"slug": slug.current,\n\tprice,\n\tweightInGrams,\n\tisUniquePiece,\n\tstockLevel,\n\tisFeatured,\n\t_createdAt,\n\t"category": category->{ name, "slug": slug.current },\n\t"image": images[0]{\n\t\t"url": asset->url,\n\t\t"alt": alt,\n\t\t"width": asset->metadata.dimensions.width,\n\t\t"height": asset->metadata.dimensions.height\n\t}\n\n\t}\n': PRODUCTS_BY_CATEGORY_QUERY_RESULT;
+    '\n\t*[_type == "product" && slug.current == $slug][0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current,\n\t\tdescription,\n\t\tprice,\n\t\tweightInGrams,\n\t\tlocalPickupAvailable,\n\t\tcountryOfOrigin,\n\t\tisUniquePiece,\n\t\tstockLevel,\n\t\t"category": category->{ name, "slug": slug.current },\n\t\t"images": images[]{\n\t\t\t"url": asset->url,\n\t\t\t"alt": alt,\n\t\t\t"width": asset->metadata.dimensions.width,\n\t\t\t"height": asset->metadata.dimensions.height\n\t\t}\n\t}\n': PRODUCT_BY_SLUG_QUERY_RESULT;
   }
 }
