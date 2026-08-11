@@ -1,24 +1,22 @@
 ---
 import { sanityClient } from 'sanity:client'
-
+import Layout from '../layouts/Layout.astro'
 import { PRODUCTS_QUERY } from '../queries/sanity'
 
 const products = await sanityClient.fetch(PRODUCTS_QUERY)
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Crystal Shop</title>
-	</head>
-	<body>
-		<h1>Crystal Shop</h1>
-		<p>Products loaded from Sanity:</p>
-		<ul>
-			{products.map((product) => <li>{product.name} — £{product.price}</li>)}
+<Layout>
+	<main class="mx-auto max-w-4xl px-4 py-12">
+		<h1 class="text-4xl font-semibold text-stone-900">Eclipsia Crystals</h1>
+		<p class="mt-2 text-stone-600">Products loaded from Sanity:</p>
+		<ul class="mt-6 space-y-2">
+			{products.map((product) => (
+				<li class="flex justify-between gap-4 border-b border-stone-200 py-2">
+					<span>{product.name}</span>
+					<span class="font-medium text-stone-800">£{product.price}</span>
+				</li>
+			))}
 		</ul>
-	</body>
-</html>
+	</main>
+</Layout>

@@ -49,3 +49,27 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
   expressions except for inline anonymous functions for which arrow functions
   are fine.
 
+## Styling Conventions
+
+- **Tailwind CSS v4 (CSS-first)**: All styling is Tailwind utilities in
+  markup. No `@apply`, no scoped `<style>` blocks in `.astro` files, no CSS
+  modules. One styling mechanism.
+- **Single CSS file**: All Tailwind setup lives in `src/styles/global.css`
+  (`@import`, `@source`, `@plugin`, `@theme`, base layer). Do not add new CSS
+  files; extend this one or split only if it outgrows its home.
+- **Fonts**: Self-hosted via `@fontsource`. `Cormorant Garamond` is the display
+  face (`--font-display`, applied to all headings in the base layer), `Inter`
+  is the body face (`--font-sans`). Load weight CSS files in
+  `src/layouts/Layout.astro`.
+- **Accent colour**: Violet is the only accent colour — raw built-in utilities
+  such as `violet-700` (interactive) and `violet-800` (hover). No custom
+  accent tokens.
+- **Extract repetition**: When the same class group repeats 3+ times, extract
+  it into a small presentational component under `src/components/ui/` that
+  owns those classes. Prefer descriptive component names.
+- **Light-only**: No `dark:` variants. Mobile-first (`sm:`/`md:` breakpoints).
+- **Content scanning**: Tailwind `@source` directives are constrained to
+  `src/pages`, `src/components`, `src/layouts`. Add new template directories
+  there — never let `src/queries`, `src/schemaTypes`, or generated types into
+  the scan. Do not import `global.css` on `/admin` (Studio keeps its own CSS).
+
