@@ -1,15 +1,9 @@
 ---
 import { sanityClient } from 'sanity:client'
 
-interface Product {
-	_id: string
-	name: string
-	price: number
-}
+import { PRODUCTS_QUERY } from '../queries/sanity'
 
-const products = await sanityClient.fetch<Product[]>(
-	`*[_type == "product"]{_id, name, price} | order(name asc)`
-)
+const products = await sanityClient.fetch(PRODUCTS_QUERY)
 ---
 
 <html lang="en">

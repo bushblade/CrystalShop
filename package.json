@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "typegen": "sanity schemas extract --force --enforce-required-fields && sanity typegen generate"
   },
   "dependencies": {
     "@astrojs/netlify": "^8.2.0",
@@ -19,6 +20,7 @@
     "@sanity/icons": "^5.2.1",
     "@sanity/vision": "^6.9.1",
     "astro": "^7.2.0",
+    "groq": "^6.9.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-is": "^19.2.8",

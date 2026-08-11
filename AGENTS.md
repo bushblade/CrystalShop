@@ -28,7 +28,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 ## Architecture Rules
 
 1. **Embedded Studio:** 
-2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`.
+2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`. After any schema change, run `pnpm typegen` to regenerate `sanity.types.ts` (and `schema.json`) before committing.
 3. **Product Queries:** Use `src/queries/sanity.ts` for type-safe GROQ queries.
 
 ## Code Style

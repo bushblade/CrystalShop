@@ -29,6 +29,9 @@ importers:
       astro:
         specifier: ^7.2.0
         version: 7.2.0(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@netlify/blobs@10.7.12)(@types/node@26.2.0)(jiti@2.7.0)(tsx@4.23.11)(yaml@2.9.0)
+      groq:
+        specifier: ^6.9.1
+        version: 6.9.1
       react:
         specifier: ^19.2.8
         version: 19.2.8
