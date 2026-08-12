@@ -1,6 +1,7 @@
 import { formatPrice } from '../../lib/format'
 import { imageUrl } from '../../lib/images'
 import type { ProductCardData } from '../../queries/sanity'
+import FadeInImage from './FadeInImage'
 
 interface ProductCardProps {
 	product: ProductCardData
@@ -15,13 +16,15 @@ export default function ProductCard({ product }: ProductCardProps) {
 		>
 			<div className="relative aspect-square overflow-hidden rounded-md bg-stone-100">
 				{imageSrc ? (
-					<img
+					<FadeInImage
 						src={imageSrc}
 						alt={product.image?.alt ?? product.name}
 						width={product.image?.width ?? undefined}
 						height={product.image?.height ?? undefined}
+						placeholderColor={product.image?.dominantColor}
+						className="aspect-square w-full rounded-md"
+						imgClassName="group-hover:scale-105"
 						loading="lazy"
-						className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
 					/>
 				) : null}
 				{product.isUniquePiece ? (

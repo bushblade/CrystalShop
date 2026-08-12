@@ -92,5 +92,12 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 				</nav>
 			</div>
 		</footer>
+		<script>
+			import { transitionImage } from '../utils/transitionImage'
+			const images = document.querySelectorAll<HTMLImageElement>('img[data-fade-in]')
+			for (const image of images) {
+				transitionImage(image)
+			}
+		</script>
 	</body>
 </html>

@@ -1,9 +1,13 @@
 function reveal(image: HTMLImageElement, fade: boolean) {
 	if (!fade) {
-		image.classList.remove('motion-safe:transition-opacity', 'motion-safe:duration-300')
+		image.style.transition = 'none'
 	}
 	image.classList.remove('opacity-0')
 	image.classList.add('opacity-100')
+	if (!fade) {
+		void image.offsetWidth
+		image.style.transition = ''
+	}
 }
 
 export function transitionImage(image: HTMLImageElement) {
