@@ -3,6 +3,7 @@ import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
 
 import { schemaTypes } from './src/schemaTypes'
+import { structure } from './src/structure'
 
 function getRequiredEnvVar(name: string): string {
 	const value = typeof process !== 'undefined' ? process.env[name] : import.meta.env[name]
@@ -20,7 +21,7 @@ export default defineConfig({
 	title: 'Crystal Shop',
 	projectId,
 	dataset,
-	plugins: [structureTool(), visionTool()],
+	plugins: [structureTool({ structure }), visionTool()],
 	schema: {
 		types: schemaTypes,
 	},
