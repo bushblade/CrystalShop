@@ -480,11 +480,14 @@ async function run() {
 				name,
 				slug: { _type: 'slug', current: slug },
 				description: describeProduct(gem.label, item, origin),
-				images: pool.slice(0, Math.min(2 + (index % 3), pool.length)).map((assetId) => ({
-					_type: 'image',
-					asset: { _type: 'reference', _ref: assetId },
-					alt,
-				})),
+				images: pool
+					.slice(0, Math.min(2 + (index % 3), pool.length))
+					.map((assetId, imageIndex) => ({
+						_type: 'image',
+						_key: `seed-img-${imageIndex}`,
+						asset: { _type: 'reference', _ref: assetId },
+						alt,
+					})),
 				price: item.price,
 				category: { _type: 'reference', _ref: categoryId },
 				weightInGrams: item.weight,
