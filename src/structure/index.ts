@@ -1,3 +1,4 @@
+import { CogIcon } from '@sanity/icons/Cog'
 import { StarIcon } from '@sanity/icons/Star'
 import type { StructureResolver } from 'sanity/structure'
 
@@ -5,6 +6,12 @@ export const structure: StructureResolver = (S) =>
 	S.list()
 		.title('Content')
 		.items([
+			S.listItem()
+				.title('Site Settings')
+				.icon(CogIcon)
+				.child(
+					S.document().schemaType('siteSettings').documentId('siteSettings').title('Site Settings'),
+				),
 			S.listItem()
 				.title('Featured Products')
 				.icon(StarIcon)
@@ -19,5 +26,5 @@ export const structure: StructureResolver = (S) =>
 						),
 				),
 			S.divider(),
-			...S.documentTypeListItems(),
+			...S.documentTypeListItems().filter((listItem) => listItem.getId() !== 'siteSettings'),
 		])

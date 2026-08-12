@@ -19,7 +19,7 @@ A low-cost, low-maintenance e-commerce store for an artisan crystal seller. Mana
 | `/shop` | All in-stock products with client-side search, sort and pagination (`?q=&sort=&page=`) |
 | `/shop/categories/[slug]` | Server-rendered list for one category |
 | `/shop/product/[slug]` | Product detail — gallery, specs, Snipcart buy button (or "Sold out" badge) |
-| `/about`, `/contact`, `/terms` | Static pages |
+| `/about`, `/contact`, `/terms` | About & Terms render `siteSettings` portable text; Contact links to `siteSettings.contactEmail` (also in the footer) |
 | `/admin` | Sanity Studio |
 
 Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`stockLevel === 0`) it stays visible on its product page with a "Sold out" badge, but is filtered out of `/shop` and category listings — no backorders.
@@ -35,6 +35,8 @@ Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`
 | `pnpm typegen` | Regenerate `sanity.types.ts` after schema changes |
 | `pnpm seed:dummy` | Create ~60 dummy products in the local dataset (Amethyst/Agate/Citrine) to test catalog pagination, search and sorting |
 | `pnpm seed:dummy:delete` | Remove all dummy products created by the seed script |
+| `pnpm seed:site-settings` | Upsert the `siteSettings` singleton (About/Terms portable text + contact email) — useful as default content for production |
+| `pnpm seed:site-settings:delete` | Delete the `siteSettings` singleton |
 
 ## Environment variables
 

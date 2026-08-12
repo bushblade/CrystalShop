@@ -59,7 +59,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 - **`/shop`** — All in-stock products, server-rendered, embedding the `CatalogExplorer` React island (`src/components/CatalogExplorer.tsx`). Search / sort / pagination are client-side; state syncs to the URL via `history.replaceState` (`?q=&sort=&page=`).
 - **`/shop/categories/[slug]`** — Server-rendered filtered list for one category (`PRODUCTS_BY_CATEGORY_QUERY`), embedding the same island. Category is a **path**, never a query param. Unknown slug → `Astro.redirect('/shop')`.
 - **`/shop/product/[slug]`** — PDP: gallery, specs, Snipcart buy button (or "Sold out" badge when `stockLevel === 0`). Sold-out items stay reachable here but are filtered out of listings. Unknown slug → redirect to `/shop`.
-- **`/about`, `/contact`, `/terms`** — Hardcoded static Astro pages.
+- **`/about`, `/terms`** — Server-rendered from the `siteSettings` singleton's `aboutBody` / `termsBody` portable text. **`/contact`** — Static, with the email link pulled from `siteSettings.contactEmail` (same field feeds the footer via `Layout.astro`). Unknown content renders the page heading only.
 - **`/admin`** — Embedded Sanity Studio (reserved, from the sanity integration).
 
 Routing rules: product URLs are flat (never nested under category), so re-categorising never breaks links. All listing queries must filter `coalesce(stockLevel, 0) > 0`.

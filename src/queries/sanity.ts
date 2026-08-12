@@ -79,3 +79,11 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(/* groq */ `
 		}
 	}
 `)
+
+export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
+	*[_type == "siteSettings"][0]{
+		aboutBody,
+		termsBody,
+		contactEmail
+	}
+`)

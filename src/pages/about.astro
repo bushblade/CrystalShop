@@ -1,6 +1,12 @@
 ---
+import { sanityClient } from 'sanity:client'
+import { toHTML } from '@portabletext/to-html'
 import PageHeading from '../components/ui/PageHeading.astro'
 import Layout from '../layouts/Layout.astro'
+import { SITE_SETTINGS_QUERY } from '../queries/sanity'
+
+const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
+const aboutHtml = siteSettings?.aboutBody ? toHTML(siteSettings.aboutBody) : ''
 ---
 
 <Layout
@@ -9,15 +15,7 @@ import Layout from '../layouts/Layout.astro'
 	maxWidth="3xl"
 >
 	<PageHeading>About Us</PageHeading>
-	<div class="mt-6 space-y-4 text-stone-700">
-		<p>
-			Eclipsia Crystals is a small independent shop for natural crystal pieces. Every
-			stone is handpicked — many of them one-of-a-kind finds that will never be
-			restocked once they're gone.
-		</p>
-		<p>
-			Because each piece is unique, you'll find a full description and its exact weight
-			with every listing, so what you see is exactly what you'll receive.
-		</p>
-	</div>
+	{aboutHtml ? (
+		<div class="prose prose-stone mt-6 max-w-none" set:html={aboutHtml} />
+	) : null}
 </Layout>

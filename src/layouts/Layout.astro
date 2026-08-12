@@ -7,8 +7,10 @@ import '@fontsource/cormorant-garamond/400.css'
 import '@fontsource/cormorant-garamond/400-italic.css'
 import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
+import { sanityClient } from 'sanity:client'
 import NavLink from '../components/ui/NavLink.astro'
 import PrimaryButton from '../components/ui/PrimaryButton.astro'
+import { SITE_SETTINGS_QUERY } from '../queries/sanity'
 import '../styles/global.css'
 
 interface Props {
@@ -25,6 +27,8 @@ const {
 	padded = true,
 } = Astro.props
 const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
+const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
+const contactEmail = siteSettings?.contactEmail
 ---
 
 <!doctype html>
@@ -91,6 +95,16 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 					<NavLink href="/terms">Terms</NavLink>
 				</nav>
 			</div>
+			{contactEmail ? (
+				<div class="mx-auto max-w-6xl px-4 pt-4 text-center text-sm text-stone-500 sm:text-right">
+					<a
+						href={`mailto:${contactEmail}`}
+						class="transition-colors hover:text-violet-700"
+					>
+						{contactEmail}
+					</a>
+				</div>
+			) : null}
 		</footer>
 		<script>
 			import { transitionImage } from '../utils/transitionImage'

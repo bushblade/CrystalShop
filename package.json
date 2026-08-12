@@ -13,11 +13,14 @@
 		"lint": "biome check .",
 		"seed:dummy": "node --env-file=.env scripts/seed-dummy-data.mjs",
 		"seed:dummy:delete": "node --env-file=.env scripts/seed-dummy-data.mjs -- --delete",
+		"seed:site-settings": "node --env-file=.env scripts/seed-site-settings.mjs",
+		"seed:site-settings:delete": "node --env-file=.env scripts/seed-site-settings.mjs -- --delete",
 		"typegen": "sanity schemas extract --force --enforce-required-fields && sanity typegen generate"
 	},
 	"dependencies": {
 		"@astrojs/netlify": "^8.2.0",
 		"@astrojs/react": "^6.0.2",
+		"@portabletext/to-html": "^5.0.3",
 		"@sanity/astro": "^3.5.0",
 		"@sanity/client": "^7.26.2",
 		"@sanity/icons": "^5.2.1",
