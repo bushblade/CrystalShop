@@ -107,7 +107,7 @@ export default function CatalogExplorer({
 					<select
 						value={sort}
 						onChange={(event) => updateSort(event.target.value as SortKey)}
-						className="rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-800"
+						className="rounded-md border border-stone-300 py-2 pl-3 text-sm text-stone-800"
 					>
 						{SORT_OPTIONS.map((option) => (
 							<option key={option.value} value={option.value}>
