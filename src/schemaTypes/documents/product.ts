@@ -135,6 +135,23 @@ export const product = defineType({
 			title: 'Featured on Homepage',
 			type: 'boolean',
 			group: INVENTORY_GROUP,
+			validation: (rule) =>
+				rule
+					.custom(async (isFeatured, context) => {
+						if (!isFeatured) return true
+						const client = context
+							.getClient({ apiVersion: '2026-08-10' })
+							.withConfig({ perspective: 'drafts' })
+						const id = context.document?._id?.replace(/^drafts\./, '')
+						const featuredCount = await client.fetch(
+							`count(*[_type == "product" && isFeatured == true && defined(slug.current) && coalesce(stockLevel, 0) > 0 && (_id != $id || !defined($id))])`,
+							{ id },
+						)
+						return featuredCount < 6
+							? true
+							: `Only 6 products are shown on the homepage — ${featuredCount + 1} would be featured. Unfeature one so they all display.`
+					})
+					.warning(),
 		}),
 	],
 	preview: {
