@@ -14,6 +14,11 @@
 			"type": "remote",
 			"url": "https://mcp.sanity.io",
 			"oauth": {}
+		},
+		"netlify-mcp": {
+			"type": "remote",
+			"url": "https://netlify-mcp.netlify.app/mcp",
+			"enabled": true
 		}
 	}
 }
