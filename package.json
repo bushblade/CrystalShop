@@ -1,46 +1,48 @@
 {
-  "name": "crystalshop",
-  "type": "module",
-  "version": "0.0.1",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "lint": "biome check .",
-    "typegen": "sanity schemas extract --force --enforce-required-fields && sanity typegen generate"
-  },
-  "dependencies": {
-    "@astrojs/netlify": "^8.2.0",
-    "@astrojs/react": "^6.0.2",
-    "@sanity/astro": "^3.5.0",
-    "@sanity/client": "^7.26.2",
-    "@sanity/icons": "^5.2.1",
-    "@sanity/vision": "^6.9.1",
-    "@tailwindcss/vite": "^4.3.3",
-    "astro": "^7.2.0",
-    "groq": "^6.9.1",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
-    "react-is": "^19.2.8",
-    "sanity": "^6.9.1",
-    "styled-components": "^6.5.1",
-    "tailwindcss": "^4.3.3"
-  },
-  "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "@biomejs/biome": "^2.5.7",
-    "@fontsource/cormorant-garamond": "^5.3.0",
-    "@fontsource/inter": "^5.3.0",
-    "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/typography": "^0.5.20",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "typescript": "^6.0.3",
-    "vite": "^8.2.1"
-  }
+	"name": "crystalshop",
+	"type": "module",
+	"version": "0.0.1",
+	"engines": {
+		"node": ">=22.12.0"
+	},
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"lint": "biome check .",
+		"seed:dummy": "node --env-file=.env scripts/seed-dummy-data.mjs",
+		"seed:dummy:delete": "node --env-file=.env scripts/seed-dummy-data.mjs -- --delete",
+		"typegen": "sanity schemas extract --force --enforce-required-fields && sanity typegen generate"
+	},
+	"dependencies": {
+		"@astrojs/netlify": "^8.2.0",
+		"@astrojs/react": "^6.0.2",
+		"@sanity/astro": "^3.5.0",
+		"@sanity/client": "^7.26.2",
+		"@sanity/icons": "^5.2.1",
+		"@sanity/vision": "^6.9.1",
+		"@tailwindcss/vite": "^4.3.3",
+		"astro": "^7.2.0",
+		"groq": "^6.9.1",
+		"react": "^19.2.8",
+		"react-dom": "^19.2.8",
+		"react-is": "^19.2.8",
+		"sanity": "^6.9.1",
+		"styled-components": "^6.5.1",
+		"tailwindcss": "^4.3.3"
+	},
+	"devDependencies": {
+		"@astrojs/check": "^0.9.10",
+		"@biomejs/biome": "^2.5.7",
+		"@fontsource/cormorant-garamond": "^5.3.0",
+		"@fontsource/inter": "^5.3.0",
+		"@tailwindcss/forms": "^0.5.11",
+		"@tailwindcss/typography": "^0.5.20",
+		"@types/node": "^26.2.0",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "^19.2.4",
+		"typescript": "^6.0.3",
+		"vite": "^8.2.1"
+	}
 }

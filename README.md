@@ -33,6 +33,8 @@ Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`
 | `pnpm preview` | Preview the build locally |
 | `pnpm lint` | Run Biome checks |
 | `pnpm typegen` | Regenerate `sanity.types.ts` after schema changes |
+| `pnpm seed:dummy` | Create ~60 dummy products in the local dataset (Amethyst/Agate/Citrine) to test catalog pagination, search and sorting |
+| `pnpm seed:dummy:delete` | Remove all dummy products created by the seed script |
 
 ## Environment variables
 
@@ -41,5 +43,6 @@ Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`
 | `PUBLIC_SANITY_STUDIO_PROJECT_ID` | Yes | Sanity project ID |
 | `PUBLIC_SANITY_STUDIO_DATASET` | Yes | Sanity dataset (`development` locally, `production` on Netlify) |
 | `PUBLIC_SNIPCART_API_KEY` | No | Snipcart public key; enables the cart UI when set |
+| `SANITY_WRITE_TOKEN` | No | Sanity writer token for `pnpm seed:dummy` only; not used by the app |
 
 See `.env.example` for a template.
