@@ -7,29 +7,25 @@ interface Props {
 }
 
 const { categories, activeSlug = null } = Astro.props
+
+function categoryPillClasses(isActive: boolean): string[] {
+	return [
+		'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+		isActive
+			? 'border-violet-700 bg-violet-700 text-white'
+			: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
+	]
+}
 ---
 
 <nav class="flex flex-wrap gap-2" aria-label="Categories">
-	<a
-		href="/shop"
-		class:list={[
-			'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
-			activeSlug === null
-				? 'border-violet-700 bg-violet-700 text-white'
-				: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
-		]}
-	>
+	<a href="/shop" class:list={categoryPillClasses(activeSlug === null)}>
 		All
 	</a>
 	{categories.map((category) => (
 		<a
 			href={`/shop/categories/${category.slug}`}
-			class:list={[
-				'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
-				activeSlug === category.slug
-					? 'border-violet-700 bg-violet-700 text-white'
-					: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
-			]}
+			class:list={categoryPillClasses(activeSlug === category.slug)}
 		>
 			{category.name}
 		</a>

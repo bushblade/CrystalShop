@@ -1,6 +1,7 @@
 ---
 import { sanityClient } from 'sanity:client'
-import ProductCard from '../components/ui/ProductCard'
+import PrimaryButton from '../components/ui/PrimaryButton.astro'
+import ProductGrid from '../components/ui/ProductGrid'
 import Layout from '../layouts/Layout.astro'
 import { FEATURED_PRODUCTS_QUERY } from '../queries/sanity'
 
@@ -17,24 +18,15 @@ const featured = await sanityClient.fetch(FEATURED_PRODUCTS_QUERY)
 			<p class="mx-auto mt-4 max-w-xl text-lg text-stone-600">
 				Handpicked natural crystals — clusters, points and one-of-a-kind pieces, each with its own story.
 			</p>
-			<a
-				href="/shop"
-				class="mt-8 inline-block rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800"
-			>
+			<PrimaryButton href="/shop" class="mt-8 inline-block">
 				Shop all crystals
-			</a>
+			</PrimaryButton>
 		</section>
 
 		{featured.length > 0 ? (
 			<section class="pb-16">
 				<h2 class="font-display text-2xl font-semibold text-stone-900">Featured pieces</h2>
-				<ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
-					{featured.map((product) => (
-						<li>
-							<ProductCard product={product} />
-						</li>
-					))}
-				</ul>
+				<ProductGrid products={featured} />
 			</section>
 		) : null}
 </Layout>

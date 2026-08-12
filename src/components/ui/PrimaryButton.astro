@@ -1,0 +1,25 @@
+---
+interface Props {
+	href?: string
+	size?: 'md' | 'sm'
+	class?: string
+}
+
+const { href, size = 'md', class: className = '', ...attrs } = Astro.props
+
+const classes = [
+	'rounded-full bg-violet-700 font-medium text-white transition-colors hover:bg-violet-800',
+	size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-8 py-3',
+	className,
+]
+---
+
+{href ? (
+	<a href={href} class:list={classes} {...attrs}>
+		<slot />
+	</a>
+) : (
+	<button type="button" class:list={classes} {...attrs}>
+		<slot />
+	</button>
+)}

@@ -1,6 +1,7 @@
 ---
 import type { CATEGORIES_QUERY_RESULT } from '../../../sanity.types'
 import CategoryNav from './CategoryNav.astro'
+import PageHeading from './PageHeading.astro'
 
 interface Props {
 	title: string
@@ -12,6 +13,6 @@ const { title, categories, activeSlug = null } = Astro.props
 ---
 
 <header class="mb-8">
-	<h1 class="text-3xl font-semibold text-stone-900 mb-4">{title}</h1>
+	<PageHeading class="mb-4">{title}</PageHeading>
 	<CategoryNav categories={categories} activeSlug={activeSlug} />
 </header>

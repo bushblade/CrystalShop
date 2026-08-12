@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ProductCardData } from '../queries/sanity'
-import ProductCard from './ui/ProductCard'
+import ProductGrid from './ui/ProductGrid'
 
 const PAGE_SIZE = 12
 
@@ -119,13 +119,7 @@ export default function CatalogExplorer({
 			</div>
 
 			{visibleProducts.length > 0 ? (
-				<ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-					{visibleProducts.map((product) => (
-						<li key={product._id}>
-							<ProductCard product={product} />
-						</li>
-					))}
-				</ul>
+				<ProductGrid products={visibleProducts} wide />
 			) : (
 				<p className="mt-16 text-center text-stone-500">No crystals match your search.</p>
 			)}

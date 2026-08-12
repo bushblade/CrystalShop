@@ -7,6 +7,8 @@ import '@fontsource/cormorant-garamond/400.css'
 import '@fontsource/cormorant-garamond/400-italic.css'
 import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
+import NavLink from '../components/ui/NavLink.astro'
+import PrimaryButton from '../components/ui/PrimaryButton.astro'
 import '../styles/global.css'
 
 interface Props {
@@ -56,16 +58,13 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 			<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
 				<a href="/" class="font-display text-2xl font-semibold text-stone-900">Eclipsia Crystals</a>
 				<div class="flex items-center gap-6 text-sm font-medium text-stone-700">
-					<a href="/shop" class="transition-colors hover:text-violet-700">Shop</a>
-					<a href="/about" class="transition-colors hover:text-violet-700">About</a>
-					<a href="/contact" class="transition-colors hover:text-violet-700">Contact</a>
+					<NavLink href="/shop">Shop</NavLink>
+					<NavLink href="/about">About</NavLink>
+					<NavLink href="/contact">Contact</NavLink>
 					{snipcartApiKey ? (
-						<button
-							type="button"
-							class="snipcart-checkout rounded-full bg-violet-700 px-4 py-1.5 text-white transition-colors hover:bg-violet-800"
-						>
+						<PrimaryButton size="sm" class="snipcart-checkout">
 							Cart <span class="snipcart-items-count">0</span>
-						</button>
+						</PrimaryButton>
 					) : null}
 				</div>
 			</nav>
@@ -83,10 +82,10 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 			<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-stone-500 sm:flex-row">
 				<p>© {new Date().getFullYear()} Eclipsia Crystals</p>
 				<nav class="flex gap-6">
-					<a href="/shop" class="transition-colors hover:text-violet-700">Shop</a>
-					<a href="/about" class="transition-colors hover:text-violet-700">About</a>
-					<a href="/contact" class="transition-colors hover:text-violet-700">Contact</a>
-					<a href="/terms" class="transition-colors hover:text-violet-700">Terms</a>
+					<NavLink href="/shop">Shop</NavLink>
+					<NavLink href="/about">About</NavLink>
+					<NavLink href="/contact">Contact</NavLink>
+					<NavLink href="/terms">Terms</NavLink>
 				</nav>
 			</div>
 		</footer>
