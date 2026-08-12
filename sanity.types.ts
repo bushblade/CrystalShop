@@ -298,7 +298,7 @@ export type PRODUCTS_BY_CATEGORY_QUERY_RESULT = Array<{
 
 // Source: src/queries/sanity.ts
 // Variable: PRODUCT_BY_SLUG_QUERY
-// Query: *[_type == "product" && slug.current == $slug][0]{		_id,		name,		"slug": slug.current,		description,		price,		weightInGrams,		localPickupAvailable,		countryOfOrigin,		isUniquePiece,		stockLevel,		"category": category->{ name, "slug": slug.current },		"images": images[]{			"url": asset->url,			"alt": alt,			"width": asset->metadata.dimensions.width,			"height": asset->metadata.dimensions.height		}	}
+// Query: *[_type == "product" && slug.current == $slug][0]{		_id,		name,		"slug": slug.current,		description,		price,		weightInGrams,		localPickupAvailable,		countryOfOrigin,		isUniquePiece,		stockLevel,		"category": category->{ name, "slug": slug.current },		"images": images[]{			"url": asset->url,			"alt": alt,			"width": asset->metadata.dimensions.width,			"height": asset->metadata.dimensions.height,			"dominantColor": asset->metadata.palette.dominant.background		}	}
 export type PRODUCT_BY_SLUG_QUERY_RESULT = {
   _id: string;
   name: string;
@@ -319,6 +319,7 @@ export type PRODUCT_BY_SLUG_QUERY_RESULT = {
     alt: string | null;
     width: number | null;
     height: number | null;
+    dominantColor: string | null;
   }> | null;
 } | null;
 
@@ -331,6 +332,6 @@ declare module "@sanity/client" {
     '\n\t*[_type == "category" &&\n\t\tcount(*[_type == "product" && category._ref == ^._id && coalesce(stockLevel, 0) > 0]) > 0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current\n\t} | order(name asc)\n': CATEGORIES_QUERY_RESULT;
     '\n\t*[_type == "category" && slug.current == $slug][0]{ _id, name, "slug": slug.current }\n': CATEGORY_BY_SLUG_QUERY_RESULT;
     '\n\t*[_type == "product" &&\n\t\tcategory._ref in *[_type == "category" && slug.current == $slug]._id &&\n\t\tdefined(slug.current) && coalesce(stockLevel, 0) > 0]{\n\t\t\n\t_id,\n\tname,\n\t"slug": slug.current,\n\tprice,\n\tweightInGrams,\n\tisUniquePiece,\n\tstockLevel,\n\tisFeatured,\n\t_createdAt,\n\t"category": category->{ name, "slug": slug.current },\n\t"image": images[0]{\n\t\t"url": asset->url,\n\t\t"alt": alt,\n\t\t"width": asset->metadata.dimensions.width,\n\t\t"height": asset->metadata.dimensions.height\n\t}\n\n\t}\n': PRODUCTS_BY_CATEGORY_QUERY_RESULT;
-    '\n\t*[_type == "product" && slug.current == $slug][0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current,\n\t\tdescription,\n\t\tprice,\n\t\tweightInGrams,\n\t\tlocalPickupAvailable,\n\t\tcountryOfOrigin,\n\t\tisUniquePiece,\n\t\tstockLevel,\n\t\t"category": category->{ name, "slug": slug.current },\n\t\t"images": images[]{\n\t\t\t"url": asset->url,\n\t\t\t"alt": alt,\n\t\t\t"width": asset->metadata.dimensions.width,\n\t\t\t"height": asset->metadata.dimensions.height\n\t\t}\n\t}\n': PRODUCT_BY_SLUG_QUERY_RESULT;
+    '\n\t*[_type == "product" && slug.current == $slug][0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current,\n\t\tdescription,\n\t\tprice,\n\t\tweightInGrams,\n\t\tlocalPickupAvailable,\n\t\tcountryOfOrigin,\n\t\tisUniquePiece,\n\t\tstockLevel,\n\t\t"category": category->{ name, "slug": slug.current },\n\t\t"images": images[]{\n\t\t\t"url": asset->url,\n\t\t\t"alt": alt,\n\t\t\t"width": asset->metadata.dimensions.width,\n\t\t\t"height": asset->metadata.dimensions.height,\n\t\t\t"dominantColor": asset->metadata.palette.dominant.background\n\t\t}\n\t}\n': PRODUCT_BY_SLUG_QUERY_RESULT;
   }
 }

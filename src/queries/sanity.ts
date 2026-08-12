@@ -73,7 +73,8 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(/* groq */ `
 			"url": asset->url,
 			"alt": alt,
 			"width": asset->metadata.dimensions.width,
-			"height": asset->metadata.dimensions.height
+			"height": asset->metadata.dimensions.height,
+			"dominantColor": asset->metadata.palette.dominant.background
 		}
 	}
 `)

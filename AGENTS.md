@@ -64,6 +64,10 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 
 Routing rules: product URLs are flat (never nested under category), so re-categorising never breaks links. All listing queries must filter `coalesce(stockLevel, 0) > 0`.
 
+Follow-up: `ProductCard` images on `/`, `/shop`, and `/shop/categories/[slug]` still flash alt text on load. Roll out the `FadeInImage` placeholder pattern from `ProductGallery` (dominant colour backdrop + `opacity-0` SSR image + fade via `src/utils/transitionImage.ts`, no-JS fallback via the `<noscript>` style in `Layout.astro`) there — requires `PRODUCT_CARD_FRAGMENT` to project `dominantColor` and a hydration mechanism (per-page inline script querying `img[data-fade-in]`, as in WillAdamsDotDev's `projects.astro`). Note: `transitionImage` reveals cached/already-loaded images instantly and fades only fresh loads — deliberate (matches WillAdamsDotDev), don't "simplify" it back to always-fade.
+
+Follow-up: `FadeInImage` currently uses a flat dominant colour backdrop only. Sanity also provides `asset->metadata.lqip` (base64 LQIP, zero deps — matches the Cloudinary `blur:100` trick from WillAdamsDotDev's `ProjectCard`) and `blurHash` (needs a decode lib) per image. Consider layering one of these under the fade as a blurred backdrop — explore on a separate branch.
+
 ## Code Style
 
 - **Conditional rendering**: Use ternary operators with `null` over logical AND (`&&`).

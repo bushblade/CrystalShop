@@ -39,6 +39,9 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 		<meta property="og:description" content={description} />
 		<meta property="og:type" content="website" />
 		<title>{title}</title>
+		<noscript>
+			<style>img[data-fade-in] { opacity: 1 !important; }</style>
+		</noscript>
 		{snipcartApiKey ? (
 			<>
 				<link rel="preconnect" href="https://app.snipcart.com" />
