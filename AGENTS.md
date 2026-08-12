@@ -30,6 +30,28 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 1. **Embedded Studio:** 
 2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`. After any schema change, run `pnpm typegen` to regenerate `sanity.types.ts` (and `schema.json`) before committing.
 3. **Product Queries:** Use `src/queries/sanity.ts` for type-safe GROQ queries.
+4. **`sanity.config.ts` runs in two environments — never read env vars with a
+   single API.** The embedded Studio bundles `sanity.config.ts` into the browser
+   via the `sanity:studio` virtual module, while `pnpm typegen` executes it in
+   Node. `process` doesn't exist in the browser and `import.meta.env` doesn't
+   exist in Node, so a plain `process.env` or `import.meta.env` read breaks one
+   of them. Always use the dual guard:
+
+   ```ts
+   function getRequiredEnvVar(name: string): string {
+     const value =
+       typeof process !== 'undefined'
+         ? process.env[name]
+         : import.meta.env[name]
+     if (!value) {
+       throw new Error(`Missing required environment variable: ${name}`)
+     }
+     return value
+   }
+   ```
+
+   Do not "simplify" this to either single form — commit a5c06e0 did and broke
+   the embedded Studio at `/admin` (`ReferenceError: process is not defined`).
 
 ## Routing
 

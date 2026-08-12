@@ -5,7 +5,7 @@ import { structureTool } from 'sanity/structure'
 import { schemaTypes } from './src/schemaTypes'
 
 function getRequiredEnvVar(name: string): string {
-	const value = process.env[name]
+	const value = typeof process !== 'undefined' ? process.env[name] : import.meta.env[name]
 	if (!value) {
 		throw new Error(`Missing required environment variable: ${name}`)
 	}
