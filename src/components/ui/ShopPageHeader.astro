@@ -1,0 +1,17 @@
+---
+import type { CATEGORIES_QUERY_RESULT } from '../../../sanity.types'
+import CategoryNav from './CategoryNav.astro'
+
+interface Props {
+	title: string
+	categories: CATEGORIES_QUERY_RESULT
+	activeSlug?: string | null
+}
+
+const { title, categories, activeSlug = null } = Astro.props
+---
+
+<header class="mb-8">
+	<h1 class="text-3xl font-semibold text-stone-900 mb-4">{title}</h1>
+	<CategoryNav categories={categories} activeSlug={activeSlug} />
+</header>

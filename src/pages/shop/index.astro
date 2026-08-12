@@ -1,7 +1,7 @@
 ---
 import { sanityClient } from 'sanity:client'
 import CatalogExplorer from '../../components/CatalogExplorer'
-import CategoryNav from '../../components/ui/CategoryNav.astro'
+import ShopPageHeader from '../../components/ui/ShopPageHeader.astro'
 import Layout from '../../layouts/Layout.astro'
 import { CATEGORIES_QUERY, IN_STOCK_PRODUCTS_QUERY } from '../../queries/sanity'
 
@@ -15,9 +15,6 @@ const [products, categories] = await Promise.all([
 	title="Shop Crystals | Eclipsia Crystals"
 	description="Browse our collection of natural crystals — clusters, points and one-of-a-kind pieces."
 >
-	<header class="mb-8">
-		<h1 class="text-3xl font-semibold text-stone-900">All Crystals</h1>
-		<CategoryNav categories={categories} />
-	</header>
+	<ShopPageHeader title="All Crystals" categories={categories} />
 	<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
 </Layout>

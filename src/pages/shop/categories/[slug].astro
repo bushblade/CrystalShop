@@ -1,7 +1,7 @@
 ---
 import { sanityClient } from 'sanity:client'
 import CatalogExplorer from '../../../components/CatalogExplorer'
-import CategoryNav from '../../../components/ui/CategoryNav.astro'
+import ShopPageHeader from '../../../components/ui/ShopPageHeader.astro'
 import Layout from '../../../layouts/Layout.astro'
 import {
 	CATEGORIES_QUERY,
@@ -27,9 +27,6 @@ const [products, categories] = await Promise.all([
 	title={`${category.name} Crystals | Eclipsia Crystals`}
 	description={`Browse our ${category.name} crystals — handpicked natural pieces.`}
 >
-	<header class="mb-8">
-		<h1 class="text-3xl font-semibold text-stone-900">{category.name} Crystals</h1>
-		<CategoryNav categories={categories} activeSlug={category.slug} />
-	</header>
+	<ShopPageHeader title={`${category.name} Crystals`} categories={categories} activeSlug={category.slug} />
 	<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
 </Layout>
