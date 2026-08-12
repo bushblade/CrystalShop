@@ -13,7 +13,10 @@ export const structure: StructureResolver = (S) =>
 						.title('Featured Products')
 						.schemaType('product')
 						.apiVersion('2026-08-10')
-						.filter('_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0'),
+						.filter('_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0')
+						.canHandleIntent(
+							(intentName, params) => intentName === 'edit' && params?.type === 'product',
+						),
 				),
 			S.divider(),
 			...S.documentTypeListItems(),
