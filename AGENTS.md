@@ -66,6 +66,8 @@ Routing rules: product URLs are flat (never nested under category), so re-catego
 
 Note: `ProductCard` uses the same `FadeInImage` placeholder pattern as `ProductGallery`. Because cards render in two hydration contexts, reveal needs two mechanisms: (1) inside the `CatalogExplorer client:load` island, the React `useEffect` in `FadeInImage` reveals images; (2) SSR-only pages (`/`) are covered by the bundled `<script>` in `Layout.astro` that queries `img[data-fade-in]` and calls `transitionImage`. Don't drop either. `transitionImage` reveals cached/already-loaded images instantly and fades only fresh loads — deliberate (matches WillAdamsDotDev), don't "simplify" it back to always-fade.
 
+The `data-fade-in` attribute also drives the `<noscript>` fallback in `Layout.astro` (`img[data-fade-in] { opacity: 1 !important; }`) — keep the attribute on every SSR image. The img's fade classes are `opacity-0 motion-safe:transition-[opacity,transform,scale] motion-safe:duration-300`; the transition list must retain `scale` (Tailwind v4's `scale-*` uses the `scale` property, not `transform`) or `ProductCard`'s `group-hover:scale-105` stops animating. Queries feeding cards/gallery must project `dominantColor` (`asset->metadata.palette.dominant.background`); absent it, `FadeInImage` falls back to `bg-stone-100`.
+
 Follow-up: `FadeInImage` currently uses a flat dominant colour backdrop only. Sanity also provides `asset->metadata.lqip` (base64 LQIP, zero deps — matches the Cloudinary `blur:100` trick from WillAdamsDotDev's `ProjectCard`) and `blurHash` (needs a decode lib) per image. Consider layering one of these under the fade as a blurred backdrop — explore on a separate branch.
 
 ## Code Style
