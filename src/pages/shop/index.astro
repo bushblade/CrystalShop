@@ -20,6 +20,6 @@ const [products, categories] = await Promise.all([
 			<h1 class="text-3xl font-semibold text-stone-900">All Crystals</h1>
 			<CategoryNav categories={categories} />
 		</header>
-		<CatalogExplorer client:load products={products} initialQuery={Astro.url.search} />
+		<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
 	</main>
 </Layout>

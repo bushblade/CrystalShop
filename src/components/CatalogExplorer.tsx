@@ -15,11 +15,11 @@ const SORT_OPTIONS: ReadonlyArray<{ value: SortKey; label: string }> = [
 
 interface CatalogExplorerProps {
 	products: ProductCardData[]
-	initialQuery: string
+	initialSearchParamsFromAstro: string
 }
 
-function readInitialState(initialQuery: string) {
-	const params = new URLSearchParams(initialQuery)
+function readInitialState(initialSearchParamsFromAstro: string) {
+	const params = new URLSearchParams(initialSearchParamsFromAstro)
 	const q = params.get('q') ?? ''
 	const sortParam = params.get('sort')
 	const sort: SortKey = SORT_OPTIONS.some((option) => option.value === sortParam)
@@ -30,21 +30,23 @@ function readInitialState(initialQuery: string) {
 }
 
 function sortProducts(products: ProductCardData[], sort: SortKey): ProductCardData[] {
-	const sorted = [...products]
 	switch (sort) {
 		case 'name-asc':
-			return sorted.sort((a, b) => a.name.localeCompare(b.name))
+			return products.toSorted((a, b) => a.name.localeCompare(b.name))
 		case 'price-asc':
-			return sorted.sort((a, b) => a.price - b.price)
+			return products.toSorted((a, b) => a.price - b.price)
 		case 'price-desc':
-			return sorted.sort((a, b) => b.price - a.price)
+			return products.toSorted((a, b) => b.price - a.price)
 		default:
-			return sorted.sort((a, b) => b._createdAt.localeCompare(a._createdAt))
+			return products.toSorted((a, b) => b._createdAt.localeCompare(a._createdAt))
 	}
 }
 
-export default function CatalogExplorer({ products, initialQuery }: CatalogExplorerProps) {
-	const initialState = readInitialState(initialQuery)
+export default function CatalogExplorer({
+	products,
+	initialSearchParamsFromAstro,
+}: CatalogExplorerProps) {
+	const initialState = readInitialState(initialSearchParamsFromAstro)
 	const [q, setQ] = useState(initialState.q)
 	const [sort, setSort] = useState<SortKey>(initialState.sort)
 	const [page, setPage] = useState(initialState.page)
