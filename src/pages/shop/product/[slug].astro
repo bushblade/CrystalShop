@@ -1,5 +1,6 @@
 ---
 import { sanityClient } from 'sanity:client'
+import ProductGallery from '../../../components/ProductGallery'
 import NavLink from '../../../components/ui/NavLink.astro'
 import PageHeading from '../../../components/ui/PageHeading.astro'
 import PrimaryButton from '../../../components/ui/PrimaryButton.astro'
@@ -33,33 +34,7 @@ const heroImage = product.images?.[0]
 		</nav>
 
 		<div class="mt-8 grid gap-10 lg:grid-cols-2">
-			<div class="space-y-4">
-				{heroImage?.url ? (
-					<img
-						src={imageUrl(heroImage.url, 1000) ?? undefined}
-						alt={heroImage.alt ?? product.name}
-						width={heroImage.width ?? undefined}
-						height={heroImage.height ?? undefined}
-						class="aspect-square w-full rounded-lg bg-stone-100 object-cover"
-					/>
-				) : null}
-				{product.images && product.images.length > 1 ? (
-					<div class="grid grid-cols-4 gap-4">
-						{product.images.slice(1).map((image) =>
-							image.url ? (
-								<img
-									src={imageUrl(image.url, 300) ?? undefined}
-									alt={image.alt ?? product.name}
-									width={image.width ?? undefined}
-									height={image.height ?? undefined}
-									loading="lazy"
-									class="aspect-square w-full rounded-md bg-stone-100 object-cover"
-								/>
-							) : null,
-						)}
-					</div>
-				) : null}
-			</div>
+			<ProductGallery client:load images={product.images ?? []} name={product.name} />
 
 			<div>
 				{product.isUniquePiece ? (
