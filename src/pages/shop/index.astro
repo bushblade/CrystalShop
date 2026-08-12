@@ -15,11 +15,9 @@ const [products, categories] = await Promise.all([
 	title="Shop Crystals | Eclipsia Crystals"
 	description="Browse our collection of natural crystals — clusters, points and one-of-a-kind pieces."
 >
-	<main class="mx-auto max-w-6xl flex-1 px-4 py-10">
-		<header class="mb-8">
-			<h1 class="text-3xl font-semibold text-stone-900">All Crystals</h1>
-			<CategoryNav categories={categories} />
-		</header>
-		<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
-	</main>
+	<header class="mb-8">
+		<h1 class="text-3xl font-semibold text-stone-900">All Crystals</h1>
+		<CategoryNav categories={categories} />
+	</header>
+	<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
 </Layout>

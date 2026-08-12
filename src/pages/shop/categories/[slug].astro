@@ -27,11 +27,9 @@ const [products, categories] = await Promise.all([
 	title={`${category.name} Crystals | Eclipsia Crystals`}
 	description={`Browse our ${category.name} crystals — handpicked natural pieces.`}
 >
-	<main class="mx-auto max-w-6xl flex-1 px-4 py-10">
-		<header class="mb-8">
-			<h1 class="text-3xl font-semibold text-stone-900">{category.name} Crystals</h1>
-			<CategoryNav categories={categories} activeSlug={category.slug} />
-		</header>
-		<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
-	</main>
+	<header class="mb-8">
+		<h1 class="text-3xl font-semibold text-stone-900">{category.name} Crystals</h1>
+		<CategoryNav categories={categories} activeSlug={category.slug} />
+	</header>
+	<CatalogExplorer client:load products={products} initialSearchParamsFromAstro={Astro.url.search} />
 </Layout>

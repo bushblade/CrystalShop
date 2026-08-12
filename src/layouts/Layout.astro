@@ -12,10 +12,16 @@ import '../styles/global.css'
 interface Props {
 	title?: string
 	description?: string
+	maxWidth?: '3xl' | '6xl'
+	padded?: boolean
 }
 
-const { title = 'Eclipsia Crystals', description = 'Natural crystals, handpicked for you.' } =
-	Astro.props
+const {
+	title = 'Eclipsia Crystals',
+	description = 'Natural crystals, handpicked for you.',
+	maxWidth = '6xl',
+	padded = true,
+} = Astro.props
 const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 ---
 
@@ -64,7 +70,15 @@ const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 				</div>
 			</nav>
 		</header>
-		<slot />
+		<main
+			class:list={[
+				'mx-auto w-full flex-1 px-4',
+				maxWidth === '3xl' ? 'max-w-3xl' : 'max-w-6xl',
+				padded ? 'py-10' : '',
+			]}
+		>
+			<slot />
+		</main>
 		<footer class="mt-auto border-t border-stone-200 py-8">
 			<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-stone-500 sm:flex-row">
 				<p>© {new Date().getFullYear()} Eclipsia Crystals</p>

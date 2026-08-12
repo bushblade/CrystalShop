@@ -10,9 +10,9 @@ const featured = await sanityClient.fetch(FEATURED_PRODUCTS_QUERY)
 <Layout
 	title="Eclipsia Crystals | Natural Crystals"
 	description="Handpicked natural crystals, each piece unique and ready to be yours."
+	padded={false}
 >
-	<main class="mx-auto max-w-6xl flex-1 px-4">
-		<section class="py-16 text-center sm:py-24">
+	<section class="py-16 text-center sm:py-24">
 			<h1 class="text-4xl font-semibold text-stone-900 sm:text-5xl">Eclipsia Crystals</h1>
 			<p class="mx-auto mt-4 max-w-xl text-lg text-stone-600">
 				Handpicked natural crystals — clusters, points and one-of-a-kind pieces, each with its own story.
@@ -37,5 +37,4 @@ const featured = await sanityClient.fetch(FEATURED_PRODUCTS_QUERY)
 				</ul>
 			</section>
 		) : null}
-	</main>
 </Layout>
