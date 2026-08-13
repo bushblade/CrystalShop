@@ -24,11 +24,13 @@ export const category = defineType({
 			validation: (rule) =>
 				rule.required().custom(async (slug, context) => {
 					if (!slug?.current) return true
-					const client = context.getClient({ apiVersion: '2026-08-10' })
-					const id = context.document?._id?.replace(/^drafts\./, '')
+					const client = context
+						.getClient({ apiVersion: '2026-08-10' })
+						.withConfig({ perspective: 'raw' })
+					const published = context.document?._id?.replace(/^drafts\./, '')
 					const existing = await client.fetch(
-						`count(*[_type == "category" && slug.current == $slug && _id != $id])`,
-						{ slug: slug.current, id },
+						`count(*[_type == "category" && slug.current == $slug && !sanity::versionOf($published)])`,
+						{ slug: slug.current, published },
 					)
 					return existing === 0 || 'Slug is already used by another category'
 				}),
