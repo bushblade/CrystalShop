@@ -17,7 +17,7 @@ export const structure: StructureResolver = (S) =>
 				.icon(StarIcon)
 				.child(
 					S.documentList()
-						.title('Featured Products')
+						.title('Featured Products: Max of 6 products')
 						.schemaType('product')
 						.apiVersion('2026-08-10')
 						.filter('_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0')
