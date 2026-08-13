@@ -47,7 +47,7 @@ Replace the pinned `v3.2.0` script + CSS block (currently lines ~49-61) with the
   window.SnipcartSettings = {
     publicApiKey: "YOUR_API_KEY",
     loadStrategy: "on-user-interaction",
-    version: "3.9.x", // pin a recent stable
+    version: "3.9.0",
     currency: "gbp",
   };
   // ...the IIFE loader from https://docs.snipcart.com/v3/setup/installation
@@ -109,7 +109,9 @@ Run `pnpm typegen` after registering.
 
 ### B6. Webhook function — 🤖
 
-New file `netlify/functions/snipcart-webhook.mts` (default-handler shape):
+New file `netlify/functions/snipcart-webhook.mts` (default-handler shape). Add
+`@netlify/functions` as a dev dependency (`pnpm add -D @netlify/functions`) for the
+`Context`/`Config` types and `Netlify.env.get()` typing:
 
 ```ts
 export const config = { path: '/api/webhooks/snipcart', method: ['POST'] }
@@ -124,7 +126,10 @@ Logic:
    reject on 404 (tokens valid 1h, single-use).
 3. Idempotency: `*[_type == "snipcartOrder" && orderToken == $token][0]` exists → respond
    200 "already processed", stop.
-4. Mode gate: only proceed when `content.mode` matches `SNIPCART_EXPECTED_MODE`.
+4. Mode gate: only proceed when the envelope's top-level `eventName` is
+   `'order.completed'` and its top-level `mode` matches `SNIPCART_EXPECTED_MODE`.
+   (`mode` and `eventName` are envelope fields alongside `content`; reading
+   `content.mode` is wrong for non-order events.)
 5. Apply atomically in one `client.transaction()`:
    - `create` the `snipcartOrder` doc
    - for each `content.items[]` whose `id` matches a product `_id`:
@@ -136,8 +141,10 @@ Note: this is not a payment endpoint — no payment processing happens server-si
 ### B7. Register webhook — 👤
 
 In the Snipcart dashboard (Test environment), register `order.completed` →
-`https://eclipsiacrystalsdevelopment.netlify.app/.netlify/functions/snipcart-webhook`
-(agent gives the exact URL; deploy B6 first so the function is live).
+`https://eclipsiacrystalsdevelopment.netlify.app/api/webhooks/snipcart`
+(deploy B6 first so the function is live). This must be the `config.path`, not
+`/.netlify/functions/snipcart-webhook` — with a custom `path` set, the function is
+reachable *only* at that path.
 
 ### B8. Dev payment testing — 👤 + 🤖
 

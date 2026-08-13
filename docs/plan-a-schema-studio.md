@@ -103,7 +103,21 @@ pnpm seed:dummy:delete
 pnpm seed:dummy
 ```
 
-### A7. Studio structure — 🤖
+### A7. Patch real (non-seed) products — 🤖
+
+The development dataset holds 5 real products (non-`seed-*` IDs) the seed script never
+touches. Two still carry `localPickupAvailable: true` and must keep their "arrange"
+semantics:
+
+- `eb915efe-8fdb-41d9-9141-ebc02909310d` — Citrine Portal (2720 g) → `arrange`
+- `f0df3380-98c6-4f61-8cc4-e533fa30174a` — Amethyst Church Cathedral 43.25kg Brazil → `arrange`
+
+Apply a one-off patch to every non-seed product: set `deliveryMethod` to `'arrange'`
+where `localPickupAvailable == true`, else `'post'`, then `unset` the
+`localPickupAvailable` field. Run this before verifying — real docs otherwise lack the
+required `deliveryMethod` field and their PDPs read `undefined`.
+
+### A8. Studio structure — 🤖
 
 File: `src/structure/index.ts`
 
@@ -115,14 +129,14 @@ File: `src/structure/index.ts`
 - Keep "Featured Products" and "Site Settings".
 - Exclude `product` and `siteSettings` from the remaining `...S.documentTypeListItems()`.
 
-### A8. Preview subtitle — 🤖
+### A9. Preview subtitle — 🤖
 
 File: `src/schemaTypes/documents/product.ts`
 
 Update `preview.prepare` so the subtitle reads e.g. `£58 · In stock: 3` or `£58 · Out of
 stock`, driven by the `stockLevel` selection.
 
-### A9. Verify — 🤖 + 👤
+### A10. Verify — 🤖 + 👤
 
 - 🤖 `pnpm typegen`, `pnpm lint`, `pnpm build`
 - 👤 Open `/admin` on the dev site and confirm:
