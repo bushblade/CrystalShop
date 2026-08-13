@@ -1,11 +1,7 @@
 ---
-import { sanityClient } from 'sanity:client'
+import ContactForm from '../components/ui/ContactForm'
 import PageHeading from '../components/ui/PageHeading.astro'
 import Layout from '../layouts/Layout.astro'
-import { SITE_SETTINGS_QUERY } from '../queries/sanity'
-
-const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
-const contactEmail = siteSettings?.contactEmail
 ---
 
 <Layout
@@ -19,14 +15,6 @@ const contactEmail = siteSettings?.contactEmail
 			If you have a question about a piece, a shipping estimate, or local pickup
 			arrangements, we'd love to hear from you.
 		</p>
-		{contactEmail ? (
-			<p>
-				Email us at{' '}
-				<a href={`mailto:${contactEmail}`} class="text-violet-700 underline transition-colors hover:text-violet-800">
-					{contactEmail}
-				</a>
-				.
-			</p>
-		) : null}
 	</div>
+	<ContactForm client:load />
 </Layout>
