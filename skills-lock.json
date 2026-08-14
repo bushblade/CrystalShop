@@ -1,6 +1,20 @@
 {
   "version": 1,
   "skills": {
+    "connect-recommend": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "ddf136d2fdc3fb24d5b4b932ec60cb714e941ca8b624b5f3fe8888728e5b5563",
+      "wellKnownDigest": "sha256:02aaebe4ca5578ab043ae666d5589a819281cef2f687926266e5ee05e7b3ab84"
+    },
+    "connect-required-verification-information": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "2aab50320b9ebde437ef8ae3d963a70c189b8f400855fe4e3fab2eadbca7db60",
+      "wellKnownDigest": "sha256:3de1f9190e319f05a76f867cad991426c5c8ff20b657b001daea277daa16d481"
+    },
     "content-modeling-best-practices": {
       "source": "sanity-io/agent-toolkit",
       "sourceType": "github",
@@ -114,6 +128,27 @@
       "sourceType": "github",
       "skillPath": ".claude/skills/skill-creator/SKILL.md",
       "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+    },
+    "stripe-best-practices": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "89ca50633d85f6763e28d7c0d1fa96e4890545760abd05b44bd695b57bc97ec2",
+      "wellKnownDigest": "sha256:6fb5efbddd18782df8f10d922fb985236e0024d31bb1f5c09ede7b4857de6d6a"
+    },
+    "stripe-docs": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "7f8b47057d65cdc55c60ed870bf6ad508907e5d981fca77781b4964de54d985f",
+      "wellKnownDigest": "sha256:a2d407ba808bce05731557fa7b92022376545e363a8958012253a3b82def71a6"
+    },
+    "stripe-projects": {
+      "source": "docs.stripe.com",
+      "sourceUrl": "https://docs.stripe.com",
+      "sourceType": "well-known",
+      "computedHash": "d75347f4e465c0e78032f7cb28b7bcd406cde9a34826b780958b059423fba778",
+      "wellKnownDigest": "sha256:1d0e134fc0b0e97e63b6f6078edeb6a6f802744a62485a05bef264fd89df1269"
     }
   }
 }
