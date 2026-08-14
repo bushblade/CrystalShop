@@ -1,5 +1,7 @@
 # Plan A — Product Schema & Sanity Studio
 
+> **Status: Complete** — delivered on `feat/schema-delivery-method`, merged to `main`.
+
 Prerequisite work for the Snipcart integration (Plan B). No Snipcart dependency. Must be
 completed first so the site builds with the new schema.
 
@@ -130,12 +132,13 @@ script). Choose one and stick to it for all five.
 
 File: `src/structure/index.ts`
 
-- Build a "Products" group with three `S.documentList()` children:
+- Build a "Products" group with four `S.documentList()` children:
   - **All Products** — schemaType `product`, default ordering by `stockLevel asc`
+  - **Featured Products** — filter `_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0`
   - **In Stock** — filter `_type == "product" && coalesce(stockLevel, 0) > 0`
   - **Out of Stock** — filter `_type == "product" && coalesce(stockLevel, 0) == 0`
 - Give each filtered list `.canHandleIntent(intentName, params) => intentName === 'edit' && params?.type === 'product'`.
-- Keep "Featured Products" and "Site Settings".
+- Top-level order: `Site Settings`, a divider, then the `Products` group.
 - Exclude `product` and `siteSettings` from the remaining `...S.documentTypeListItems()`.
 
 ### A9. Preview subtitle — 🤖
