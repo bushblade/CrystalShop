@@ -28,6 +28,7 @@ export const structure: StructureResolver = (S) =>
 				.child(
 					S.document().schemaType('siteSettings').documentId('siteSettings').title('Site Settings'),
 				),
+			S.divider(),
 			S.listItem()
 				.title('Products')
 				.icon(PackageIcon)
@@ -49,24 +50,25 @@ export const structure: StructureResolver = (S) =>
 											(intentName, params) => intentName === 'edit' && params?.type === 'product',
 										),
 								),
+							S.listItem()
+								.title('Featured Products')
+								.icon(StarIcon)
+								.child(
+									S.documentList()
+										.title('Featured Products: Max of 6 products')
+										.schemaType('product')
+										.apiVersion('2026-08-10')
+										.filter(
+											'_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0',
+										)
+										.canHandleIntent(
+											(intentName, params) => intentName === 'edit' && params?.type === 'product',
+										),
+								),
 							productList(S, 'In Stock', '_type == "product" && coalesce(stockLevel, 0) > 0'),
 							productList(S, 'Out of Stock', '_type == "product" && coalesce(stockLevel, 0) == 0'),
 						]),
 				),
-			S.listItem()
-				.title('Featured Products')
-				.icon(StarIcon)
-				.child(
-					S.documentList()
-						.title('Featured Products: Max of 6 products')
-						.schemaType('product')
-						.apiVersion('2026-08-10')
-						.filter('_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0')
-						.canHandleIntent(
-							(intentName, params) => intentName === 'edit' && params?.type === 'product',
-						),
-				),
-			S.divider(),
 			...S.documentTypeListItems().filter(
 				(listItem) => listItem.getId() !== 'siteSettings' && listItem.getId() !== 'product',
 			),
