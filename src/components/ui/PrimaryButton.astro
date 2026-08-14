@@ -8,7 +8,7 @@ interface Props {
 const { href, size = 'md', class: className = '', ...attrs } = Astro.props
 
 const classes = [
-	'rounded-full bg-violet-700 font-medium text-white transition-colors hover:bg-violet-800',
+	'cursor-pointer rounded-full bg-violet-700 font-medium text-white transition-colors hover:bg-violet-800',
 	size === 'sm' ? 'px-4 py-1.5 text-sm' : 'px-8 py-3',
 	className,
 ]
