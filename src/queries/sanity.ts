@@ -65,7 +65,7 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(/* groq */ `
 		description,
 		price,
 		weightInGrams,
-		localPickupAvailable,
+		deliveryMethod,
 		countryOfOrigin,
 		isUniquePiece,
 		stockLevel,

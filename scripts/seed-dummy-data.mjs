@@ -491,7 +491,7 @@ async function run() {
 				price: item.price,
 				category: { _type: 'reference', _ref: categoryId },
 				weightInGrams: item.weight,
-				localPickupAvailable: item.pickup ?? false,
+				deliveryMethod: item.pickup ? 'arrange' : 'post',
 				countryOfOrigin: origin,
 				isUniquePiece: item.unique !== false,
 				stockLevel,

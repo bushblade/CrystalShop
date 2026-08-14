@@ -94,11 +94,21 @@ export const product = defineType({
 			validation: (rule) => rule.required().positive().error('Enter the product weight in grams'),
 		}),
 		defineField({
-			name: 'localPickupAvailable',
-			title: 'Local Pickup Available',
-			type: 'boolean',
+			name: 'deliveryMethod',
+			title: 'Delivery Method',
+			type: 'string',
 			group: PACKAGING_GROUP,
-			description: 'Tick if the buyer can collect in person instead of shipping',
+			description:
+				'How this piece reaches the buyer. Pick "Arrange" for pieces too heavy for standard postage.',
+			initialValue: 'post',
+			options: {
+				list: [
+					{ title: 'Standard postage', value: 'post' },
+					{ title: 'Arrange collection or delivery', value: 'arrange' },
+				],
+				layout: 'radio',
+			},
+			validation: (rule) => rule.required(),
 		}),
 		defineField({
 			name: 'countryOfOrigin',
@@ -156,16 +166,31 @@ export const product = defineType({
 					.warning(),
 		}),
 	],
+	orderings: [
+		{
+			title: 'Stock: low to high',
+			name: 'stockLevelAsc',
+			by: [{ field: 'stockLevel', direction: 'asc' }],
+		},
+		{
+			title: 'Stock: high to low',
+			name: 'stockLevelDesc',
+			by: [{ field: 'stockLevel', direction: 'desc' }],
+		},
+	],
 	preview: {
 		select: {
 			title: 'name',
 			subtitle: 'price',
+			stockLevel: 'stockLevel',
 			media: 'images.0',
 		},
-		prepare({ title, subtitle, media }) {
+		prepare({ title, subtitle, stockLevel, media }) {
+			const price = subtitle !== undefined ? `£${subtitle}` : null
+			const stock = (stockLevel ?? 0) > 0 ? `In stock: ${stockLevel}` : 'Out of stock'
 			return {
 				title,
-				subtitle: subtitle !== undefined ? `£${subtitle}` : undefined,
+				subtitle: [price, stock].filter(Boolean).join(' · '),
 				media,
 			}
 		},

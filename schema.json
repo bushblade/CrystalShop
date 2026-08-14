@@ -429,12 +429,22 @@
         },
         "optional": false
       },
-      "localPickupAvailable": {
+      "deliveryMethod": {
         "type": "objectAttribute",
         "value": {
-          "type": "boolean"
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "post"
+            },
+            {
+              "type": "string",
+              "value": "arrange"
+            }
+          ]
         },
-        "optional": true
+        "optional": false
       },
       "countryOfOrigin": {
         "type": "objectAttribute",

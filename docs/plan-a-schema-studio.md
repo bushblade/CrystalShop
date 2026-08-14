@@ -74,7 +74,9 @@ orderings: [
 
 File: `src/queries/sanity.ts`
 
-Add `deliveryMethod` to the `PRODUCT_BY_SLUG_QUERY` projection so the PDP can read it.
+Replace `localPickupAvailable` with `deliveryMethod` in the `PRODUCT_BY_SLUG_QUERY` projection
+(remove the old line, don't just add alongside it — leaving it in returns `null` and pollutes the
+generated types).
 
 ### A4. PDP spec sheet — 🤖
 
@@ -116,6 +118,13 @@ Apply a one-off patch to every non-seed product: set `deliveryMethod` to `'arran
 where `localPickupAvailable == true`, else `'post'`, then `unset` the
 `localPickupAvailable` field. Run this before verifying — real docs otherwise lack the
 required `deliveryMethod` field and their PDPs read `undefined`.
+
+Note on mechanism: the Sanity MCP `patch_documents` tool only edits **drafts** — it never
+touches published content. The 5 real products are published, so a patch alone leaves
+`deliveryMethod` undefined on the live site. Either (a) patch each document then
+**publish** it (`sanity_publish_documents`), or (b) use a one-off `@sanity/client`
+transaction script that mutates published docs directly (same pattern as the seed
+script). Choose one and stick to it for all five.
 
 ### A8. Studio structure — 🤖
 

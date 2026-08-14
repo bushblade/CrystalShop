@@ -1,6 +1,22 @@
 import { CogIcon } from '@sanity/icons/Cog'
+import { PackageIcon } from '@sanity/icons/Package'
 import { StarIcon } from '@sanity/icons/Star'
-import type { StructureResolver } from 'sanity/structure'
+import type { StructureBuilder, StructureResolver } from 'sanity/structure'
+
+const productList = (S: StructureBuilder, title: string, filter: string) =>
+	S.listItem()
+		.title(title)
+		.icon(PackageIcon)
+		.child(
+			S.documentList()
+				.title(title)
+				.schemaType('product')
+				.apiVersion('2026-08-10')
+				.filter(filter)
+				.canHandleIntent(
+					(intentName, params) => intentName === 'edit' && params?.type === 'product',
+				),
+		)
 
 export const structure: StructureResolver = (S) =>
 	S.list()
@@ -11,6 +27,31 @@ export const structure: StructureResolver = (S) =>
 				.icon(CogIcon)
 				.child(
 					S.document().schemaType('siteSettings').documentId('siteSettings').title('Site Settings'),
+				),
+			S.listItem()
+				.title('Products')
+				.icon(PackageIcon)
+				.child(
+					S.list()
+						.title('Products')
+						.items([
+							S.listItem()
+								.title('All Products')
+								.icon(PackageIcon)
+								.child(
+									S.documentList()
+										.title('All Products')
+										.schemaType('product')
+										.apiVersion('2026-08-10')
+										.filter('_type == "product"')
+										.defaultOrdering([{ field: 'stockLevel', direction: 'asc' }])
+										.canHandleIntent(
+											(intentName, params) => intentName === 'edit' && params?.type === 'product',
+										),
+								),
+							productList(S, 'In Stock', '_type == "product" && coalesce(stockLevel, 0) > 0'),
+							productList(S, 'Out of Stock', '_type == "product" && coalesce(stockLevel, 0) == 0'),
+						]),
 				),
 			S.listItem()
 				.title('Featured Products')
@@ -26,5 +67,7 @@ export const structure: StructureResolver = (S) =>
 						),
 				),
 			S.divider(),
-			...S.documentTypeListItems().filter((listItem) => listItem.getId() !== 'siteSettings'),
+			...S.documentTypeListItems().filter(
+				(listItem) => listItem.getId() !== 'siteSettings' && listItem.getId() !== 'product',
+			),
 		])
