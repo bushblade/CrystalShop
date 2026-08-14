@@ -5,7 +5,7 @@ import NavLink from '../../../components/ui/NavLink.astro'
 import PageHeading from '../../../components/ui/PageHeading.astro'
 import PrimaryButton from '../../../components/ui/PrimaryButton.astro'
 import Layout from '../../../layouts/Layout.astro'
-import { formatPrice } from '../../../lib/format'
+import { formatPrice, formatWeight } from '../../../lib/format'
 import { imageUrl } from '../../../lib/images'
 import { PRODUCT_BY_SLUG_QUERY } from '../../../queries/sanity'
 
@@ -58,7 +58,7 @@ const heroImage = product.images?.[0]
 					{product.weightInGrams ? (
 						<div class="flex justify-between border-b border-stone-100 py-2">
 							<dt>Weight</dt>
-							<dd class="text-stone-800">{product.weightInGrams} g</dd>
+							<dd class="text-stone-800">{formatWeight(product.weightInGrams)}</dd>
 						</div>
 					) : null}
 					{product.countryOfOrigin ? (

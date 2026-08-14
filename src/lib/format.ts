@@ -6,3 +6,12 @@ const priceFormatter = new Intl.NumberFormat('en-GB', {
 export function formatPrice(price: number): string {
 	return priceFormatter.format(price)
 }
+
+export function formatWeight(weightInGrams: number): string {
+	if (weightInGrams < 1000) return `${weightInGrams} g`
+	const wholeKg = Math.floor(weightInGrams / 1000)
+	const remainder = weightInGrams % 1000
+	if (remainder === 0) return `${wholeKg} kg`
+	const grams = String(remainder).padStart(3, '0').replace(/0+$/, '')
+	return grams ? `${wholeKg}.${grams} kg` : `${wholeKg} kg`
+}
