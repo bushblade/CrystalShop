@@ -85,18 +85,31 @@ track (`8`, `9`) are independent.
 
 Strip Snipcart before building anything new so there's never a dual checkout path.
 
+Cleaning only — no placeholder buttons, no new visual elements. The PDP and header
+keep their current look; only Snipcart wiring is removed.
+
 **Files:**
 - `src/layouts/Layout.astro` — delete the Snipcart bootstrap `<script>`/CSS block
-  (currently ~lines 49-61), the `<link rel="preconnect">` hints, the header cart
-  button (`snipcart-checkout`), and the `snipcartApiKey` read.
-- `src/pages/shop/product/[slug].astro` — replace the `snipcart-add-item` button
-  with a **disabled placeholder** button ("Online checkout coming soon") so the
-  PDP doesn't regress to a dead button. Keep the sold-out badge logic.
+  (currently ~lines 49-61), the `<link rel="preconnect">` hints, and the
+  `snipcartApiKey` read. Keep the header Cart button, rendered unconditionally as
+  "Cart 0" — drop the `snipcart-checkout` class and the `snipcart-items-count`
+  span class.
+- `src/pages/shop/product/[slug].astro` — keep the "Add to cart" button; remove
+  the `snipcart-add-item` class and all `data-item-*` attributes, plus the
+  `productUrl` / `heroImage` / `imageUrl` that only fed those attributes. Sold-out
+  badge logic unchanged. No placeholder.
 - `.env.example` — remove `PUBLIC_SNIPCART_API_KEY` and the Snipcart secret key
   comment.
+- `README.md` / `AGENTS.md` — remove Snipcart references (the Payments & Cart
+  stack lines, PDP "Snipcart buy button" wording, the `PUBLIC_SNIPCART_API_KEY`
+  env row, and the weight/shipping phrasing). Stage 11 still adds the full Stripe
+  documentation.
 
-**Done when:** `rg snipcart` returns nothing outside git history and the PDP shows
-a disabled placeholder.
+**Done when:** `rg snipcart` returns nothing in code, config, or `.env.example`
+(README.md clean; only this plan and AGENTS.md's migration-context note still
+mention it); the PDP still shows "Add to cart" and the header still shows "Cart"
+with no Snipcart classes or attributes; gallery images fade in with no browser
+console errors.
 
 ---
 
@@ -194,9 +207,8 @@ shows for mixed carts.
 ## Stage 7 — PDP add-to-cart + shipping estimate · `feat/pdp-add-to-cart` · - [ ]
 
 **Files:**
-- `src/pages/shop/product/[slug].astro` — replace the Stage 1 disabled placeholder
-  with a real **Add to cart** button wired to the Stage 5 store (pass
-  `maxQuantity`: `1` for unique pieces, else `stockLevel`).
+- `src/pages/shop/product/[slug].astro` — wire the Stage 1 "Add to cart" button to
+  the Stage 5 store (pass `maxQuantity`: `1` for unique pieces, else `stockLevel`).
   - Keep the sold-out badge (`stockLevel === 0`).
   - Show **"Shipping from £X"** computed via Stage 4 for this item's weight when
     `deliveryMethod === 'post'`; the existing heavy-item "contact us" banner stays
@@ -294,7 +306,7 @@ from a completed/cancelled checkout.
   confirm success page, buyer receipt email, webhook decremented stock once, `order`
   doc created. Repeat for an `arrange`-only cart (no shipping step) and a mixed cart
   (heavy-item notice + shippable-only postage).
-- Update `AGENTS.md` (Stripe replaces Snipcart, function locations, `/api/checkout` +
+- Update `AGENTS.md` (Stripe architecture, function locations, `/api/checkout` +
   `/api/webhooks/stripe`, livemode gating) and `README.md` (env-var table, endpoints).
 - Tick every checkbox in this plan.
 

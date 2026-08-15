@@ -10,15 +10,14 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 
 - **Product Type:** Natural crystals.
 - **Inventory Model:** Many products are unique 1-of-1 physical pieces (`isUniquePiece: true`). Once sold out, they should not accept backorders.
-- **Shipping:** Physical items vary by weight. Every product schema must record `weightInGrams` so Snipcart can calculate weight-based shipping at checkout.
-- **Payments & Cart:** Handled entirely on the client by Snipcart via HTML data attributes (`data-item-id`, `data-item-price`, `data-item-weight`, etc.). No custom backend payment endpoints should be created.
+- **Shipping:** Physical items vary by weight. Every product schema must record `weightInGrams` so shipping costs can be calculated at checkout.
+- **Payments & Cart:** Not yet implemented — migration from Snipcart to Stripe Checkout is planned (see `docs/plan-c-stripe-migration.md`).
 
 ## Core Tech Stack
 
 - **Framework:** Astro (SSR / Hybrid mode with React islands) [Sanity Astro
   integration](https://raw.githubusercontent.com/sanity-io/sanity-astro/refs/heads/main/packages/sanity-astro/README.md)
 - **CMS:** Embedded Sanity Studio inside Astro at `/admin` 
-- **Payments & Cart:** Snipcart
 - **Package Manager:** `pnpm` (DO NOT use npm or yarn)
 - **Formatter & Linter:** Biome (DO NOT create `.eslintrc` or `.prettierrc`)
 - **Language:** TypeScript (strict mode)
@@ -58,7 +57,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 - **`/`** — Home. Featured products only (`isFeatured == true`, in stock, max 6), server-rendered with `ProductCard`; "Shop all" CTA → `/shop`.
 - **`/shop`** — All in-stock products, server-rendered, embedding the `CatalogExplorer` React island (`src/components/CatalogExplorer.tsx`). Search / sort / pagination are client-side; state syncs to the URL via `history.replaceState` (`?q=&sort=&page=`).
 - **`/shop/categories/[slug]`** — Server-rendered filtered list for one category (`PRODUCTS_BY_CATEGORY_QUERY`), embedding the same island. Category is a **path**, never a query param. Unknown slug → `Astro.redirect('/shop')`.
-- **`/shop/product/[slug]`** — PDP: gallery, specs, Snipcart buy button (or "Sold out" badge when `stockLevel === 0`). Sold-out items stay reachable here but are filtered out of listings. Unknown slug → redirect to `/shop`.
+- **`/shop/product/[slug]`** — PDP: gallery, specs, Add to cart button (or "Sold out" badge when `stockLevel === 0`). Sold-out items stay reachable here but are filtered out of listings. Unknown slug → redirect to `/shop`.
 - **`/about`, `/terms`** — Server-rendered from the `siteSettings` singleton's `aboutBody` / `termsBody` portable text. **`/contact`** — Static, with the email link pulled from `siteSettings.contactEmail` (same field feeds the footer via `Layout.astro`). Unknown content renders the page heading only.
 - **`/admin`** — Embedded Sanity Studio (reserved, from the sanity integration).
 

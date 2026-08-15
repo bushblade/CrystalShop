@@ -6,7 +6,6 @@ A low-cost, low-maintenance e-commerce store for an artisan crystal seller. Mana
 
 - **Framework:** Astro (SSR) with React islands
 - **CMS:** Embedded Sanity Studio at `/admin`
-- **Payments & Cart:** Snipcart (client-side, via HTML data attributes)
 - **Deploy target:** Netlify
 - **Package manager:** `pnpm`
 - **Linter / formatter:** Biome
@@ -18,7 +17,7 @@ A low-cost, low-maintenance e-commerce store for an artisan crystal seller. Mana
 | `/` | Home — up to 6 featured in-stock pieces, "Shop all" CTA |
 | `/shop` | All in-stock products with client-side search, sort and pagination (`?q=&sort=&page=`) |
 | `/shop/categories/[slug]` | Server-rendered list for one category |
-| `/shop/product/[slug]` | Product detail — gallery, specs, Snipcart buy button (or "Sold out" badge) |
+| `/shop/product/[slug]` | Product detail — gallery, specs, Add to cart button (or "Sold out" badge) |
 | `/about`, `/contact`, `/terms` | About & Terms render `siteSettings` portable text; Contact links to `siteSettings.contactEmail` (also in the footer) |
 | `/admin` | Sanity Studio |
 
@@ -44,7 +43,6 @@ Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`
 | --- | --- | --- |
 | `PUBLIC_SANITY_STUDIO_PROJECT_ID` | Yes | Sanity project ID |
 | `PUBLIC_SANITY_STUDIO_DATASET` | Yes | Sanity dataset (`development` locally, `production` on Netlify) |
-| `PUBLIC_SNIPCART_API_KEY` | No | Snipcart public key; enables the cart UI when set |
 | `SANITY_WRITE_TOKEN` | No | Sanity writer token for `pnpm seed:dummy` only; not used by the app |
 
 See `.env.example` for a template.
