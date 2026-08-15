@@ -71,7 +71,7 @@ without bloating its context window.
 | 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [x] |
 | 3 | Sanity models (shippingRates on siteSettings + order) | `feat/stripe-sanity-models` | - [x] |
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [x] |
-| 5 | Client cart store | `feat/cart-store` | - [ ] |
+| 5 | Client cart store | `feat/cart-store` | - [x] |
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [ ] |
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [ ] |
 | 8 | Checkout session function | `feat/create-checkout-session` | - [ ] |
@@ -200,7 +200,7 @@ tier, zero weight) return the expected tier.
 
 ---
 
-## Stage 5 — Client cart store · `feat/cart-store` · - [ ]
+## Stage 5 — Client cart store · `feat/cart-store` · - [x]
 
 **Decision (review):** use **Zustand + `persist`** for the cart store instead of a
 hand-rolled `subscribe` store. Zustand v5 is already in the dependency tree

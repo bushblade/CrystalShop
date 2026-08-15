@@ -36,7 +36,8 @@
 		"sanity": "^6.9.1",
 		"stripe": "^22.5.0",
 		"styled-components": "^6.5.1",
-		"tailwindcss": "^4.3.3"
+		"tailwindcss": "^4.3.3",
+		"zustand": "^5.0.14"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.10",
