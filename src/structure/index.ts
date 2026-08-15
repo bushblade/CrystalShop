@@ -1,4 +1,5 @@
 import { CogIcon } from '@sanity/icons/Cog'
+import { DocumentTextIcon } from '@sanity/icons/DocumentText'
 import { PackageIcon } from '@sanity/icons/Package'
 import { StarIcon } from '@sanity/icons/Star'
 import type { StructureBuilder, StructureResolver } from 'sanity/structure'
@@ -70,6 +71,22 @@ export const structure: StructureResolver = (S) =>
 						]),
 				),
 			...S.documentTypeListItems().filter(
-				(listItem) => listItem.getId() !== 'siteSettings' && listItem.getId() !== 'product',
+				(listItem) => !['siteSettings', 'product', 'order'].includes(listItem.getId() ?? ''),
 			),
+			S.divider(),
+			S.listItem()
+				.title('Orders (read only)')
+				.icon(DocumentTextIcon)
+				.child(
+					S.documentList()
+						.title('Orders — sales history, read only')
+						.schemaType('order')
+						.apiVersion('2026-08-10')
+						.filter('_type == "order"')
+						.initialValueTemplates([])
+						.defaultOrdering([{ field: 'completedAt', direction: 'desc' }])
+						.canHandleIntent(
+							(intentName, params) => intentName === 'edit' && params?.type === 'order',
+						),
+				),
 		])

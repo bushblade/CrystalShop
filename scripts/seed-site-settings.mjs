@@ -67,6 +67,14 @@ const termsBody = [
 
 const contactEmail = 'hello@eclipsiacrystals.com'
 
+// Placeholder postage tiers — the owner must confirm real UK rates before go-live.
+// The final band (null maxWeightGrams) is the catch-all for heavier parcels.
+const shippingRates = [
+	{ _key: 'rate-standard', name: 'Standard', maxWeightGrams: 1000, price: 4.5 },
+	{ _key: 'rate-medium', name: 'Medium', maxWeightGrams: 2000, price: 6.5 },
+	{ _key: 'rate-large', name: 'Large', maxWeightGrams: null, price: 9.5 },
+]
+
 async function run() {
 	if (isDeleteMode) {
 		await client.delete({ query: '_id == "siteSettings"' })
@@ -80,6 +88,7 @@ async function run() {
 		aboutBody,
 		termsBody,
 		contactEmail,
+		shippingRates,
 	}
 
 	await client.createOrReplace(document)
@@ -87,6 +96,7 @@ async function run() {
 	console.log(`  aboutBody: ${aboutBody.length} block(s)`)
 	console.log(`  termsBody: ${termsBody.length} block(s)`)
 	console.log(`  contactEmail: ${contactEmail}`)
+	console.log(`  shippingRates: ${shippingRates.length} tier(s) (placeholders)`)
 }
 
 run().catch((error) => {

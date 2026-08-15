@@ -30,8 +30,9 @@ without bloating its context window.
 - **Currency / region:** GBP, UK-only (`shipping_address_collection.allowed_countries = ["GB"]`).
 - **Cart:** client-side, localStorage-backed, **add-to-cart only on the PDP**
   (matches today's behaviour — no add buttons on listing cards).
-- **Shipping:** computed from a new `shippingSettings` Sanity singleton holding
-  weight-band tiers (`{ name, maxWeightGrams, price }`, top band open-ended).
+- **Shipping:** computed from `shippingRates` (weight-band tiers
+  `{ name, maxWeightGrams, price }`, top band open-ended) stored on the
+  `siteSettings` singleton — one settings doc, not a separate singleton.
   Postage is calculated on **shippable items only**
   (`deliveryMethod === 'post'`). Items with `deliveryMethod === 'arrange'` are
   heavy → buyer pays online, then arranges collection/courier (the PDP already
@@ -66,7 +67,7 @@ without bloating its context window.
 |---|---|---|---|
 | 1 | Remove Snipcart | `feat/remove-snipcart` | - [x] |
 | 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [x] |
-| 3 | Sanity models (shippingSettings + order) | `feat/stripe-sanity-models` | - [ ] |
+| 3 | Sanity models (shippingRates on siteSettings + order) | `feat/stripe-sanity-models` | - [x] |
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [ ] |
 | 5 | Client cart store | `feat/cart-store` | - [ ] |
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [ ] |
@@ -141,24 +142,43 @@ only exists once the webhook endpoint is registered (Stage 9).
 
 ---
 
-## Stage 3 — Sanity models · `feat/stripe-sanity-models` · - [ ]
+## Stage 3 — Sanity models · `feat/stripe-sanity-models` · - [x]
+
+**Decision (review):** shipping rates merge into the existing `siteSettings`
+singleton as a `shippingRates` field — no separate `shippingSettings` doc, reuses
+the pinned singleton + seed plumbing. Orders are webhook-written and read-only in
+Studio (all fields `readOnly: true` — Studio-only guard; the API write token is
+unaffected).
 
 **Files:**
-- `src/schemaTypes/documents/shippingSettings.ts` — singleton `shippingSettings`:
-  - `rates` (array, ordered) of `{ name, maxWeightGrams (number, nullable = open
-    top band), price (number, £) }`. Helpful descriptions for the non-technical
-    owner (e.g. "Standard", "0–1000g", "£4.50").
-- `src/schemaTypes/documents/order.ts` — minimal `order` doc, **no PII**:
-  - `sessionId` (string, required, unique)
+- `src/schemaTypes/documents/siteSettings.ts` — add `shippingRates` (array,
+  ordered) of `{ name (string), maxWeightGrams (number, nullable = open top band),
+  price (number, £) }`. Helpful descriptions for the non-technical owner (e.g.
+  "Standard", "0–1000g", "£4.50"). Custom validation: at most one open-ended band
+  and it must be last.
+- `src/schemaTypes/documents/order.ts` — minimal `order` doc, **no PII**, all
+  fields `readOnly: true`:
+  - `sessionId` (string, required, unique — custom async validator mirroring the
+    slug pattern in `product.ts`; Sanity has no native `unique()`. Real
+    enforcement is the Stage 9 webhook idempotency check)
+  - `paymentIntentId` (string — the `pi_...`; cross-references refunds. Single id
+    per session is accepted: `mode: 'payment'` means multi-intent sessions are
+    rare and only matter if a refund ever arrives for a non-stored intent)
   - `livemode` (boolean)
   - `total` (number), `currency` (string)
-  - `items` (array of `{ productId, productName, quantity, unitPrice }`)
+  - `items` (array of `orderItem`: `{ productId, productName, quantity, unitPrice }`)
   - `completedAt` (datetime)
-- `src/schemaTypes/index.ts` — register both.
+- `src/schemaTypes/index.ts` — register `order`.
+- `src/structure/index.ts` — pin a read-only **Orders** `documentList`
+  (`schemaType: 'order'`, `completedAt desc`, `canHandleIntent` allows `edit`
+  only so the read-only form opens but no create button).
+- `scripts/seed-site-settings.mjs` — seed `shippingRates` with placeholder tiers
+  (owner confirms real UK rates before go-live).
 - Run `pnpm typegen`.
 
-**Done when:** `pnpm typegen` passes and `schema.json` lists `shippingSettings`
-and `order`.
+**Done when:** `pnpm typegen` passes; `schema.json` lists `order`;
+`sanity.types.ts` `SiteSettings` includes `shippingRates`; Orders list in Studio
+is read-only with no create button.
 
 ---
 
@@ -200,8 +220,9 @@ fire on change.
 - `src/components/CartDrawer.tsx` — React island (`client:load` in `Layout.astro`):
   - Header cart button with live count (subscribes to Stage 5 store).
   - Drawer listing items, quantity steppers, remove buttons.
-  - Totals: item subtotal + shipping estimate (Stage 4 against the `shippingSettings`
-    rates — fetch them in `Layout.astro` server-side and pass as props).
+  - Totals: item subtotal + shipping estimate (Stage 4 against the
+    `siteSettings.shippingRates` — fetch them in `Layout.astro` server-side and
+    pass as props).
   - Heavy-item notice when the cart contains any `deliveryMethod === 'arrange'` item:
     "Contains a piece too heavy for standard postage — we'll contact you to arrange
     collection or courier."
@@ -277,7 +298,9 @@ Stripe's hosted checkout with correct line items and shipping.
        `checkout.session.async_payment_succeeded`, fulfill.
     3. **Idempotency:** if an `order` doc with this `sessionId` exists → 200, stop
        (Stripe retries are at-least-once; never decrement twice).
-    4. Create the `order` doc (no PII).
+    4. Create the `order` doc (no PII). Set `sessionId` from the event, and
+       `paymentIntentId` from `event.data.object.payment_intent` when present
+       (don't fail if absent — rare multi-intent sessions are accepted).
     5. Atomically decrement `stockLevel` for each item via a single Sanity
        transaction: `stockLevel = max(0, current - quantity)`.
   - Handle `checkout.session.async_payment_failed`: log only — no stock was
@@ -301,7 +324,7 @@ event does not decrement.
   happens via webhook and can lag the redirect; don't display stock-sensitive claims.
 - `src/pages/shop/checkout/cancel.astro` — "payment didn't complete, cart is safe" copy.
 - **Delivery section** — new page/section (decided: PDP + a Delivery section) listing
-  the `shippingSettings` tiers (name, weight band, price) and the heavy-item policy.
+  the `siteSettings.shippingRates` tiers (name, weight band, price) and the heavy-item policy.
   Fetch rates from Sanity server-side. Link from the PDP and footer.
 
 **Done when:** pages render with real tier data from Sanity; success/cancel reachable
@@ -328,10 +351,11 @@ from a completed/cancelled checkout.
 
 - **Owner dispatch email** — provider TBD (Resend free tier / Postmark). Webhook stub
   in Stage 9 awaits this.
-- **Real UK postage rate values** — owner must decide; seed `shippingSettings` with
-  placeholders until then.
+- **Real UK postage rate values** — owner must decide; `siteSettings.shippingRates`
+  is seeded with placeholders until then.
 - **Apple Pay domain registration** — one-time Stripe dashboard step at go-live.
-- **Refunds restoring stock** (`charge.refunded` webhook).
+- **Refunds restoring stock** (`charge.refunded` webhook) — match the refund's
+  `charge.payment_intent` against the order's `paymentIntentId` to find the sale.
 - **VAT / `automatic_tax`** — leave `automatic_tax` off until/unless the owner
   registers for VAT; the most common Stripe Tax mistake is enabling it without a
   registration and collecting nothing.

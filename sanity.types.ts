@@ -34,6 +34,28 @@ export type BlockContent = Array<{
   _key: string;
 }>;
 
+export type Order = {
+  _id: string;
+  _type: "order";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  sessionId: string;
+  paymentIntentId?: string;
+  livemode?: boolean;
+  total?: number;
+  currency?: string;
+  items?: Array<{
+    productId?: string;
+    productName?: string;
+    quantity?: number;
+    unitPrice?: number;
+    _type: "orderItem";
+    _key: string;
+  }>;
+  completedAt?: string;
+};
+
 export type SiteSettings = {
   _id: string;
   _type: "siteSettings";
@@ -43,6 +65,13 @@ export type SiteSettings = {
   aboutBody?: BlockContent;
   termsBody?: BlockContent;
   contactEmail: string;
+  shippingRates?: Array<{
+    name: string;
+    maxWeightGrams?: number;
+    price: number;
+    _type: "shippingRate";
+    _key: string;
+  }>;
 };
 
 export type SanityImageAssetReference = {
@@ -218,6 +247,7 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | BlockContent
+  | Order
   | SiteSettings
   | SanityImageAssetReference
   | CategoryReference
