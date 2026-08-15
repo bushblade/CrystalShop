@@ -37,6 +37,7 @@ function FadeInImage({
 		>
 			<img
 				ref={imageRef}
+				suppressHydrationWarning
 				data-fade-in
 				src={src}
 				alt={alt}
