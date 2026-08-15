@@ -28,8 +28,10 @@ without bloating its context window.
   removes the $20/mo fee (or 2% <$1k/mo). Stripe UK: £0/mo, 1.5% + 20p per card.
   Apple Pay / Google Pay / Stripe Link are included automatically.
 - **Currency / region:** GBP, UK-only (`shipping_address_collection.allowed_countries = ["GB"]`).
-- **Cart:** client-side, localStorage-backed, **add-to-cart only on the PDP**
-  (matches today's behaviour — no add buttons on listing cards).
+- **Cart:** client-side **Zustand** store with `persist` middleware
+  (localStorage-backed, rehydrated in the browser), shared across React islands
+  via `useSyncExternalStore`; **add-to-cart only on the PDP** (matches today's
+  behaviour — no add buttons on listing cards).
 - **Shipping:** computed from `shippingRates` (weight-band tiers
   `{ name, maxWeightGrams, price }`, top band open-ended) stored on the
   `siteSettings` singleton — one settings doc, not a separate singleton.
@@ -200,17 +202,40 @@ tier, zero weight) return the expected tier.
 
 ## Stage 5 — Client cart store · `feat/cart-store` · - [ ]
 
-**Files:**
-- `src/lib/cart.ts` — localStorage-backed store, framework-agnostic:
-  - `CartItem = { id, name, price, weightInGrams, image, deliveryMethod, quantity }`
-  - `add(item)`, `remove(id)`, `setQuantity(id, qty)`, `clear()`, `subscribe(fn)`
-  - Persist to `localStorage`; load on init; emit changes to subscribers
-    (used by the React islands).
-  - Enforce `quantity <= stockLevel` and `maxQuantity 1` for `isUniquePiece` at the
-    call site (the PDP passes limits in).
+**Decision (review):** use **Zustand + `persist`** for the cart store instead of a
+hand-rolled `subscribe` store. Zustand v5 is already in the dependency tree
+(transitively via Sanity — `@sanity/sdk` → `@sanity/workbench`), so this adds zero
+new bundle weight. `persist` owns the localStorage plumbing (hydration,
+corrupt-data guard, versioning); the React binding is `useSyncExternalStore`, so
+islands never write subscribe/unsubscribe code — Stage 6's drawer and Stage 7's
+PDP button both consume the store via `useCartStore((s) => s.items)` and stay live
+across islands. SSR renders the empty-cart snapshot, so the header badge may flash
+0 → N on hydration (acceptable — same with any localStorage approach).
 
-**Done when:** add/remove/quantity round-trip through localStorage and subscribers
-fire on change.
+**Files:**
+- `package.json` — add `zustand` `^5` (direct dependency; version already in tree).
+- `src/lib/cart.ts` — `create` + `persist` (key `eclipsia:cart`, `partialize`
+  persists `items` only):
+  - `CartItem = { id, name, price, weightInGrams, image, deliveryMethod, quantity }`
+    — `id` is the Sanity `_id` (Stage 8 re-fetches via `_id in $ids`); `image`
+    trimmed to `{ url, alt }`.
+  - State: `items` + `limits: Record<id, maxQuantity>` (private cap per line).
+  - Actions: `add(item, maxQuantity)` (increment by 1, clamp to `maxQuantity`,
+    no-op at cap), `setQuantity(id, qty)` (clamp to `[1, max]`, **0 removes the
+    line**), `remove(id)`, `clear()`.
+  - Clamping is enforced **in the store** via `limits`, not only at the call site —
+    `setQuantity` can't cap without knowing the limit. The PDP (Stage 7) computes
+    `maxQuantity`: `1` for `isUniquePiece`, else `stockLevel`.
+- `src/lib/cart.test.ts` — vitest, node env; fresh store per test with an
+  in-memory fake storage via `createJSONStorage(() => fakeStorage)`. Covers: add
+  appends / same-id increments / clamps / no-op at cap; `setQuantity` clamps and
+  `setQuantity(id, 0)` removes; remove; clear; persistence round-trip (second
+  store on the same fake storage rehydrates); corrupt JSON loads empty.
+
+**Done when:** `pnpm lint`, `pnpm test`, `pnpm build` pass; add/remove/quantity
+round-trip through localStorage via `persist` rehydration; clamping enforced
+(quantity never exceeds `maxQuantity`, unique pieces at most 1); components
+reading the store re-render on change.
 
 ---
 
@@ -218,7 +243,8 @@ fire on change.
 
 **Files:**
 - `src/components/CartDrawer.tsx` — React island (`client:load` in `Layout.astro`):
-  - Header cart button with live count (subscribes to Stage 5 store).
+  - Header cart button with live count (reads the Stage 5 store via
+    `useCartStore`).
   - Drawer listing items, quantity steppers, remove buttons.
   - Totals: item subtotal + shipping estimate (Stage 4 against the
     `siteSettings.shippingRates` — fetch them in `Layout.astro` server-side and
@@ -239,7 +265,8 @@ shows for mixed carts.
 
 **Files:**
 - `src/pages/shop/product/[slug].astro` — wire the Stage 1 "Add to cart" button to
-  the Stage 5 store (pass `maxQuantity`: `1` for unique pieces, else `stockLevel`).
+  the Stage 5 store (call `add(item, maxQuantity)` where `maxQuantity` is `1` for
+  unique pieces, else `stockLevel`).
   - Keep the sold-out badge (`stockLevel === 0`).
   - Show **"Shipping from £X"** computed via Stage 4 for this item's weight when
     `deliveryMethod === 'post'`; the existing heavy-item "contact us" banner stays
