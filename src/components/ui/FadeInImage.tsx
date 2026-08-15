@@ -7,6 +7,7 @@ interface FadeInImageProps {
 	width?: number
 	height?: number
 	placeholderColor?: string | null
+	placeholderLqip?: string | null
 	className?: string
 	imgClassName?: string
 	loading?: 'eager' | 'lazy'
@@ -18,6 +19,7 @@ function FadeInImage({
 	width,
 	height,
 	placeholderColor,
+	placeholderLqip,
 	className,
 	imgClassName,
 	loading,
@@ -35,6 +37,14 @@ function FadeInImage({
 			className={`relative overflow-hidden bg-stone-100 ${className ?? ''}`}
 			style={placeholderColor ? { backgroundColor: placeholderColor } : undefined}
 		>
+			{placeholderLqip ? (
+				<img
+					src={placeholderLqip}
+					alt=""
+					aria-hidden
+					className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl"
+				/>
+			) : null}
 			<img
 				ref={imageRef}
 				suppressHydrationWarning

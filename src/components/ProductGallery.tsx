@@ -8,6 +8,7 @@ interface ProductGalleryImage {
 	width?: number | null
 	height?: number | null
 	dominantColor?: string | null
+	lqip?: string | null
 }
 
 interface ProductGalleryProps {
@@ -34,6 +35,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
 					width={selected.width ?? undefined}
 					height={selected.height ?? undefined}
 					placeholderColor={selected.dominantColor}
+					placeholderLqip={selected.lqip}
 					className="aspect-square w-full rounded-lg"
 				/>
 			) : null}
@@ -55,6 +57,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
 									width={image.width ?? undefined}
 									height={image.height ?? undefined}
 									placeholderColor={image.dominantColor}
+									placeholderLqip={image.lqip}
 									loading="lazy"
 									className={`aspect-square w-full rounded-md transition-opacity ${
 										index === selectedIndex

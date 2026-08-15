@@ -19,7 +19,8 @@ const PRODUCT_CARD_FRAGMENT = /* groq */ `
 		"alt": alt,
 		"width": asset->metadata.dimensions.width,
 		"height": asset->metadata.dimensions.height,
-		"dominantColor": asset->metadata.palette.dominant.background
+		"dominantColor": asset->metadata.palette.dominant.background,
+		"lqip": asset->metadata.lqip
 	}
 `
 
@@ -75,7 +76,8 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(/* groq */ `
 			"alt": alt,
 			"width": asset->metadata.dimensions.width,
 			"height": asset->metadata.dimensions.height,
-			"dominantColor": asset->metadata.palette.dominant.background
+			"dominantColor": asset->metadata.palette.dominant.background,
+			"lqip": asset->metadata.lqip
 		}
 	}
 `)

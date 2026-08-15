@@ -22,6 +22,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 						width={product.image?.width ?? undefined}
 						height={product.image?.height ?? undefined}
 						placeholderColor={product.image?.dominantColor}
+						placeholderLqip={product.image?.lqip}
 						className="aspect-square w-full rounded-md"
 						imgClassName="group-hover:scale-105"
 						loading="lazy"
