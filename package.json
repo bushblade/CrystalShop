@@ -11,6 +11,8 @@
 		"preview": "astro preview",
 		"astro": "astro",
 		"lint": "biome check .",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"seed:dummy": "node --env-file=.env scripts/seed-dummy-data.mjs",
 		"seed:dummy:delete": "node --env-file=.env scripts/seed-dummy-data.mjs -- --delete",
 		"seed:site-settings": "node --env-file=.env scripts/seed-site-settings.mjs",
@@ -48,6 +50,7 @@
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
 		"typescript": "^6.0.3",
-		"vite": "^8.2.1"
+		"vite": "^8.2.1",
+		"vitest": "^4.1.10"
 	}
 }

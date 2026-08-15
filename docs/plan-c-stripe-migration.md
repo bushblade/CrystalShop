@@ -68,7 +68,7 @@ without bloating its context window.
 | 1 | Remove Snipcart | `feat/remove-snipcart` | - [x] |
 | 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [x] |
 | 3 | Sanity models (shippingRates on siteSettings + order) | `feat/stripe-sanity-models` | - [x] |
-| 4 | Shipping calculator lib | `feat/shipping-calculator` | - [ ] |
+| 4 | Shipping calculator lib | `feat/shipping-calculator` | - [x] |
 | 5 | Client cart store | `feat/cart-store` | - [ ] |
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [ ] |
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [ ] |
@@ -182,7 +182,7 @@ is read-only with no create button.
 
 ---
 
-## Stage 4 — Shipping calculator · `feat/shipping-calculator` · - [ ]
+## Stage 4 — Shipping calculator · `feat/shipping-calculator` · - [x]
 
 **Files:**
 - `src/lib/shipping.ts` — pure, no I/O:
