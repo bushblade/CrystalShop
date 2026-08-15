@@ -13,7 +13,9 @@ without bloating its context window.
 ## Tracking mechanism
 
 - Each stage has a checkbox + a git branch. **Tick the checkbox only when the
-  branch is merged.**
+  human has reviewed the changes and told the agent to mark the stage complete.**
+  The box is ticked on the stage's current feature/working branch; merging stays a
+  separate human step.
 - A fresh agent starts by reading the "Context & locked decisions" block below plus
   the single stage it's assigned — nothing else.
 - Status key: `- [ ]` todo · `- [x]` done. Mark in-progress stages by leaving the
