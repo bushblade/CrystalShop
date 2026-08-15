@@ -8,8 +8,8 @@ import '@fontsource/cormorant-garamond/400-italic.css'
 import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
 import { sanityClient } from 'sanity:client'
+import CartDrawer from '../components/CartDrawer'
 import NavLink from '../components/ui/NavLink.astro'
-import PrimaryButton from '../components/ui/PrimaryButton.astro'
 import { SITE_SETTINGS_QUERY } from '../queries/sanity'
 import '../styles/global.css'
 
@@ -28,6 +28,12 @@ const {
 } = Astro.props
 const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
 const contactEmail = siteSettings?.contactEmail
+const shippingRates =
+	siteSettings?.shippingRates?.map((rate) => ({
+		name: rate.name,
+		maxWeightGrams: rate.maxWeightGrams ?? null,
+		price: rate.price,
+	})) ?? []
 ---
 
 <!doctype html>
@@ -54,7 +60,7 @@ const contactEmail = siteSettings?.contactEmail
 					<NavLink href="/shop">Shop</NavLink>
 					<NavLink href="/about">About</NavLink>
 					<NavLink href="/contact">Contact</NavLink>
-					<PrimaryButton size="sm">Cart 0</PrimaryButton>
+					<CartDrawer client:load shippingRates={shippingRates} />
 				</div>
 			</nav>
 		</header>

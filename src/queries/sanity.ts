@@ -86,6 +86,11 @@ export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
 	*[_type == "siteSettings"][0]{
 		aboutBody,
 		termsBody,
-		contactEmail
+		contactEmail,
+		shippingRates[]{
+			name,
+			maxWeightGrams,
+			price
+		}
 	}
 `)
