@@ -65,7 +65,7 @@ without bloating its context window.
 | # | Stage | Branch | Status |
 |---|---|---|---|
 | 1 | Remove Snipcart | `feat/remove-snipcart` | - [x] |
-| 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [ ] |
+| 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [x] |
 | 3 | Sanity models (shippingSettings + order) | `feat/stripe-sanity-models` | - [ ] |
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [ ] |
 | 5 | Client cart store | `feat/cart-store` | - [ ] |
@@ -115,7 +115,7 @@ console errors.
 
 ---
 
-## Stage 2 — Deps + env scaffolding · `feat/stripe-deps-env` · - [ ]
+## Stage 2 — Deps + env scaffolding · `feat/stripe-deps-env` · - [x]
 
 **Files:**
 - `package.json` — add `stripe` `^22` (dependency) and `@netlify/functions` (devDependency).
@@ -128,6 +128,14 @@ console errors.
   `events` read (Stage 9). Keep them out of any `PUBLIC_`-prefixed var so they never
   reach the client.
 - Netlify env (👤): set the Stripe keys on the dev site. Test keys only for now.
+
+**Notes (stage 2 implementation):** Keys come from the isolated **"Crystal Shop
+Dev" Stripe Sandbox**. Deviation from the locked "two scoped RAKs" decision: the
+sandbox RAK was created with broader access (verified: answers 200 on `balance` /
+`customers` too, not just `checkout.sessions` + `events`) — accepted for the dev
+site since the sandbox is throwaway. Create properly-scoped `rk_` keys before
+production go-live. `STRIPE_WEBHOOK_SECRET` is not set yet — the `whsec_` value
+only exists once the webhook endpoint is registered (Stage 9).
 
 **Done when:** `pnpm build` passes with the new deps; env vars documented.
 
