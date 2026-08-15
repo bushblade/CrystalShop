@@ -6,7 +6,6 @@ import PageHeading from '../../../components/ui/PageHeading.astro'
 import PrimaryButton from '../../../components/ui/PrimaryButton.astro'
 import Layout from '../../../layouts/Layout.astro'
 import { formatPrice, formatWeight } from '../../../lib/format'
-import { imageUrl } from '../../../lib/images'
 import { PRODUCT_BY_SLUG_QUERY } from '../../../queries/sanity'
 
 const { slug } = Astro.params
@@ -18,8 +17,6 @@ if (!product) {
 }
 
 const isSoldOut = (product.stockLevel ?? 0) === 0
-const productUrl = new URL(`/shop/product/${product.slug}`, Astro.site ?? Astro.url).href
-const heroImage = product.images?.[0]
 ---
 
 <Layout title={`${product.name} | Eclipsia Crystals`} description={product.description ?? undefined}>
@@ -75,17 +72,7 @@ const heroImage = product.images?.[0]
 							Sold out
 						</span>
 					) : (
-						<PrimaryButton
-							class="snipcart-add-item"
-							data-item-id={product._id}
-							data-item-name={product.name}
-							data-item-price={product.price}
-							data-item-url={productUrl}
-							data-item-image={imageUrl(heroImage?.url, 600) ?? undefined}
-							data-item-description={product.description ?? ''}
-							data-item-weight={product.weightInGrams}
-							data-item-max-quantity={product.isUniquePiece ? '1' : String(product.stockLevel ?? 1)}
-						>
+						<PrimaryButton>
 							Add to cart
 						</PrimaryButton>
 					)}

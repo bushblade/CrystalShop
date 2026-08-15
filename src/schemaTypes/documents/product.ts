@@ -90,7 +90,7 @@ export const product = defineType({
 			title: 'Weight (g)',
 			type: 'number',
 			group: PACKAGING_GROUP,
-			description: 'Used by Snipcart to calculate shipping costs',
+			description: 'Used to calculate shipping costs',
 			validation: (rule) => rule.required().positive().error('Enter the product weight in grams'),
 		}),
 		defineField({

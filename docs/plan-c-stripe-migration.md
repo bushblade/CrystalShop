@@ -62,7 +62,7 @@ without bloating its context window.
 
 | # | Stage | Branch | Status |
 |---|---|---|---|
-| 1 | Remove Snipcart | `feat/remove-snipcart` | - [ ] |
+| 1 | Remove Snipcart | `feat/remove-snipcart` | - [x] |
 | 2 | Deps + env scaffolding | `feat/stripe-deps-env` | - [ ] |
 | 3 | Sanity models (shippingSettings + order) | `feat/stripe-sanity-models` | - [ ] |
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [ ] |
@@ -81,7 +81,7 @@ track (`8`, `9`) are independent.
 
 ---
 
-## Stage 1 — Remove Snipcart · `feat/remove-snipcart` · - [ ]
+## Stage 1 — Remove Snipcart · `feat/remove-snipcart` · - [x]
 
 Strip Snipcart before building anything new so there's never a dual checkout path.
 

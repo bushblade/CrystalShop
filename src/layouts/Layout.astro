@@ -26,7 +26,6 @@ const {
 	maxWidth = '6xl',
 	padded = true,
 } = Astro.props
-const snipcartApiKey = import.meta.env.PUBLIC_SNIPCART_API_KEY
 const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
 const contactEmail = siteSettings?.contactEmail
 ---
@@ -46,19 +45,6 @@ const contactEmail = siteSettings?.contactEmail
 		<noscript>
 			<style>img[data-fade-in] { opacity: 1 !important; }</style>
 		</noscript>
-		{snipcartApiKey ? (
-			<>
-				<link rel="preconnect" href="https://app.snipcart.com" />
-				<link rel="preconnect" href="https://cdn.snipcart.com" />
-				<link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.css" />
-				<script
-					is:inline
-					async
-					src="https://cdn.snipcart.com/themes/v3.2.0/default/snipcart.js"
-					data-api-key={snipcartApiKey}
-				/>
-			</>
-		) : null}
 	</head>
 	<body class="flex min-h-screen flex-col">
 		<header class="border-b border-stone-200">
@@ -68,11 +54,7 @@ const contactEmail = siteSettings?.contactEmail
 					<NavLink href="/shop">Shop</NavLink>
 					<NavLink href="/about">About</NavLink>
 					<NavLink href="/contact">Contact</NavLink>
-					{snipcartApiKey ? (
-						<PrimaryButton size="sm" class="snipcart-checkout">
-							Cart <span class="snipcart-items-count">0</span>
-						</PrimaryButton>
-					) : null}
+					<PrimaryButton size="sm">Cart 0</PrimaryButton>
 				</div>
 			</nav>
 		</header>
