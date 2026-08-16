@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createJSONStorage, type StateStorage } from 'zustand/middleware'
 
-import { type CartItem, createCartStore } from './cart'
+import { type CartItem, createCartStore, parsePersistedCart, syncCartFromStorage } from './cart'
 
 function createFakeStorage(initial: Record<string, string> = {}) {
 	const data: Record<string, string> = { ...initial }
@@ -143,5 +143,85 @@ describe('persistence', () => {
 		const store = createCartStore(createJSONStorage(() => storage))
 		expect(store.getState().items).toEqual([])
 		expect(store.getState().limits).toEqual({})
+	})
+})
+
+function persistValue(state: object): string {
+	return JSON.stringify({ state, version: 1 })
+}
+
+describe('parsePersistedCart', () => {
+	it('parses a valid persisted value', () => {
+		const raw = persistValue({
+			items: [{ ...makeItem(), quantity: 1 }],
+			limits: { 'product-1': 1 },
+		})
+		expect(parsePersistedCart(raw)).toEqual({
+			items: [{ ...makeItem(), quantity: 1 }],
+			limits: { 'product-1': 1 },
+		})
+	})
+
+	it('returns null for corrupt JSON', () => {
+		expect(parsePersistedCart('not-json{')).toBeNull()
+	})
+
+	it('returns null when the version mismatches', () => {
+		const raw = JSON.stringify({
+			state: { items: [], limits: {} },
+			version: 99,
+		})
+		expect(parsePersistedCart(raw)).toBeNull()
+	})
+
+	it('returns null when items is not an array', () => {
+		const raw = persistValue({ items: 'nope', limits: {} })
+		expect(parsePersistedCart(raw)).toBeNull()
+	})
+
+	it('returns null when limits is missing', () => {
+		const raw = JSON.stringify({ state: { items: [] }, version: 1 })
+		expect(parsePersistedCart(raw)).toBeNull()
+	})
+})
+
+describe('syncCartFromStorage', () => {
+	it('returns null when the state is unchanged', () => {
+		const current = {
+			items: [{ ...makeItem(), quantity: 2 }],
+			limits: { 'product-1': 3 },
+		}
+		const incoming = {
+			items: [{ ...makeItem(), quantity: 2 }],
+			limits: { 'product-1': 3 },
+		}
+		expect(syncCartFromStorage(current, incoming)).toBeNull()
+	})
+
+	it('returns the incoming state when it differs', () => {
+		const current = {
+			items: [{ ...makeItem(), quantity: 2 }],
+			limits: { 'product-1': 3 },
+		}
+		const incoming = {
+			items: [{ ...makeItem(), quantity: 1 }],
+			limits: { 'product-1': 3 },
+		}
+		expect(syncCartFromStorage(current, incoming)).toEqual(incoming)
+	})
+
+	it('returns the incoming state when a line was removed elsewhere', () => {
+		const current = {
+			items: [
+				{ ...makeItem(), quantity: 1 },
+				{ ...makeItem({ id: 'product-2', name: 'Rose Quartz' }), quantity: 1 },
+			],
+			limits: { 'product-1': 1, 'product-2': 1 },
+		}
+		const incoming = {
+			items: [{ ...makeItem(), quantity: 1 }],
+			limits: { 'product-1': 1 },
+		}
+		expect(syncCartFromStorage(current, incoming)).toEqual(incoming)
 	})
 })
