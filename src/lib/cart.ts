@@ -27,6 +27,41 @@ type CartState = {
 
 type PersistedCart = Pick<CartState, 'items' | 'limits'>
 
+export const CART_STORAGE_KEY = 'eclipsia:cart'
+const CART_VERSION = 1
+
+export function parsePersistedCart(raw: string): PersistedCart | null {
+	try {
+		const parsed = JSON.parse(raw) as {
+			state?: { items?: unknown; limits?: unknown }
+			version?: unknown
+		}
+		if (parsed.version !== CART_VERSION) return null
+		const state = parsed.state
+		if (
+			!state ||
+			!Array.isArray(state.items) ||
+			typeof state.limits !== 'object' ||
+			state.limits === null
+		) {
+			return null
+		}
+		return { items: state.items as CartItem[], limits: state.limits as Record<string, number> }
+	} catch {
+		return null
+	}
+}
+
+export function syncCartFromStorage(
+	current: PersistedCart,
+	incoming: PersistedCart,
+): PersistedCart | null {
+	const currentJson = JSON.stringify(current)
+	const incomingJson = JSON.stringify(incoming)
+	if (currentJson === incomingJson) return null
+	return incoming
+}
+
 export function createCartStore(storage: PersistStorage<PersistedCart> | undefined) {
 	return create<CartState>()(
 		persist(
@@ -80,8 +115,8 @@ export function createCartStore(storage: PersistStorage<PersistedCart> | undefin
 				clear: () => set({ items: [], limits: {} }),
 			}),
 			{
-				name: 'eclipsia:cart',
-				version: 1,
+				name: CART_STORAGE_KEY,
+				version: CART_VERSION,
 				partialize: (state) => ({ items: state.items, limits: state.limits }),
 				storage,
 			},
@@ -90,3 +125,14 @@ export function createCartStore(storage: PersistStorage<PersistedCart> | undefin
 }
 
 export const useCartStore = createCartStore(createJSONStorage(() => localStorage))
+
+if (typeof window !== 'undefined') {
+	window.addEventListener('storage', (event) => {
+		if (event.storageArea !== window.localStorage || event.key !== CART_STORAGE_KEY) return
+		const parsed =
+			event.newValue === null ? { items: [], limits: {} } : parsePersistedCart(event.newValue)
+		if (!parsed) return
+		const update = syncCartFromStorage(useCartStore.getState(), parsed)
+		if (update) useCartStore.setState(update)
+	})
+}

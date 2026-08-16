@@ -9,7 +9,9 @@ import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
 import { sanityClient } from 'sanity:client'
 import CartDrawer from '../components/CartDrawer'
+import CartFreshnessChecker from '../components/CartFreshnessChecker'
 import NavLink from '../components/ui/NavLink.astro'
+import Toaster from '../components/ui/Toaster'
 import { SITE_SETTINGS_QUERY } from '../queries/sanity'
 import '../styles/global.css'
 
@@ -71,6 +73,8 @@ const shippingRates =
 				padded ? 'py-10' : '',
 			]}
 		>
+			<CartFreshnessChecker client:load />
+			<Toaster client:only="react" />
 			<slot />
 		</main>
 		<footer class="mt-auto border-t border-stone-200 py-8">
