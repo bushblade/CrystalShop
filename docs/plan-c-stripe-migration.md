@@ -73,7 +73,7 @@ without bloating its context window.
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [x] |
 | 5 | Client cart store | `feat/cart-store` | - [x] |
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [x] |
-| 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [ ] |
+| 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [x] |
 | 8 | Checkout session function | `feat/create-checkout-session` | - [ ] |
 | 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [ ] |
 | 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [ ] |
@@ -261,7 +261,7 @@ shows for mixed carts.
 
 ---
 
-## Stage 7 — PDP add-to-cart + shipping estimate · `feat/pdp-add-to-cart` · - [ ]
+## Stage 7 — PDP add-to-cart + shipping estimate · `feat/pdp-add-to-cart` · - [x]
 
 **Files:**
 - `src/pages/shop/product/[slug].astro` — wire the Stage 1 "Add to cart" button to
