@@ -55,7 +55,7 @@ export async function checkCartFreshness(): Promise<string[]> {
 		projectId: import.meta.env.PUBLIC_SANITY_STUDIO_PROJECT_ID,
 		dataset: import.meta.env.PUBLIC_SANITY_STUDIO_DATASET,
 		apiVersion: '2026-08-10',
-		useCdn: true,
+		useCdn: false,
 	})
 
 	const matches = await client.fetch(PRODUCT_AVAILABILITY_QUERY, { ids: requestedIds })
