@@ -23,6 +23,7 @@
 		"@astrojs/netlify": "^8.2.0",
 		"@astrojs/react": "^6.0.2",
 		"@portabletext/to-html": "^5.0.3",
+		"@react-spring/web": "^10.1.2",
 		"@sanity/astro": "^3.5.0",
 		"@sanity/client": "^7.26.2",
 		"@sanity/icons": "^5.2.1",
