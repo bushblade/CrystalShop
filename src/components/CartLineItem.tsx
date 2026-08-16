@@ -1,5 +1,6 @@
 import type { CartItem } from '../lib/cart'
 import { formatPrice } from '../lib/format'
+import { imageUrl } from '../lib/images'
 
 interface CartLineItemProps {
 	item: CartItem
@@ -22,7 +23,7 @@ export default function CartLineItem({
 	return (
 		<li className="flex gap-4 py-4">
 			<img
-				src={item.image.url}
+				src={imageUrl(item.image.url, 128) ?? ''}
 				alt={item.image.alt}
 				loading="lazy"
 				className="h-16 w-16 shrink-0 rounded-md object-cover"
