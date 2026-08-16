@@ -72,7 +72,7 @@ without bloating its context window.
 | 3 | Sanity models (shippingRates on siteSettings + order) | `feat/stripe-sanity-models` | - [x] |
 | 4 | Shipping calculator lib | `feat/shipping-calculator` | - [x] |
 | 5 | Client cart store | `feat/cart-store` | - [x] |
-| 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [ ] |
+| 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [x] |
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [ ] |
 | 8 | Checkout session function | `feat/create-checkout-session` | - [ ] |
 | 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [ ] |
@@ -239,7 +239,7 @@ reading the store re-render on change.
 
 ---
 
-## Stage 6 — Cart UI · `feat/cart-ui` · - [ ]
+## Stage 6 — Cart UI · `feat/cart-ui` · - [x]
 
 **Files:**
 - `src/components/CartDrawer.tsx` — React island (`client:load` in `Layout.astro`):
