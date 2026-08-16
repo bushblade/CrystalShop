@@ -27,6 +27,7 @@ function makeItem(overrides: Partial<CartItem> = {}): Omit<CartItem, 'quantity'>
 	return {
 		id: 'product-1',
 		name: 'Amethyst Cluster',
+		slug: 'amethyst-cluster',
 		price: 24,
 		weightInGrams: 400,
 		image: { url: 'https://example.com/amethyst.jpg', alt: 'Amethyst cluster' },
@@ -147,7 +148,7 @@ describe('persistence', () => {
 })
 
 function persistValue(state: object): string {
-	return JSON.stringify({ state, version: 1 })
+	return JSON.stringify({ state, version: 2 })
 }
 
 describe('parsePersistedCart', () => {

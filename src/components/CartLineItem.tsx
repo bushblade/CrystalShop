@@ -20,16 +20,25 @@ export default function CartLineItem({
 	onIncrease,
 	onRemove,
 }: CartLineItemProps) {
+	const productUrl = `/shop/product/${item.slug}`
+
 	return (
 		<li className="flex gap-4 py-4">
-			<img
-				src={imageUrl(item.image.url, 128) ?? ''}
-				alt={item.image.alt}
-				loading="lazy"
-				className="h-16 w-16 shrink-0 rounded-md object-cover"
-			/>
+			<a href={productUrl} className="shrink-0" aria-label={`View ${item.name}`}>
+				<img
+					src={imageUrl(item.image.url, 128) ?? ''}
+					alt={item.image.alt}
+					loading="lazy"
+					className="h-16 w-16 rounded-md object-cover transition-opacity hover:opacity-80"
+				/>
+			</a>
 			<div className="flex flex-1 flex-col">
-				<span className="text-sm font-medium text-stone-900">{item.name}</span>
+				<a
+					href={productUrl}
+					className="text-sm font-medium text-stone-900 transition-colors hover:text-violet-700"
+				>
+					{item.name}
+				</a>
 				<span className="text-xs text-stone-500">{formatPrice(item.price)} each</span>
 				<div className="mt-auto flex items-center gap-2">
 					<button

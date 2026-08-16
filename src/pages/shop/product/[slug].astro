@@ -36,6 +36,7 @@ const heroImage = product.images?.[0]
 const cartItem = {
 	id: product._id,
 	name: product.name,
+	slug: product.slug ?? '',
 	price: product.price,
 	weightInGrams: product.weightInGrams ?? 0,
 	image: { url: heroImage?.url ?? '', alt: heroImage?.alt ?? product.name },

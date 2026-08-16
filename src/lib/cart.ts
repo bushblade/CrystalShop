@@ -9,6 +9,7 @@ export type CartImage = {
 export type CartItem = {
 	id: string
 	name: string
+	slug: string
 	price: number
 	weightInGrams: number
 	image: CartImage
@@ -28,7 +29,7 @@ type CartState = {
 type PersistedCart = Pick<CartState, 'items' | 'limits'>
 
 export const CART_STORAGE_KEY = 'eclipsia:cart'
-const CART_VERSION = 1
+const CART_VERSION = 2
 
 export function parsePersistedCart(raw: string): PersistedCart | null {
 	try {
