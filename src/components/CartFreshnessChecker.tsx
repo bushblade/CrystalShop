@@ -4,9 +4,9 @@ import { checkCartFreshness } from '../lib/cartFreshness'
 
 function describeRemovals(removedItems: string[]): string {
 	if (removedItems.length === 1) {
-		return `${removedItems[0]} sold out while you were away and was removed from your cart.`
+		return `We're sorry — ${removedItems[0]} sold out while you were away, so we've removed it from your cart.`
 	}
-	return `${removedItems.length} items in your cart sold out while you were away and were removed.`
+	return `We're sorry — ${removedItems.length} items sold out while you were away and were removed from your cart.`
 }
 
 export default function CartFreshnessChecker() {
