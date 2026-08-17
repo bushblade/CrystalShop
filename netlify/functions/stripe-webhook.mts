@@ -177,6 +177,7 @@ export default async (req: Request): Promise<Response> => {
 			const item = itemsById.get(id)
 			if (!item) throw new Error(`Missing metadata for product ${id}`)
 			return {
+				_key: id, // unique within the items array (map keys are unique); required for Studio
 				productId: id,
 				productName: item.name,
 				quantity: quantitiesById.get(id),
