@@ -17,3 +17,18 @@ import Layout from '../../../layouts/Layout.astro'
 		<NavLink href="/shop" class="font-medium text-violet-700">Back to shop</NavLink>
 	</p>
 </Layout>
+
+<script>
+	import { useCartStore } from '../../../lib/cart'
+
+	// Clear the cart after a completed purchase. Stripe redirects here once
+	// payment succeeds, but nothing else in the flow ever empties the cart —
+	// without this, the just-bought items would linger and CartFreshnessChecker
+	// would misreport them as "sold out while you were away" on the next page.
+	// Gated on the session_id query param so a stray visit to this URL doesn't
+	// wipe a cart that's still in progress. Runs at page load, before the
+	// freshness check's network fetch resolves, so it never toasts.
+	if (new URLSearchParams(window.location.search).has('session_id')) {
+		useCartStore.getState().clear()
+	}
+</script>

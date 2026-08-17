@@ -123,7 +123,14 @@ export default async (req: Request): Promise<Response> => {
 			},
 		})),
 		metadata: {
-			items: JSON.stringify(items.map((item) => ({ id: item.id, quantity: item.quantity }))),
+			items: JSON.stringify(
+				items.map((item) => ({
+					id: item.id,
+					name: item.name,
+					unitPrice: item.price,
+					quantity: item.quantity,
+				})),
+			),
 		},
 		success_url: `${origin}/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 		cancel_url: `${origin}/shop/checkout/cancel`,

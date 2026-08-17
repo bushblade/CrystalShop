@@ -5,7 +5,7 @@ import { createClient } from '@sanity/client'
 // both `netlify dev` and deployed functions. Always reads fresh, published
 // content — never the CDN, never drafts — so checkout can't be priced or
 // stocked from stale or unpublished data.
-export function createSanityClient() {
+export function createSanityClient(token?: string) {
 	const projectId = Netlify.env.get('PUBLIC_SANITY_STUDIO_PROJECT_ID')
 	const dataset = Netlify.env.get('PUBLIC_SANITY_STUDIO_DATASET')
 	if (!projectId) {
@@ -20,5 +20,6 @@ export function createSanityClient() {
 		apiVersion: '2026-08-10',
 		useCdn: false,
 		perspective: 'published',
+		token,
 	})
 }
