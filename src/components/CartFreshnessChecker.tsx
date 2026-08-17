@@ -11,6 +11,9 @@ function describeRemovals(removedItems: string[]): string {
 
 export default function CartFreshnessChecker() {
 	useEffect(() => {
+		// The success page already clears the cart for the purchase just made —
+		// checking there would misreport those items as "sold out while away".
+		if (window.location.pathname.startsWith('/shop/checkout/success')) return
 		let cancelled = false
 		checkCartFreshness().then((removedItems) => {
 			if (cancelled || removedItems.length === 0) return

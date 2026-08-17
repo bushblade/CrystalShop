@@ -81,7 +81,7 @@ without bloating its context window.
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [x] |
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [x] |
 | 8 | Checkout session function | `feat/create-checkout-session` | - [x] |
-| 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [ ] |
+| 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [x] |
 | 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [ ] |
 | 11 | Verify, test, docs | `chore/stripe-verify` | - [ ] |
 

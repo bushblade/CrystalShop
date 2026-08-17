@@ -427,6 +427,14 @@ export type CHECKOUT_ITEMS_QUERY_RESULT = Array<{
   deliveryMethod: "arrange" | "post";
 }>;
 
+// Source: src/queries/sanity.ts
+// Variable: STOCK_LEVELS_QUERY
+// Query: *[_type == "product" && _id in $ids]{ _id, stockLevel }
+export type STOCK_LEVELS_QUERY_RESULT = Array<{
+  _id: string;
+  stockLevel: number | null;
+}>;
+
 // Query TypeMap
 import "@sanity/client";
 declare module "@sanity/client" {
@@ -440,5 +448,6 @@ declare module "@sanity/client" {
     '\n\t*[_type == "siteSettings"][0]{\n\t\taboutBody,\n\t\ttermsBody,\n\t\tcontactEmail,\n\t\tshippingRates[]{\n\t\t\tname,\n\t\t\tmaxWeightGrams,\n\t\t\tprice\n\t\t}\n\t}\n': SITE_SETTINGS_QUERY_RESULT;
     '\n\t*[_type == "product" && _id in $ids]{ _id, stockLevel, isUniquePiece }\n': PRODUCT_AVAILABILITY_QUERY_RESULT;
     '\n\t*[_type == "product" && _id in $ids]{\n\t\t_id,\n\t\tname,\n\t\tprice,\n\t\tstockLevel,\n\t\tweightInGrams,\n\t\tdeliveryMethod\n\t}\n': CHECKOUT_ITEMS_QUERY_RESULT;
+    '\n\t*[_type == "product" && _id in $ids]{ _id, stockLevel }\n': STOCK_LEVELS_QUERY_RESULT;
   }
 }

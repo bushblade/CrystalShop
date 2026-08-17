@@ -109,3 +109,7 @@ export const CHECKOUT_ITEMS_QUERY = defineQuery(/* groq */ `
 		deliveryMethod
 	}
 `)
+
+export const STOCK_LEVELS_QUERY = defineQuery(/* groq */ `
+	*[_type == "product" && _id in $ids]{ _id, stockLevel }
+`)
