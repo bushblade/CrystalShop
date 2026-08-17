@@ -1,0 +1,19 @@
+---
+import NavLink from '../../../components/ui/NavLink.astro'
+import PageHeading from '../../../components/ui/PageHeading.astro'
+import Layout from '../../../layouts/Layout.astro'
+---
+
+<Layout
+	title="Order complete | Eclipsia Crystals"
+	description="Thank you for your order — we'll be in touch about dispatch."
+>
+	<PageHeading>Thank you — your order is on its way</PageHeading>
+	<p class="mt-4 text-stone-600">
+		We've received your payment. If your order needs a delivery arrangement, we'll contact you
+		shortly.
+	</p>
+	<p class="mt-6">
+		<NavLink href="/shop" class="font-medium text-violet-700">Back to shop</NavLink>
+	</p>
+</Layout>

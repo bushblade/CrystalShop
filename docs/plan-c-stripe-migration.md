@@ -35,10 +35,16 @@ without bloating its context window.
 - **Shipping:** computed from `shippingRates` (weight-band tiers
   `{ name, maxWeightGrams, price }`, top band open-ended) stored on the
   `siteSettings` singleton — one settings doc, not a separate singleton.
-  Postage is calculated on **shippable items only**
-  (`deliveryMethod === 'post'`). Items with `deliveryMethod === 'arrange'` are
-  heavy → buyer pays online, then arranges collection/courier (the PDP already
-  shows a "Collection or local delivery — contact us" banner for these).
+  **Shipping by tier only applies when the whole cart is `post` items AND the
+  total weight fits a tier** (shared `getCartShipping` in `src/lib/shipping.ts`).
+  Any `arrange` item, an overweight total, or an unconfigured rates list means
+  the order is **arrange-everything**: no shipping step at checkout, buyer pays
+  the item total online, owner contacts them (via the Stripe receipt email —
+  order docs carry no PII) to arrange collection/courier. Decision (Stage 8
+  grill): this supersedes the earlier "postage on shippable items only" rule — a
+  mixed cart is arranged as a whole, never part-shipped. Client (CartDrawer,
+  PDP) and the checkout function share the same `getCartShipping` decision so
+  they can't drift.
 - **Order recording:** Stripe is the source of truth for orders and customer
   data. A minimal `order` doc in Sanity is only an **idempotency guard + sales
   log** (no PII: no names, emails, or addresses). Stripe auto-emails the buyer's
@@ -74,7 +80,7 @@ without bloating its context window.
 | 5 | Client cart store | `feat/cart-store` | - [x] |
 | 6 | Cart UI (header button + drawer) | `feat/cart-ui` | - [x] |
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [x] |
-| 8 | Checkout session function | `feat/create-checkout-session` | - [ ] |
+| 8 | Checkout session function | `feat/create-checkout-session` | - [x] |
 | 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [ ] |
 | 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [ ] |
 | 11 | Verify, test, docs | `chore/stripe-verify` | - [ ] |
@@ -248,7 +254,9 @@ reading the store re-render on change.
   - Drawer listing items, quantity steppers, remove buttons.
   - Totals: item subtotal + shipping estimate (Stage 4 against the
     `siteSettings.shippingRates` — fetch them in `Layout.astro` server-side and
-    pass as props).
+    pass as props). **Shipping applies only via `getCartShipping`** (Stage 8's
+    client-alignment work): arrange/overweight carts show "To be arranged" and
+    the whole-order arrangement notice instead of a shipping price.
   - Heavy-item notice when the cart contains any `deliveryMethod === 'arrange'` item:
     "Contains a piece too heavy for standard postage — we'll contact you to arrange
     collection or courier."
@@ -270,40 +278,73 @@ shows for mixed carts.
   - Keep the sold-out badge (`stockLevel === 0`).
   - Show **"Shipping from £X"** computed via Stage 4 for this item's weight when
     `deliveryMethod === 'post'`; the existing heavy-item "contact us" banner stays
-    for `arrange` items.
+    for `arrange` items. (Stage 8's alignment: both now come from the shared
+    `getCartShipping` — the estimate only shows when it applies, and an overweight
+    `post` item also shows the contact banner.)
 
 **Done when:** add-to-cart from the PDP updates the header count; estimate and
 heavy-item note render.
 
 ---
 
-## Stage 8 — Checkout session function · `feat/create-checkout-session` · - [ ]
+## Stage 8 — Checkout session function · `feat/create-checkout-session` · - [x]
 
 **Files:**
 - `netlify/functions/create-checkout-session.mts` — `config = { path: '/api/checkout', method: ['POST'] }`.
-  - Read env via `Netlify.env.get()`: `STRIPE_RESTRICTED_KEY`, Sanity project/dataset, `SANITY_WRITE_TOKEN`.
-  - Body: `{ items: [{ id, quantity }] }`.
-  - Server-side: query Sanity for each item's `price`, `stockLevel`,
-    `weightInGrams`, `deliveryMethod`, `name`, first image. **Never use client prices.**
-  - Reject the whole request (4xx) if any item is out of stock — sold-out 1-of-1
-    guard.
-  - Shipping: `totalShippableWeight()` → `pickShippingRate()` → tier price.
-    - Has shippable items: pass `shipping_options` with that rate + collect `["GB"]` addresses.
-    - Only `arrange` items: omit shipping options and address collection (matches
-      Snipcart's "skip shipping" behaviour).
+  - Read env via `Netlify.env.get()`: `STRIPE_RESTRICTED_KEY` + Sanity
+    project/dataset (via the shared client). Read-only — no `SANITY_WRITE_TOKEN`
+    needed here (that's Stage 9).
+  - Body: `{ items: [{ id, quantity }] }` — validated (400 on bad shape or
+    unknown id `Unknown product: <id>`); duplicate ids merged (quantities summed).
+  - Server-side: `CHECKOUT_ITEMS_QUERY` (below) for each item's `price`,
+    `stockLevel`, `weightInGrams`, `deliveryMethod`, `name` +
+    `SITE_SETTINGS_QUERY` for `shippingRates`. **Never use client prices.**
+  - Reject the whole request (409 `Out of stock: <name>`) if any item is out of
+    stock — sold-out 1-of-1 guard. Quantities are **clamped** to `stockLevel`
+    (matches the client-side cart prune).
+  - Shipping: `getCartShipping()` from `src/lib/shipping.ts` (shared with the
+    drawer + PDP) → `{ applies, rate }`. Applies only when the whole cart is
+    `post` and the total weight fits a tier.
+    - Applies: pass `shipping_options` (fixed_amount in pence, `display_name` =
+      tier name) + collect `["GB"]` addresses.
+    - Doesn't apply (arrange item, overweight total, or unseeded rates — empty
+      rates logged as a warning): omit shipping options and address collection —
+      arrange-everything.
   - Build Checkout Session: `mode: 'payment'`, `currency: 'gbp'`,
     `line_items` with `price_data` (unit amount in pence = `round(price * 100)`),
-    `metadata` with the product ids/quantities for the webhook,
-    `success_url` / `cancel_url` pointing at Stage 10's pages.
+    `metadata: { items: JSON.stringify([{id, quantity}]) }` for the webhook,
+    `success_url` → `/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    `cancel_url` → `/shop/checkout/cancel`.
   - `apiVersion: '2026-07-29.dahlia'` on the `Stripe` client instance.
   - Omit `payment_method_types` entirely (dynamic payment methods — Apple Pay /
     Google Pay / Link enabled automatically). Do **not** set `automatic_tax`.
-  - Pass `integration_identifier` (e.g. `"crystalshop-" + randomSuffix(8)`) to tag
-    this checkout flow in the Dashboard.
-  - Return `{ url }`.
+  - `integration_identifier: 'crystalshop-web'` (fixed — dev runs on a separate
+    sandbox account, so no dev/prod suffix needed).
+  - Base URL for success/cancel: `Netlify.env.get('URL')` (prod, not spoofable)
+    → localhost-only `Origin` header (dev) → `http://localhost:8888`.
+  - Return `{ url }`; error bodies are meaningful strings (400/409/500), details
+    logged server-side only.
+- `netlify/lib/shared-sanity-client.ts` — `createSanityClient()`: functions-side
+  client (distinct from Astro's `sanity:client`), `useCdn: false`,
+  `perspective: 'published'`, `apiVersion: '2026-08-10'`. Shared with Stage 9.
+- `src/queries/sanity.ts` — add `CHECKOUT_ITEMS_QUERY` (`defineQuery`) so typegen
+  types the function's fetch. (Deviation: no "first image" — nothing consumes it.)
+- `src/lib/shipping.ts` — add `getCartShipping()` + `ShippingDecision` (pure,
+  unit-tested).
+- Client alignment (retroactive to Stages 6–7): `CartDrawer` + `CartTotals`
+  totals and the whole-order arrangement notice, and the PDP "Shipping from £X" /
+  contact banner, all use the same `getCartShipping` rule so the drawer/PDP never
+  show a shipping price the server won't charge.
+- `src/pages/shop/checkout/success.astro` + `cancel.astro` — minimal placeholders
+  (Stage 10 replaces with full content + the Delivery section).
+- Dev tooling: `netlify-cli` (devDependency) + `dev:netlify` script; test via
+  `netlify dev` at `localhost:8888`.
 
 **Done when:** with Stripe test keys, the function returns a session URL that opens
-Stripe's hosted checkout with correct line items and shipping.
+Stripe's hosted checkout with correct line items and shipping for an all-post
+cart; mixed / overweight / arrange-only carts produce no shipping step; 400 on
+unknown id, 409 on sold-out, qty clamped; drawer and PDP agree with the server on
+when shipping applies.
 
 ---
 

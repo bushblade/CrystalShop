@@ -2,7 +2,7 @@ import { animated, useReducedMotion, useTransition } from '@react-spring/web'
 import { useEffect, useMemo, useState } from 'react'
 import { useCartStore } from '../lib/cart'
 import { formatPrice } from '../lib/format'
-import { pickShippingRate, type ShippingRate, totalShippableWeight } from '../lib/shipping'
+import { getCartShipping, type ShippingRate } from '../lib/shipping'
 import { lockScroll, unlockScroll } from '../utils/scrollLock'
 import CartLineItem from './CartLineItem'
 import CartTotals, { type CheckoutState } from './CartTotals'
@@ -33,11 +33,11 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 		() => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
 		[items],
 	)
-	const hasHeavyItem = items.some((item) => item.deliveryMethod === 'arrange')
-	const hasShippableItems = items.some((item) => item.deliveryMethod === 'post')
-	const shippingRate = pickShippingRate(totalShippableWeight(items), shippingRates)
-	const shippingTotal = hasShippableItems && shippingRate ? shippingRate.price : 0
-	const shippingLabel = hasShippableItems ? formatPrice(shippingTotal) : 'To be arranged'
+	const shipping = getCartShipping(items, shippingRates)
+	const needsArrangement = !shipping.applies
+	const shippingTotal = shipping.applies && shipping.rate ? shipping.rate.price : 0
+	const shippingLabel =
+		shipping.applies && shipping.rate ? formatPrice(shipping.rate.price) : 'To be arranged'
 	const total = subtotal + shippingTotal
 
 	useEffect(() => {
@@ -137,7 +137,7 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 									subtotal={subtotal}
 									shippingLabel={shippingLabel}
 									total={total}
-									hasHeavyItem={hasHeavyItem}
+									needsArrangement={needsArrangement}
 									checkoutState={checkoutState}
 									onCheckout={handleCheckout}
 								/>

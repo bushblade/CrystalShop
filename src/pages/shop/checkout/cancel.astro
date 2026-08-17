@@ -1,0 +1,18 @@
+---
+import NavLink from '../../../components/ui/NavLink.astro'
+import PageHeading from '../../../components/ui/PageHeading.astro'
+import Layout from '../../../layouts/Layout.astro'
+---
+
+<Layout
+	title="Payment cancelled | Eclipsia Crystals"
+	description="Your payment didn't go through — your cart is safe."
+>
+	<PageHeading>Your payment didn't go through</PageHeading>
+	<p class="mt-4 text-stone-600">
+		Nothing has been charged and your cart is still here. You can try again whenever you're ready.
+	</p>
+	<p class="mt-6">
+		<NavLink href="/shop" class="font-medium text-violet-700">Back to shop</NavLink>
+	</p>
+</Layout>
