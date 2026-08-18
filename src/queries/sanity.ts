@@ -3,6 +3,15 @@ import type { IN_STOCK_PRODUCTS_QUERY_RESULT } from '../../sanity.types'
 
 export type ProductCardData = IN_STOCK_PRODUCTS_QUERY_RESULT[number]
 
+const PRODUCT_IMAGE_PROJECTION = /* groq */ `
+	"url": asset->url,
+	"alt": alt,
+	"width": asset->metadata.dimensions.width,
+	"height": asset->metadata.dimensions.height,
+	"dominantColor": asset->metadata.palette.dominant.background,
+	"lqip": asset->metadata.lqip
+`
+
 const PRODUCT_CARD_FRAGMENT = /* groq */ `
 	_id,
 	name,
@@ -15,12 +24,7 @@ const PRODUCT_CARD_FRAGMENT = /* groq */ `
 	_createdAt,
 	"category": category->{ name, "slug": slug.current },
 	"image": images[0]{
-		"url": asset->url,
-		"alt": alt,
-		"width": asset->metadata.dimensions.width,
-		"height": asset->metadata.dimensions.height,
-		"dominantColor": asset->metadata.palette.dominant.background,
-		"lqip": asset->metadata.lqip
+		${PRODUCT_IMAGE_PROJECTION}
 	}
 `
 
@@ -72,12 +76,7 @@ export const PRODUCT_BY_SLUG_QUERY = defineQuery(/* groq */ `
 		stockLevel,
 		"category": category->{ name, "slug": slug.current },
 		"images": images[]{
-			"url": asset->url,
-			"alt": alt,
-			"width": asset->metadata.dimensions.width,
-			"height": asset->metadata.dimensions.height,
-			"dominantColor": asset->metadata.palette.dominant.background,
-			"lqip": asset->metadata.lqip
+			${PRODUCT_IMAGE_PROJECTION}
 		}
 	}
 `)
