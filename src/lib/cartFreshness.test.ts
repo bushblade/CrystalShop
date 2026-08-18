@@ -7,6 +7,7 @@ function makeItem(overrides: Partial<CartItem> = {}): CartItem {
 	return {
 		id: 'product-1',
 		name: 'Amethyst Cluster',
+		slug: 'amethyst-cluster',
 		price: 24,
 		weightInGrams: 400,
 		image: { url: 'https://example.com/amethyst.jpg', alt: 'Amethyst cluster' },
