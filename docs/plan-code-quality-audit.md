@@ -38,7 +38,7 @@ Branch: `fix/shipping-catch-all-validation`
 
 ## Stage 2: Server-Render the Contact Email
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `fix/contact-email-ssr`
 
 **Files:**
