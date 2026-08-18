@@ -179,7 +179,7 @@ Branch: `fix/cart-drawer-focus`
 
 ## Stage 8: Make Tooltip Behavior Accessible
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `fix/tooltip-accessibility`
 
 **Files:**
@@ -191,6 +191,12 @@ Branch: `fix/tooltip-accessibility`
 - Connect tooltip content using `aria-describedby`.
 - Ensure disabled buttons still expose useful status text.
 - Avoid relying on hover over a disabled element.
+
+**Implemented notes:** The tooltip only appears over the *disabled*
+Add-to-Cart button, which cannot receive focus, so `aria-describedby` would be
+dead for assistive tech. Instead the status is announced directly via an
+`aria-live="polite"` `sr-only` region owned by `Tooltip` (single shared label),
+independent of hover/focus. The visual tooltip remains a hover-only affordance.
 
 **Done when:**
 - Tooltip content is available to keyboard users.
