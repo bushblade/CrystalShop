@@ -5,6 +5,7 @@ import {
 	type SetStateAction,
 	useState,
 } from 'react'
+import { primaryButtonClasses, primaryButtonSizeClasses } from './buttonClasses'
 
 interface FieldState {
 	text: string
@@ -22,10 +23,9 @@ const FIELD_ERRORS = {
 
 const LABEL_CLASSES = 'mb-2 block text-sm font-medium text-stone-700'
 const INPUT_CLASSES =
-	'w-full rounded-md border-stone-300 bg-white text-stone-800 placeholder:text-stone-400 focus:border-violet-700 focus:ring-violet-700'
+	'w-full rounded-sm border-stone-300 bg-white text-stone-800 placeholder:text-stone-400 focus:border-violet-700 focus:ring-violet-700'
 const ERROR_CLASSES = 'mt-1 text-sm text-red-600'
-const SUBMIT_CLASSES =
-	'rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-50'
+const SUBMIT_CLASSES = `${primaryButtonClasses} ${primaryButtonSizeClasses.md}`
 
 const isInvalid = (field: FieldState) => field.text.length > 0 && !field.valid
 
@@ -72,8 +72,10 @@ function ContactForm() {
 
 	if (sent) {
 		return (
-			<div className="mt-6 rounded-lg border border-stone-200 bg-stone-50 p-6 text-stone-700">
-				<h2 className="font-display text-2xl font-semibold text-stone-900">Message sent</h2>
+			<div className="mt-6 rounded-sm border border-stone-200 bg-white p-6 text-stone-700 shadow-sm">
+				<h2 className="font-display text-2xl font-semibold tracking-tight text-stone-900">
+					Message sent
+				</h2>
 				<p className="mt-2">
 					Thanks for getting in touch. We'll get back to you as soon as we can.
 				</p>

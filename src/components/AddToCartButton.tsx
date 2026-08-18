@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { type CartItem, useCartStore } from '../lib/cart'
+import { primaryButtonClasses, primaryButtonSizeClasses } from './ui/buttonClasses'
 import QuantityStepper from './ui/QuantityStepper'
 import Tooltip from './ui/Tooltip'
 
@@ -11,6 +12,8 @@ interface AddToCartButtonProps {
 }
 
 const LOW_STOCK_THRESHOLD = 3
+
+const addToCartButtonClasses = [primaryButtonClasses, primaryButtonSizeClasses.md].join(' ')
 
 export default function AddToCartButton({
 	item,
@@ -49,7 +52,7 @@ export default function AddToCartButton({
 					type="button"
 					onClick={handleAdd}
 					disabled={atMax}
-					className="cursor-pointer rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-600 disabled:hover:bg-stone-200"
+					className={addToCartButtonClasses}
 				>
 					{added ? 'Added ✓' : atMax ? 'In cart' : 'Add to cart'}
 				</button>
@@ -85,7 +88,7 @@ export default function AddToCartButton({
 						type="button"
 						onClick={handleAdd}
 						disabled={atMax}
-						className="cursor-pointer rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-stone-200 disabled:text-stone-600 disabled:hover:bg-stone-200"
+						className={addToCartButtonClasses}
 					>
 						{added
 							? 'Added ✓'

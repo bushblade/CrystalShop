@@ -16,6 +16,9 @@ const aboutHtml = siteSettings?.aboutBody ? toHTML(siteSettings.aboutBody) : ''
 >
 	<PageHeading>About Us</PageHeading>
 	{aboutHtml ? (
-		<div class="prose prose-stone mt-6 max-w-none" set:html={aboutHtml} />
+		<div
+			class="prose prose-stone mt-8 max-w-none prose-a:font-medium prose-a:text-violet-700 hover:prose-a:text-violet-800"
+			set:html={aboutHtml}
+		/>
 	) : null}
 </Layout>

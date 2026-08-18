@@ -104,7 +104,9 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 							}}
 						>
 							<div className="flex items-center justify-between border-b border-stone-200 px-6 py-4">
-								<h2 className="font-display text-xl font-semibold text-stone-900">Your Cart</h2>
+								<h2 className="font-display text-2xl font-semibold tracking-tight text-stone-950">
+									Your Cart
+								</h2>
 								<button
 									type="button"
 									onClick={closeCart}

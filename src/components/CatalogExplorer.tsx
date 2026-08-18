@@ -100,14 +100,14 @@ export default function CatalogExplorer({
 					value={q}
 					onChange={(event) => updateQuery(event.target.value)}
 					placeholder="Search crystals…"
-					className="w-full rounded-md border border-stone-300 px-3 py-2 text-sm text-stone-800 sm:max-w-xs"
+					className="w-full rounded-sm border border-stone-300 bg-white px-3 py-2 text-sm text-stone-800 placeholder:text-stone-400 focus:border-violet-700 focus:outline-none focus:ring-1 focus:ring-violet-700 sm:max-w-xs"
 				/>
 				<label className="flex items-center gap-2 text-sm text-stone-600">
 					<span className="sr-only">Sort by</span>
 					<select
 						value={sort}
 						onChange={(event) => updateSort(event.target.value as SortKey)}
-						className="cursor-pointer rounded-md border border-stone-300 py-2 pl-3 text-sm text-stone-800"
+						className="cursor-pointer rounded-sm border border-stone-300 bg-white py-2 pl-3 pr-8 text-sm text-stone-800 focus:border-violet-700 focus:outline-none focus:ring-1 focus:ring-violet-700"
 					>
 						{SORT_OPTIONS.map((option) => (
 							<option key={option.value} value={option.value}>
@@ -130,7 +130,7 @@ export default function CatalogExplorer({
 						type="button"
 						disabled={currentPage === 1}
 						onClick={() => setPage(currentPage - 1)}
-						className="cursor-pointer rounded-md border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-violet-700 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+						className="cursor-pointer rounded-sm border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						Previous
 					</button>
@@ -141,7 +141,7 @@ export default function CatalogExplorer({
 						type="button"
 						disabled={currentPage === totalPages}
 						onClick={() => setPage(currentPage + 1)}
-						className="cursor-pointer rounded-md border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-violet-700 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40"
+						className="cursor-pointer rounded-sm border border-stone-300 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						Next
 					</button>

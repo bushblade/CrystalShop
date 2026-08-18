@@ -36,7 +36,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
 					height={selected.height ?? undefined}
 					placeholderColor={selected.dominantColor}
 					placeholderLqip={selected.lqip}
-					className="aspect-square w-full rounded-lg"
+					className="aspect-square w-full rounded-sm border border-stone-200/80"
 				/>
 			) : null}
 			{images.length > 1 ? (
@@ -49,7 +49,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
 								onClick={() => setSelectedIndex(index)}
 								aria-label={`Show image of ${name}`}
 								aria-current={index === selectedIndex ? 'true' : undefined}
-								className="cursor-pointer rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-700"
+								className="cursor-pointer rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-700"
 							>
 								<FadeInImage
 									src={imageUrl(image.url, 300) ?? ''}
@@ -59,7 +59,7 @@ export default function ProductGallery({ images, name }: ProductGalleryProps) {
 									placeholderColor={image.dominantColor}
 									placeholderLqip={image.lqip}
 									loading="lazy"
-									className={`aspect-square w-full rounded-md transition-opacity ${
+									className={`aspect-square w-full rounded-sm transition-opacity ${
 										index === selectedIndex
 											? 'ring-2 ring-violet-700'
 											: 'opacity-70 hover:opacity-100'

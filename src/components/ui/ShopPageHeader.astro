@@ -12,7 +12,7 @@ interface Props {
 const { title, categories, activeSlug = null } = Astro.props
 ---
 
-<header class="mb-8">
-	<PageHeading class="mb-4">{title}</PageHeading>
+<header class="mb-10 border-b border-stone-200/80 pb-8">
+	<PageHeading class="mb-5">{title}</PageHeading>
 	<CategoryNav categories={categories} activeSlug={activeSlug} />
 </header>

@@ -1,5 +1,6 @@
 ---
 import { sanityClient } from 'sanity:client'
+import NavLink from '../components/ui/NavLink.astro'
 import PrimaryButton from '../components/ui/PrimaryButton.astro'
 import ProductGrid from '../components/ui/ProductGrid'
 import Layout from '../layouts/Layout.astro'
@@ -13,20 +14,35 @@ const featured = await sanityClient.fetch(FEATURED_PRODUCTS_QUERY)
 	description="Handpicked natural crystals, each piece unique and ready to be yours."
 	padded={false}
 >
-	<section class="py-16 text-center sm:py-24">
-			<h1 class="text-4xl font-semibold text-stone-900 sm:text-5xl">Eclipsia Crystals</h1>
-			<p class="mx-auto mt-4 max-w-xl text-lg text-stone-600">
-				Handpicked natural crystals — clusters, points and one-of-a-kind pieces, each with its own story.
-			</p>
-			<PrimaryButton href="/shop" class="mt-8 inline-block">
-				Shop all crystals
-			</PrimaryButton>
-		</section>
+	<section class="border-b border-stone-200/60 py-20 text-center sm:py-28">
+		<p class="text-xs font-semibold uppercase tracking-[0.2em] text-violet-700">
+			Handpicked natural crystals
+		</p>
+		<h1 class="mx-auto mt-4 max-w-3xl text-5xl font-medium tracking-tight text-stone-950 sm:text-6xl">
+			Eclipsia Crystals
+		</h1>
+		<p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-stone-600">
+			Clusters, points and one-of-a-kind pieces, each with its own story.
+		</p>
+		<PrimaryButton href="/shop" class="mt-10 inline-block">
+			Shop all crystals
+		</PrimaryButton>
+	</section>
 
-		{featured.length > 0 ? (
-			<section class="pb-16">
-				<h2 class="font-display text-2xl font-semibold text-stone-900">Featured pieces</h2>
-				<ProductGrid products={featured} />
-			</section>
-		) : null}
+	{featured.length > 0 ? (
+		<section class="pb-24 pt-14">
+			<div class="flex items-end justify-between">
+				<h2 class="font-display text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">
+					Featured pieces
+				</h2>
+				<NavLink
+					href="/shop"
+					class="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700"
+				>
+					Shop all
+				</NavLink>
+			</div>
+			<ProductGrid products={featured} />
+		</section>
+	) : null}
 </Layout>

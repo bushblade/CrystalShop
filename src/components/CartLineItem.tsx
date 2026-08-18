@@ -27,7 +27,7 @@ export default function CartLineItem({
 					src={imageUrl(item.image.url, 128) ?? ''}
 					alt={item.image.alt}
 					loading="lazy"
-					className="h-16 w-16 rounded-md object-cover transition-opacity hover:opacity-80"
+					className="h-16 w-16 rounded-sm border border-stone-200 object-cover transition-opacity hover:opacity-80"
 				/>
 			</a>
 			<div className="flex flex-1 flex-col">

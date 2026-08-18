@@ -55,10 +55,12 @@ const shippingRates =
 		</noscript>
 	</head>
 	<body class="flex min-h-screen flex-col">
-		<header class="border-b border-stone-200">
-			<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-				<a href="/" class="font-display text-2xl font-semibold text-stone-900">Eclipsia Crystals</a>
-				<div class="flex items-center gap-6 text-sm font-medium text-stone-700">
+		<header class="border-b border-stone-200/80">
+			<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
+				<a href="/" class="font-display text-2xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800">
+					Eclipsia Crystals
+				</a>
+				<div class="flex items-center gap-7 text-xs font-medium uppercase tracking-[0.14em] text-stone-600">
 					<NavLink href="/shop">Shop</NavLink>
 					<NavLink href="/about">About</NavLink>
 					<NavLink href="/contact">Contact</NavLink>
@@ -70,14 +72,14 @@ const shippingRates =
 			class:list={[
 				'mx-auto w-full flex-1 px-4',
 				maxWidth === '3xl' ? 'max-w-3xl' : 'max-w-6xl',
-				padded ? 'py-10' : '',
+				padded ? 'py-12 sm:py-16' : '',
 			]}
 		>
 			<CartFreshnessChecker client:load />
 			<Toaster client:only="react" />
 			<slot />
 		</main>
-		<footer class="mt-auto border-t border-stone-200 py-8">
+		<footer class="mt-auto border-t border-stone-200/80 py-10">
 			<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-stone-500 sm:flex-row">
 				<p>© {new Date().getFullYear()} Eclipsia Crystals</p>
 				<nav class="flex gap-6">
