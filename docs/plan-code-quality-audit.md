@@ -133,7 +133,7 @@ Branch: `refactor/site-settings-mapping`
 
 ## Stage 6: Remove About/Terms Rendering Duplication
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `refactor/content-page-component`
 
 **Files:**
