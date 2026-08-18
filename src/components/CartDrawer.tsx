@@ -1,5 +1,5 @@
 import { animated, useReducedMotion, useTransition } from '@react-spring/web'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCartStore } from '../lib/cart'
 import { formatPrice } from '../lib/format'
 import { getCartShipping, type ShippingRate } from '../lib/shipping'
@@ -12,6 +12,16 @@ interface CartDrawerProps {
 	shippingRates: ShippingRate[]
 }
 
+// Selector for every element inside the drawer that keyboard users can Tab to.
+// Disabled controls are skipped, and [tabindex="-1"] elements (the backdrop) are
+// deliberately excluded so Tab never lands on the invisible full-screen overlay.
+const FOCUSABLE_SELECTOR =
+	'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+	return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+}
+
 export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 	const items = useCartStore((state) => state.items)
 	const limits = useCartStore((state) => state.limits)
@@ -20,12 +30,31 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 	const [open, setOpen] = useState(false)
 	const [checkoutState, setCheckoutState] = useState<CheckoutState>('idle')
 
+	const triggerRef = useRef<HTMLButtonElement>(null)
+	const drawerRef = useRef<HTMLDivElement>(null)
+	// The element focus should return to when the drawer closes (the Cart button).
+	const restoreFocusRef = useRef<HTMLElement | null>(null)
+	// Keeps the latest `open` value readable inside the spring's onRest callback,
+	// which is a closure that would otherwise capture a stale value.
+	const openRef = useRef(open)
+	openRef.current = open
+
 	const reduceMotion = useReducedMotion()
 	const transitions = useTransition(open, {
+		// The drawer slides in from the right (x: 384px) and fades.
 		from: { x: 384, opacity: 0 },
 		enter: { x: 0, opacity: 1 },
 		leave: { x: 384, opacity: 0 },
 		config: reduceMotion ? { duration: 0 } : { tension: 210, friction: 26 },
+		// onRest fires every time an animation settles. When the leave animation
+		// finishes (open is now false), the drawer node is about to unmount — this
+		// is the right moment to hand focus back to the Cart button so it isn't
+		// lost when the drawer tears down. The guard skips the enter animation.
+		onRest: () => {
+			if (openRef.current) return
+			restoreFocusRef.current?.focus()
+			restoreFocusRef.current = null
+		},
 	})
 
 	const count = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items])
@@ -40,10 +69,47 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 		shipping.applies && shipping.rate ? formatPrice(shipping.rate.price) : 'To be arranged'
 	const total = subtotal + shippingTotal
 
+	// On open: remember where focus was (the Cart button) and move focus into the
+	// drawer — the first focusable element is the ✕ close button.
+	useEffect(() => {
+		if (!open) return
+		restoreFocusRef.current = triggerRef.current
+		const container = drawerRef.current
+		if (!container) return
+		const focusables = getFocusableElements(container)
+		;(focusables[0] ?? container).focus()
+	}, [open])
+
+	// While open: trap keyboard focus inside the drawer, lock page scroll, and
+	// close on Escape. The Tab handler wraps focus between the first and last
+	// focusable elements, and also pulls focus back in if it ever ends up
+	// outside the drawer.
 	useEffect(() => {
 		if (!open) return
 		function onKeyDown(event: KeyboardEvent) {
-			if (event.key === 'Escape') setOpen(false)
+			if (event.key === 'Escape') {
+				setOpen(false)
+				return
+			}
+			if (event.key !== 'Tab') return
+			const container = drawerRef.current
+			if (!container) return
+			const focusables = getFocusableElements(container)
+			if (focusables.length === 0) return
+			const first = focusables[0]
+			const last = focusables[focusables.length - 1]
+			const current = document.activeElement
+			if (event.shiftKey) {
+				// Shift+Tab from the first element (or when focus escaped) → last.
+				if (current === first || !container.contains(current)) {
+					event.preventDefault()
+					last.focus()
+				}
+			} else if (current === last || !container.contains(current)) {
+				// Tab from the last element (or when focus escaped) → first.
+				event.preventDefault()
+				first.focus()
+			}
 		}
 		document.addEventListener('keydown', onKeyDown)
 		lockScroll()
@@ -62,6 +128,9 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 		setCheckoutState('idle')
 	}
 
+	// Sends the cart to the Netlify function that creates a Stripe Checkout
+	// Session, then redirects to Stripe. On any failure the drawer stays open
+	// and shows an inline error (checkoutState === 'error').
 	async function handleCheckout() {
 		setCheckoutState('loading')
 		try {
@@ -82,12 +151,17 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 
 	return (
 		<>
-			<CartTrigger count={count} onOpen={openCart} />
+			<CartTrigger ref={triggerRef} count={count} onOpen={openCart} />
+			{/* useTransition keeps the drawer mounted during the leave animation, then
+			    unmounts it — onRest (above) restores focus exactly at that point. */}
 			{transitions((style, item) =>
 				item ? (
-					<div className="fixed inset-0 z-50">
+					<div ref={drawerRef} className="fixed inset-0 z-50">
+						{/* Click-away backdrop. tabIndex={-1} keeps it out of the Tab
+						    order so the focus trap only cycles through cart content. */}
 						<animated.button
 							type="button"
+							tabIndex={-1}
 							className="absolute inset-0 cursor-pointer bg-stone-900/40"
 							onClick={closeCart}
 							aria-label="Close cart"
