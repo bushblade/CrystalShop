@@ -155,7 +155,7 @@ Branch: `refactor/content-page-component`
 
 ## Stage 7: Improve Cart Drawer Focus Management
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `fix/cart-drawer-focus`
 
 **Files:**
