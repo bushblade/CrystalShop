@@ -1,4 +1,5 @@
 import { formatPrice } from '../lib/format'
+import { primaryButtonClasses, primaryButtonSizeClasses } from './ui/buttonClasses'
 
 export type CheckoutState = 'idle' | 'loading' | 'error'
 
@@ -51,7 +52,7 @@ export default function CartTotals({
 				type="button"
 				onClick={onCheckout}
 				disabled={checkoutState === 'loading'}
-				className="mt-4 w-full cursor-pointer rounded-full bg-violet-700 px-8 py-3 font-medium text-white transition-colors hover:bg-violet-800 disabled:cursor-not-allowed disabled:opacity-50"
+				className={`${primaryButtonClasses} ${primaryButtonSizeClasses.md} mt-4 w-full`}
 			>
 				{checkoutState === 'loading' ? 'Taking you to checkout…' : 'Checkout'}
 			</button>

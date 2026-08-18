@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { primaryButtonClasses } from './ui/buttonClasses'
 
 interface CartTriggerProps {
 	count: number
@@ -16,7 +17,7 @@ export default function CartTrigger({ count, onOpen }: CartTriggerProps) {
 		<button
 			type="button"
 			onClick={onOpen}
-			className="flex cursor-pointer items-center gap-2 rounded-full bg-violet-700 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-violet-800"
+			className={`${primaryButtonClasses} flex items-center gap-2 px-4 py-2 text-xs`}
 		>
 			<span>Cart</span>
 			<span

@@ -8,8 +8,8 @@ interface ProductGridProps {
 
 function ProductGrid({ products, wide = false }: ProductGridProps) {
 	const gridClasses = wide
-		? 'mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4'
-		: 'mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3'
+		? 'mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4'
+		: 'mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3'
 	return (
 		<ul className={gridClasses}>
 			{products.map((product) => (

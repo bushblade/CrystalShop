@@ -8,7 +8,7 @@ interface QuantityStepperProps {
 }
 
 const stepperClasses =
-	'cursor-pointer rounded-md border border-stone-300 px-2 text-sm leading-6 text-stone-700 transition-colors hover:border-violet-700 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40'
+	'cursor-pointer rounded-sm border border-stone-300 px-2 text-sm leading-6 text-stone-700 transition-colors hover:border-violet-700 hover:text-violet-800 disabled:cursor-not-allowed disabled:opacity-40'
 
 export default function QuantityStepper({
 	value,

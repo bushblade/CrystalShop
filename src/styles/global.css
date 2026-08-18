@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
-@source "../pages/**/*.{astro,tsx}";
-@source "../components/**/*.{astro,tsx}";
-@source "../layouts/**/*.{astro,tsx}";
+@source "../pages/**/*.{astro,ts,tsx}";
+@source "../components/**/*.{astro,ts,tsx}";
+@source "../layouts/**/*.{astro,ts,tsx}";
 
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
 @theme {
+	--color-paper: #f7f5f1;
 	--font-sans:
 		"Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
 		"Segoe UI Symbol", "Noto Color Emoji";
@@ -16,8 +17,13 @@
 
 @layer base {
 	body {
-		background-color: var(--color-white);
+		background-color: var(--color-paper);
 		color: var(--color-stone-800);
+	}
+
+	::selection {
+		background-color: var(--color-violet-700);
+		color: var(--color-white);
 	}
 
 	h1,

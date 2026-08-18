@@ -10,10 +10,10 @@ const { categories, activeSlug = null } = Astro.props
 
 function categoryPillClasses(isActive: boolean): string[] {
 	return [
-		'rounded-full border px-4 py-1.5 text-sm font-medium transition-colors',
+		'rounded-full border px-4 py-1.5 text-xs font-medium uppercase tracking-[0.14em] transition-colors',
 		isActive
-			? 'border-violet-700 bg-violet-700 text-white'
-			: 'border-stone-300 text-stone-700 hover:border-violet-700 hover:text-violet-700',
+			? 'border-stone-900 bg-stone-900 text-white'
+			: 'border-stone-300 text-stone-600 hover:border-stone-900 hover:text-stone-900',
 	]
 }
 ---

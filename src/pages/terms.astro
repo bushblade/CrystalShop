@@ -12,6 +12,9 @@ const termsHtml = siteSettings?.termsBody ? toHTML(siteSettings.termsBody) : ''
 <Layout title="Terms | Eclipsia Crystals" description="Terms and conditions for shopping at Eclipsia Crystals." maxWidth="3xl">
 	<PageHeading>Terms &amp; Conditions</PageHeading>
 	{termsHtml ? (
-		<div class="prose prose-stone mt-6 max-w-none" set:html={termsHtml} />
+		<div
+			class="prose prose-stone mt-8 max-w-none prose-a:font-medium prose-a:text-violet-700 hover:prose-a:text-violet-800"
+			set:html={termsHtml}
+		/>
 	) : null}
 </Layout>
