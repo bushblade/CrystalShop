@@ -1,7 +1,8 @@
 import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
-import { getCartShipping, type ShippingRate } from '../../src/lib/shipping'
+import { getCartShipping } from '../../src/lib/shipping'
+import { extractShippingRates } from '../../src/lib/siteSettings'
 import { CHECKOUT_ITEMS_QUERY, SITE_SETTINGS_QUERY } from '../../src/queries/sanity'
 import { createSanityClient } from '../lib/shared-sanity-client'
 
@@ -96,12 +97,7 @@ export default async (req: Request): Promise<Response> => {
 		})
 	}
 
-	const rates: ShippingRate[] =
-		siteSettings?.shippingRates?.map((rate) => ({
-			name: rate.name,
-			maxWeightGrams: rate.maxWeightGrams ?? null,
-			price: rate.price,
-		})) ?? []
+	const rates = extractShippingRates(siteSettings)
 	if (rates.length === 0 && items.some((item) => item.deliveryMethod === 'post')) {
 		console.warn(
 			'siteSettings.shippingRates is empty — order will be treated as arrange-everything',
