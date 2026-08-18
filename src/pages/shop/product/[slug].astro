@@ -66,7 +66,10 @@ const cartItem = {
 				<p class="mt-3 text-2xl font-medium text-stone-900">{formatPrice(product.price)}</p>
 				{shipping.applies && shipping.rate ? (
 					<p class="mt-1 text-sm text-stone-500">
-						Shipping from {formatPrice(shipping.rate.price)}
+						Shipping from{' '}
+						<NavLink href="/shipping" class="font-medium text-violet-700 underline underline-offset-2">
+							{formatPrice(shipping.rate.price)}
+						</NavLink>
 					</p>
 				) : null}
 

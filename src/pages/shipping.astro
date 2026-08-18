@@ -1,0 +1,74 @@
+---
+import { sanityClient } from 'sanity:client'
+import NavLink from '../components/ui/NavLink.astro'
+import PageHeading from '../components/ui/PageHeading.astro'
+import Layout from '../layouts/Layout.astro'
+import { formatPrice, formatWeightBand } from '../lib/format'
+import { SITE_SETTINGS_QUERY } from '../queries/sanity'
+
+const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
+
+const rates = siteSettings?.shippingRates ?? []
+
+const bands = rates.map((rate, index) => {
+	const previous = rates[index - 1]
+	const lowerGrams = previous?.maxWeightGrams ?? 0
+	return {
+		name: rate.name,
+		lowerGrams,
+		upperGrams: rate.maxWeightGrams ?? null,
+		price: rate.price,
+	}
+})
+---
+
+<Layout
+	title="Shipping & Delivery | Eclipsia Crystals"
+	description="How shipping and delivery work at Eclipsia Crystals — UK postage tiers, heavy pieces and the arrange-everything policy."
+	maxWidth="3xl"
+>
+	<PageHeading>Shipping &amp; Delivery</PageHeading>
+
+	<p class="mt-4 text-stone-600">
+		We currently ship within the UK. Postage is calculated at checkout from the total weight of the
+		postable items in your order.
+	</p>
+
+	{bands.length > 0 ? (
+		<section class="mt-8">
+			<h2 class="font-display text-xl font-semibold text-stone-900">Postage tiers</h2>
+			<table class="mt-4 w-full text-left text-sm text-stone-700">
+				<thead>
+					<tr class="border-b border-stone-200 text-stone-500">
+						<th scope="col" class="py-2 font-medium">Band</th>
+						<th scope="col" class="py-2 font-medium">Weight</th>
+						<th scope="col" class="py-2 text-right font-medium">Price</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-stone-100">
+					{bands.map((band) => (
+						<tr>
+							<td class="py-2 font-medium text-stone-900">{band.name}</td>
+							<td class="py-2">{formatWeightBand(band.lowerGrams, band.upperGrams)}</td>
+							<td class="py-2 text-right">{formatPrice(band.price)}</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
+		</section>
+	) : (
+		<p class="mt-8 rounded-lg bg-stone-100 px-4 py-3 text-sm text-stone-600">
+			We'll confirm postage with you when you order — <NavLink href="/contact" class="font-medium text-violet-700 underline underline-offset-2">contact us</NavLink> to
+			arrange.
+		</p>
+	)}
+
+	<section class="mt-10">
+		<h2 class="font-display text-xl font-semibold text-stone-900">Heavy pieces</h2>
+		<p class="mt-3 text-stone-600">
+			Some pieces are too heavy for standard postage. When an order contains one — or when its total
+			weight is above the top tier — we arrange collection or courier instead. You pay for the pieces
+			online and we'll contact you using the email on your receipt to arrange delivery.
+		</p>
+	</section>
+</Layout>
