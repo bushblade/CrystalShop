@@ -24,7 +24,13 @@ export default function CartTotals({
 			{needsArrangement ? (
 				<p className="mb-4 rounded-md bg-stone-100 px-3 py-2 text-xs text-stone-600">
 					This order can't be sent by standard postage — we'll contact you to arrange collection or
-					courier for the whole order.
+					courier for the whole order.{' '}
+					<a
+						href="/shipping"
+						className="font-medium text-violet-700 underline underline-offset-2 transition-colors hover:text-violet-800"
+					>
+						Delivery information
+					</a>
 				</p>
 			) : null}
 			<div className="space-y-1 text-sm">

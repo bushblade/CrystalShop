@@ -15,3 +15,9 @@ export function formatWeight(weightInGrams: number): string {
 	const grams = String(remainder).padStart(3, '0').replace(/0+$/, '')
 	return grams ? `${wholeKg}.${grams} kg` : `${wholeKg} kg`
 }
+
+export function formatWeightBand(lowerGrams: number, upperGrams: number | null): string {
+	if (upperGrams === null) return `Over ${formatWeight(lowerGrams)}`
+	if (lowerGrams === 0) return `Up to ${formatWeight(upperGrams)}`
+	return `${formatWeight(lowerGrams)}–${formatWeight(upperGrams)}`
+}

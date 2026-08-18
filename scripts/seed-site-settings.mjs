@@ -57,7 +57,7 @@ const termsBody = [
 	),
 	headingBlock('Shipping'),
 	paragraphBlock(
-		'Shipping costs are calculated at checkout based on the weight of the items in your cart. Local pickup is available where a piece is marked as such.',
+		'We ship within the UK. Postage is calculated at checkout from the total weight of the items in your order. Pieces too heavy for standard postage are arranged individually — you pay online and we contact you to arrange collection or courier.',
 	),
 	headingBlock('Natural variation'),
 	paragraphBlock(

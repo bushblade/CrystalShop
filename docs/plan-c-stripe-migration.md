@@ -82,7 +82,7 @@ without bloating its context window.
 | 7 | PDP add-to-cart + shipping estimate | `feat/pdp-add-to-cart` | - [x] |
 | 8 | Checkout session function | `feat/create-checkout-session` | - [x] |
 | 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [x] |
-| 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [ ] |
+| 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [x] |
 | 11 | Verify, test, docs | `chore/stripe-verify` | - [ ] |
 
 **Dependencies:** `1 → 2` · `2 → 3,8,9` · `3 → 4,8,9` · `4 → 7,8` · `5 → 6,7` · `6 → 7` · `8,9 → 10` · `10 → 11`
@@ -348,7 +348,7 @@ when shipping applies.
 
 ---
 
-## Stage 9 — Webhook function · `feat/stripe-webhook` · - [ ]
+## Stage 9 — Webhook function · `feat/stripe-webhook` · - [x]
 
 **Files:**
 - `netlify/functions/stripe-webhook.mts` — `config = { path: '/api/webhooks/stripe', method: ['POST'] }`.
@@ -385,7 +385,7 @@ event does not decrement.
 
 ---
 
-## Stage 10 — Success/cancel pages + Delivery section · `feat/checkout-pages` · - [ ]
+## Stage 10 — Success/cancel pages + Delivery section · `feat/checkout-pages` · - [x]
 
 **Files:**
 - `src/pages/shop/checkout/success.astro` — confirmation copy. Note the stock update
