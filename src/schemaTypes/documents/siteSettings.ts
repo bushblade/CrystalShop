@@ -4,7 +4,7 @@ import { defineArrayMember, defineField, defineType } from 'sanity'
 type ShippingRateValue = {
 	_key?: string
 	name?: string
-	maxWeightGrams?: number
+	maxWeightGrams?: number | null
 	price?: number
 }
 
@@ -85,7 +85,11 @@ export const siteSettings = defineType({
 					)
 					if (openTiers.length > 1) return 'Only the final catch-all band may have no max weight'
 					const lastTier = rates[rates.length - 1]
-					if (openTiers.length === 1 && lastTier.maxWeightGrams !== undefined) {
+					if (
+						openTiers.length === 1 &&
+						lastTier.maxWeightGrams !== null &&
+						lastTier.maxWeightGrams !== undefined
+					) {
 						return 'The catch-all band must be the last band'
 					}
 					return true
