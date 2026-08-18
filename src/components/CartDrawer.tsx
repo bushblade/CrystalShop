@@ -1,8 +1,8 @@
 import { animated, useReducedMotion, useTransition } from '@react-spring/web'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useCartStore } from '../lib/cart'
-import { formatPrice } from '../lib/format'
-import { getCartShipping, type ShippingRate } from '../lib/shipping'
+import { computeCartTotals } from '../lib/cartTotals'
+import type { ShippingRate } from '../lib/shipping'
 import { lockScroll, unlockScroll } from '../utils/scrollLock'
 import CartLineItem from './CartLineItem'
 import CartTotals, { type CheckoutState } from './CartTotals'
@@ -57,17 +57,10 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 		},
 	})
 
-	const count = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items])
-	const subtotal = useMemo(
-		() => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-		[items],
-	)
-	const shipping = getCartShipping(items, shippingRates)
-	const needsArrangement = !shipping.applies
-	const shippingTotal = shipping.applies && shipping.rate ? shipping.rate.price : 0
-	const shippingLabel =
-		shipping.applies && shipping.rate ? formatPrice(shipping.rate.price) : 'To be arranged'
-	const total = subtotal + shippingTotal
+	// All cart arithmetic (count, subtotal, shipping, total) lives in the pure
+	// `computeCartTotals` helper so it's independently testable; this memo just
+	// recomputes it when the cart or shipping rates change.
+	const totals = useMemo(() => computeCartTotals(items, shippingRates), [items, shippingRates])
 
 	// On open: remember where focus was (the Cart button) and move focus into the
 	// drawer — the first focusable element is the ✕ close button.
@@ -151,7 +144,7 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 
 	return (
 		<>
-			<CartTrigger ref={triggerRef} count={count} onOpen={openCart} />
+			<CartTrigger ref={triggerRef} count={totals.count} onOpen={openCart} />
 			{/* useTransition keeps the drawer mounted during the leave animation, then
 			    unmounts it — onRest (above) restores focus exactly at that point. */}
 			{transitions((style, item) =>
@@ -210,10 +203,10 @@ export default function CartDrawer({ shippingRates }: CartDrawerProps) {
 							)}
 							{items.length > 0 ? (
 								<CartTotals
-									subtotal={subtotal}
-									shippingLabel={shippingLabel}
-									total={total}
-									needsArrangement={needsArrangement}
+									subtotal={totals.subtotal}
+									shippingLabel={totals.shippingLabel}
+									total={totals.total}
+									needsArrangement={totals.needsArrangement}
 									checkoutState={checkoutState}
 									onCheckout={handleCheckout}
 								/>

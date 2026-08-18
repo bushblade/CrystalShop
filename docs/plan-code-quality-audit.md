@@ -207,7 +207,7 @@ independent of hover/focus. The visual tooltip remains a hover-only affordance.
 
 ## Stage 9: Extract Cart Summary Logic
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `refactor/cart-summary`
 
 **Files:**
