@@ -107,7 +107,13 @@ const cartItem = {
 							Sold out
 						</span>
 					) : (
-						<AddToCartButton client:load item={cartItem} maxQuantity={maxQuantity} />
+						<AddToCartButton
+							client:load
+							item={cartItem}
+							maxQuantity={maxQuantity}
+							stockLevel={product.stockLevel ?? 0}
+							isUniquePiece={product.isUniquePiece === true}
+						/>
 					)}
 				</div>
 			</div>

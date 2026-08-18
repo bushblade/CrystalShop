@@ -20,7 +20,7 @@ export type CartItem = {
 type CartState = {
 	items: CartItem[]
 	limits: Record<string, number>
-	add: (item: Omit<CartItem, 'quantity'>, maxQuantity: number) => void
+	addMany: (item: Omit<CartItem, 'quantity'>, quantity: number, maxQuantity: number) => void
 	setQuantity: (id: string, quantity: number) => void
 	remove: (id: string) => void
 	clear: () => void
@@ -69,20 +69,23 @@ export function createCartStore(storage: PersistStorage<PersistedCart> | undefin
 			(set) => ({
 				items: [],
 				limits: {},
-				add: (item, maxQuantity) =>
+				addMany: (item, quantity, maxQuantity) =>
 					set((state) => {
 						const limit = Math.max(1, maxQuantity)
+						const amount = Math.max(1, Math.min(quantity, limit))
 						const existing = state.items.find((line) => line.id === item.id)
 						if (existing) {
 							if (existing.quantity >= limit) return state
 							return {
 								items: state.items.map((line) =>
-									line.id === item.id ? { ...line, quantity: line.quantity + 1 } : line,
+									line.id === item.id
+										? { ...line, quantity: Math.min(existing.quantity + amount, limit) }
+										: line,
 								),
 							}
 						}
 						return {
-							items: [...state.items, { ...item, quantity: 1 }],
+							items: [...state.items, { ...item, quantity: amount }],
 							limits: { ...state.limits, [item.id]: limit },
 						}
 					}),
