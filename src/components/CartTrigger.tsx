@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react'
+import { type Ref, useEffect, useState } from 'react'
 import { primaryButtonClasses } from './ui/buttonClasses'
 
 interface CartTriggerProps {
 	count: number
 	onOpen: () => void
+	ref?: Ref<HTMLButtonElement>
 }
 
-export default function CartTrigger({ count, onOpen }: CartTriggerProps) {
+export default function CartTrigger({ count, onOpen, ref }: CartTriggerProps) {
 	const [hydrated, setHydrated] = useState(false)
 
 	useEffect(() => {
@@ -16,6 +17,7 @@ export default function CartTrigger({ count, onOpen }: CartTriggerProps) {
 	return (
 		<button
 			type="button"
+			ref={ref}
 			onClick={onOpen}
 			className={`${primaryButtonClasses} flex items-center gap-2 px-4 py-2 text-xs`}
 		>
