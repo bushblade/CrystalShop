@@ -87,7 +87,7 @@ Branch: `refactor/api-version-constants`
 
 ## Stage 4: Extract Shared GROQ Image Projection
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `refactor/groq-image-projection`
 
 **Files:**
