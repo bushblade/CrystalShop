@@ -1,0 +1,27 @@
+---
+import { toHTML } from '@portabletext/to-html'
+import type { BlockContent } from '../../../sanity.types'
+import Layout from '../../layouts/Layout.astro'
+import PageHeading from './PageHeading.astro'
+
+interface Props {
+	title: string
+	description: string
+	heading: string
+	body?: BlockContent | null
+	maxWidth?: '3xl' | '6xl'
+}
+
+const { title, description, heading, body, maxWidth = '3xl' } = Astro.props
+const html = body ? toHTML(body) : ''
+---
+
+<Layout {title} {description} {maxWidth}>
+	<PageHeading>{heading}</PageHeading>
+	{html ? (
+		<div
+			class="prose prose-stone mt-8 max-w-none prose-a:font-medium prose-a:text-violet-700 hover:prose-a:text-violet-800"
+			set:html={html}
+		/>
+	) : null}
+</Layout>

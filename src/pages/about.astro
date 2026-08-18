@@ -1,24 +1,14 @@
 ---
 import { sanityClient } from 'sanity:client'
-import { toHTML } from '@portabletext/to-html'
-import PageHeading from '../components/ui/PageHeading.astro'
-import Layout from '../layouts/Layout.astro'
+import ProsePage from '../components/ui/ProsePage.astro'
 import { SITE_SETTINGS_QUERY } from '../queries/sanity'
 
 const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
-const aboutHtml = siteSettings?.aboutBody ? toHTML(siteSettings.aboutBody) : ''
 ---
 
-<Layout
+<ProsePage
 	title="About | Eclipsia Crystals"
 	description="The story behind Eclipsia Crystals and the natural pieces we handpick."
-	maxWidth="3xl"
->
-	<PageHeading>About Us</PageHeading>
-	{aboutHtml ? (
-		<div
-			class="prose prose-stone mt-8 max-w-none prose-a:font-medium prose-a:text-violet-700 hover:prose-a:text-violet-800"
-			set:html={aboutHtml}
-		/>
-	) : null}
-</Layout>
+	heading="About Us"
+	body={siteSettings?.aboutBody}
+/>

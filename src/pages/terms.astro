@@ -1,20 +1,14 @@
 ---
 import { sanityClient } from 'sanity:client'
-import { toHTML } from '@portabletext/to-html'
-import PageHeading from '../components/ui/PageHeading.astro'
-import Layout from '../layouts/Layout.astro'
+import ProsePage from '../components/ui/ProsePage.astro'
 import { SITE_SETTINGS_QUERY } from '../queries/sanity'
 
 const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
-const termsHtml = siteSettings?.termsBody ? toHTML(siteSettings.termsBody) : ''
 ---
 
-<Layout title="Terms | Eclipsia Crystals" description="Terms and conditions for shopping at Eclipsia Crystals." maxWidth="3xl">
-	<PageHeading>Terms &amp; Conditions</PageHeading>
-	{termsHtml ? (
-		<div
-			class="prose prose-stone mt-8 max-w-none prose-a:font-medium prose-a:text-violet-700 hover:prose-a:text-violet-800"
-			set:html={termsHtml}
-		/>
-	) : null}
-</Layout>
+<ProsePage
+	title="Terms | Eclipsia Crystals"
+	description="Terms and conditions for shopping at Eclipsia Crystals."
+	heading="Terms & Conditions"
+	body={siteSettings?.termsBody}
+/>
