@@ -107,7 +107,7 @@ Branch: `refactor/groq-image-projection`
 
 ## Stage 5: Extract Pure Site-Settings Mapping
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `refactor/site-settings-mapping`
 
 **Files:**

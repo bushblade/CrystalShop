@@ -7,6 +7,7 @@ import PageHeading from '../../../components/ui/PageHeading.astro'
 import Layout from '../../../layouts/Layout.astro'
 import { formatPrice, formatWeight } from '../../../lib/format'
 import { getCartShipping } from '../../../lib/shipping'
+import { extractShippingRates } from '../../../lib/siteSettings'
 import { PRODUCT_BY_SLUG_QUERY, SITE_SETTINGS_QUERY } from '../../../queries/sanity'
 
 const { slug } = Astro.params
@@ -20,12 +21,7 @@ if (!product) {
 const isSoldOut = (product.stockLevel ?? 0) === 0
 
 const siteSettings = await sanityClient.fetch(SITE_SETTINGS_QUERY)
-const shippingRates =
-	siteSettings?.shippingRates?.map((rate) => ({
-		name: rate.name,
-		maxWeightGrams: rate.maxWeightGrams ?? null,
-		price: rate.price,
-	})) ?? []
+const shippingRates = extractShippingRates(siteSettings)
 const shipping = getCartShipping(
 	[{ deliveryMethod: product.deliveryMethod, weightInGrams: product.weightInGrams ?? 0 }],
 	shippingRates,
