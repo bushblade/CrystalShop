@@ -16,6 +16,9 @@ if (!token) {
 const client = createClient({
 	projectId,
 	dataset,
+	// Canonical value: src/lib/apiVersions.ts (SANITY_API_VERSION). Kept inline
+	// because these scripts run as plain Node ESM — importing a .ts module needs
+	// Node >=22.18 (type stripping) while engines.node is >=22.12.
 	apiVersion: '2026-08-10',
 	useCdn: false,
 	token,

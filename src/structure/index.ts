@@ -6,6 +6,8 @@ import { StackCompactIcon } from '@sanity/icons/StackCompact'
 import { StarIcon } from '@sanity/icons/Star'
 import type { StructureBuilder, StructureResolver } from 'sanity/structure'
 
+import { SANITY_API_VERSION } from '../lib/apiVersions'
+
 const listMenuGroups = [
 	{ id: 'sorting', title: 'Sort' },
 	{ id: 'layout', title: 'Layout' },
@@ -55,7 +57,7 @@ const productList = (S: StructureBuilder, title: string, filter: string) =>
 			S.documentList()
 				.title(title)
 				.schemaType('product')
-				.apiVersion('2026-08-10')
+				.apiVersion(SANITY_API_VERSION)
 				.filter(filter)
 				.menuItemGroups(listMenuGroups)
 				.menuItems(productMenuItems(S))
@@ -89,7 +91,7 @@ export const structure: StructureResolver = (S) =>
 									S.documentList()
 										.title('All Products')
 										.schemaType('product')
-										.apiVersion('2026-08-10')
+										.apiVersion(SANITY_API_VERSION)
 										.filter('_type == "product"')
 										.defaultOrdering([{ field: 'stockLevel', direction: 'asc' }])
 										.menuItemGroups(listMenuGroups)
@@ -105,7 +107,7 @@ export const structure: StructureResolver = (S) =>
 									S.documentList()
 										.title('Featured Products: Max of 6 products')
 										.schemaType('product')
-										.apiVersion('2026-08-10')
+										.apiVersion(SANITY_API_VERSION)
 										.filter(
 											'_type == "product" && isFeatured == true && coalesce(stockLevel, 0) > 0',
 										)
@@ -130,7 +132,7 @@ export const structure: StructureResolver = (S) =>
 					S.documentList()
 						.title('Orders — sales history, read only')
 						.schemaType('order')
-						.apiVersion('2026-08-10')
+						.apiVersion(SANITY_API_VERSION)
 						.filter('_type == "order"')
 						.initialValueTemplates([])
 						.defaultOrdering([{ field: 'completedAt', direction: 'desc' }])

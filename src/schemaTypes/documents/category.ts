@@ -1,6 +1,8 @@
 import { TagIcon } from '@sanity/icons/Tag'
 import { defineField, defineType } from 'sanity'
 
+import { SANITY_API_VERSION } from '../../lib/apiVersions'
+
 export const category = defineType({
 	name: 'category',
 	title: 'Category',
@@ -25,7 +27,7 @@ export const category = defineType({
 				rule.required().custom(async (slug, context) => {
 					if (!slug?.current) return true
 					const client = context
-						.getClient({ apiVersion: '2026-08-10' })
+						.getClient({ apiVersion: SANITY_API_VERSION })
 						.withConfig({ perspective: 'raw' })
 					const published = context.document?._id?.replace(/^drafts\./, '')
 					const existing = await client.fetch(

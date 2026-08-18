@@ -1,4 +1,5 @@
 import { createClient } from '@sanity/client'
+import { SANITY_API_VERSION } from '../../src/lib/apiVersions'
 
 // Shared functions-side Sanity client, distinct from Astro's `sanity:client`
 // used in pages. Reads env via the Netlify runtime global so it works under
@@ -17,7 +18,7 @@ export function createSanityClient(token?: string) {
 	return createClient({
 		projectId,
 		dataset,
-		apiVersion: '2026-08-10',
+		apiVersion: SANITY_API_VERSION,
 		useCdn: false,
 		perspective: 'published',
 		token,

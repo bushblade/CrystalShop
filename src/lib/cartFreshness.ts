@@ -1,5 +1,6 @@
 import { createClient } from '@sanity/client'
 import { PRODUCT_AVAILABILITY_QUERY } from '../queries/sanity'
+import { SANITY_API_VERSION } from './apiVersions'
 import { type CartItem, useCartStore } from './cart'
 
 export type ProductAvailability = {
@@ -54,7 +55,7 @@ export async function checkCartFreshness(): Promise<string[]> {
 	const client = createClient({
 		projectId: import.meta.env.PUBLIC_SANITY_STUDIO_PROJECT_ID,
 		dataset: import.meta.env.PUBLIC_SANITY_STUDIO_DATASET,
-		apiVersion: '2026-08-10',
+		apiVersion: SANITY_API_VERSION,
 		useCdn: false,
 	})
 

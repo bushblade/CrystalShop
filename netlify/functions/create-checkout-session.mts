@@ -1,10 +1,10 @@
 import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
+import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
 import { getCartShipping, type ShippingRate } from '../../src/lib/shipping'
 import { CHECKOUT_ITEMS_QUERY, SITE_SETTINGS_QUERY } from '../../src/queries/sanity'
 import { createSanityClient } from '../lib/shared-sanity-client'
 
-const STRIPE_API_VERSION = '2026-07-29.dahlia'
 const INTEGRATION_IDENTIFIER = 'crystalshop-web'
 const LOCALHOST_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
 

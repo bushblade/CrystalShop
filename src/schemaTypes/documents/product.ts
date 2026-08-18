@@ -1,6 +1,8 @@
 import { PackageIcon } from '@sanity/icons/Package'
 import { defineArrayMember, defineField, defineType } from 'sanity'
 
+import { SANITY_API_VERSION } from '../../lib/apiVersions'
+
 const PACKAGING_GROUP = 'packaging'
 const INVENTORY_GROUP = 'inventory'
 
@@ -32,7 +34,7 @@ export const product = defineType({
 				rule.required().custom(async (slug, context) => {
 					if (!slug?.current) return true
 					const client = context
-						.getClient({ apiVersion: '2026-08-10' })
+						.getClient({ apiVersion: SANITY_API_VERSION })
 						.withConfig({ perspective: 'raw' })
 					const published = context.document?._id?.replace(/^drafts\./, '')
 					const existing = await client.fetch(
@@ -152,7 +154,7 @@ export const product = defineType({
 					.custom(async (isFeatured, context) => {
 						if (!isFeatured) return true
 						const client = context
-							.getClient({ apiVersion: '2026-08-10' })
+							.getClient({ apiVersion: SANITY_API_VERSION })
 							.withConfig({ perspective: 'drafts' })
 						const id = context.document?._id?.replace(/^drafts\./, '')
 						const featuredCount = await client.fetch(
