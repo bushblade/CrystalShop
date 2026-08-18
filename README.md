@@ -45,8 +45,9 @@ Cart (Zustand, localStorage) → POST /api/checkout → Stripe hosted Checkout
   retries are at-least-once, and a duplicate delivery is ignored.
 - **Webhook events subscribed:** `checkout.session.completed`,
   `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`.
-  Only `paid` sessions are fulfilled (delayed methods like Bacs fire `completed`
-  as `unpaid`, then succeed via `async_payment_succeeded`).
+  These are also the exact three to select when registering the webhook on a new
+  Stripe account. Only `paid` sessions are fulfilled (delayed methods like Bacs
+  fire `completed` as `unpaid`, then succeed via `async_payment_succeeded`).
 - **Livemode gating:** the webhook only processes events whose `livemode` matches
   `STRIPE_EXPECTED_MODE` — test keys write to the `development` dataset, live keys
   to `production`. Misconfiguring this means orders silently never land.
@@ -56,6 +57,25 @@ Cart (Zustand, localStorage) → POST /api/checkout → Stripe hosted Checkout
   server use the same rule). Any `arrange` item, an overweight total, or unset
   rates means the whole order is arranged with the owner — no shipping step at
   checkout, buyer pays the item total online and the owner contacts them.
+
+### Setting up Stripe on a new account (handover)
+
+When the site moves to the client's own Stripe account, register the webhook
+with **exactly these three events** — missing `checkout.session.completed` is
+the classic mistake and means orders silently never land:
+
+1. `checkout.session.completed`
+2. `checkout.session.async_payment_succeeded`
+3. `checkout.session.async_payment_failed`
+
+Endpoint URL: `https://<your-site>/api/webhooks/stripe`
+
+Then in Netlify env set: `STRIPE_WEBHOOK_SECRET` (the `whsec_` the dashboard
+issues for that endpoint — *not* the local `stripe listen` value),
+`STRIPE_RESTRICTED_KEY` and `STRIPE_PUBLISHABLE_KEY` (live keys),
+`STRIPE_EXPECTED_MODE=live`, and `PUBLIC_SANITY_STUDIO_DATASET=production`.
+The webhook only processes events whose `livemode` matches `STRIPE_EXPECTED_MODE`,
+so every one of these must flip together.
 
 ### Testing the webhook locally
 
@@ -96,7 +116,7 @@ CLI forwards the event to `localhost:8888/api/webhooks/stripe`, which creates th
 | `SANITY_WRITE_TOKEN` | Yes (functions) | Sanity writer token for `pnpm seed:dummy` **and** the webhook (writes `order` docs + decrements stock) |
 | `STRIPE_RESTRICTED_KEY` | Yes (functions) | Restricted Stripe key (`rk_...`). Server-only — never `PUBLIC_`-prefixed. Used by `/api/checkout` and to verify webhook signatures |
 | `STRIPE_PUBLISHABLE_KEY` | No (frontend) | Stripe publishable key (`pk_...`) — safe to expose to the client; used by Stripe.js |
-| `STRIPE_WEBHOOK_SECRET` | Yes (webhook) | Webhook signing secret (`whsec_...`). Local testing: the value printed by `stripe listen` (see above). Production: set when the dashboard webhook endpoint is registered |
+| `STRIPE_WEBHOOK_SECRET` | Yes (webhook) | Webhook signing secret (`whsec_...`). Local testing: the value printed by `stripe listen` (see above). Production: the value the dashboard issues when the webhook endpoint is registered — use that one, not the `stripe listen` value |
 | `STRIPE_EXPECTED_MODE` | Yes (webhook) | `test` or `live`. Gates which Stripe events the webhook processes — must match the dataset |
 
 See `.env.example` for a template.
