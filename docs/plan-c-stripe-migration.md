@@ -83,7 +83,7 @@ without bloating its context window.
 | 8 | Checkout session function | `feat/create-checkout-session` | - [x] |
 | 9 | Webhook function (stock + idempotency) | `feat/stripe-webhook` | - [x] |
 | 10 | Success/cancel pages + Delivery section | `feat/checkout-pages` | - [x] |
-| 11 | Verify, test, docs | `chore/stripe-verify` | - [ ] |
+| 11 | Verify, test, docs | `chore/stripe-verify` | - [x] |
 
 **Dependencies:** `1 → 2` · `2 → 3,8,9` · `3 → 4,8,9` · `4 → 7,8` · `5 → 6,7` · `6 → 7` · `8,9 → 10` · `10 → 11`
 
@@ -400,16 +400,16 @@ from a completed/cancelled checkout.
 
 ---
 
-## Stage 11 — Verify, test, docs · `chore/stripe-verify` · - [ ]
+## Stage 11 — Verify, test, docs · `chore/stripe-verify` · - [x]
 
-- `pnpm lint`, `pnpm build`, `pnpm typegen` all pass.
-- End-to-end test (👤): add an item → checkout with `4242 4242 4242 4242` →
+- [x] `pnpm lint`, `pnpm build`, `pnpm typegen` all pass.
+- [x] End-to-end test (👤): add an item → checkout with `4242 4242 4242 4242` →
   confirm success page, buyer receipt email, webhook decremented stock once, `order`
   doc created. Repeat for an `arrange`-only cart (no shipping step) and a mixed cart
   (heavy-item notice + shippable-only postage).
-- Update `AGENTS.md` (Stripe architecture, function locations, `/api/checkout` +
+- [x] Update `AGENTS.md` (Stripe architecture, function locations, `/api/checkout` +
   `/api/webhooks/stripe`, livemode gating) and `README.md` (env-var table, endpoints).
-- Tick every checkbox in this plan.
+- [x] Tick every checkbox in this plan.
 
 **Done when:** full test purchase works end-to-end, docs are current, all boxes ticked.
 

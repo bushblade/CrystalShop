@@ -11,7 +11,31 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 - **Product Type:** Natural crystals.
 - **Inventory Model:** Many products are unique 1-of-1 physical pieces (`isUniquePiece: true`). Once sold out, they should not accept backorders.
 - **Shipping:** Physical items vary by weight. Every product schema must record `weightInGrams` so shipping costs can be calculated at checkout.
-- **Payments & Cart:** Not yet implemented — migration from Snipcart to Stripe Checkout is planned (see `docs/plan-c-stripe-migration.md`).
+- **Payments & Cart:** Stripe Checkout (GBP, UK-only shipping). Cart is a
+  client-side Zustand store (localStorage-persisted, shared across React islands
+  via `useSyncExternalStore`); add-to-cart only on the PDP. Stripe is the source
+  of truth for orders/customers; a minimal read-only `order` doc in Sanity is an
+  idempotency guard + sales log (no PII). See `docs/plan-c-stripe-migration.md`.
+- **Server trust:** Netlify Functions re-fetch price/stock/shipping from Sanity —
+  never trust browser-sent prices.
+- **Checkout endpoints:**
+  - `/api/checkout` → `netlify/functions/create-checkout-session.mts`. Re-fetches
+    price/stock/shipping from Sanity, rejects out-of-stock (409), clamps
+    quantities, returns a Stripe Checkout URL.
+  - `/api/webhooks/stripe` → `netlify/functions/stripe-webhook.mts`. Verifies the
+    Stripe signature, writes the `order` doc, atomically decrements stock
+    (`max(0, current - quantity)`) in one Sanity transaction. Idempotent on
+    `sessionId`. Events: `checkout.session.completed`,
+    `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`.
+  - **Livemode gating:** the webhook only processes events whose `livemode`
+    matches `STRIPE_EXPECTED_MODE` — test keys write to `development`, live keys
+    to `production`.
+- **Shipping:** weight-band tiers from `siteSettings.shippingRates`, computed by
+  the shared `getCartShipping` in `src/lib/shipping.ts` (client and server use
+  the same rule). A shipping price is only charged when the whole cart is `post`
+  items and the total weight fits a tier; any `arrange` item, an overweight
+  total, or unset rates means the order is arranged as a whole (no shipping
+  step).
 
 ## Core Tech Stack
 
