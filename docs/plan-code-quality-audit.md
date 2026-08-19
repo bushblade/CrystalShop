@@ -5,8 +5,8 @@ bite-sized chunk so a single agent can tackle it without being overwhelmed.
 Work the stages in order — simplest first.
 
 **Branching:** each stage is carried out on its own dedicated git branch (named
-per stage below). Create the branch from `main`, merge it back with a PR, then
-tick the stage's checkbox once merged.
+per stage below). Create the branch from `main`, merge it back into `main`
+locally (no pull requests), then tick the stage's checkbox once merged.
 
 Status markers:
 

@@ -1,8 +1,13 @@
-import type { SanityClient } from '@sanity/client'
 import type Stripe from 'stripe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createSanityClient } from '../netlify/lib/shared-sanity-client'
 import type { CHECKOUT_ITEMS_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '../sanity.types'
+import {
+	asSanityClient,
+	type FakeSanity,
+	type FakeSanityConfig,
+	fakeSanity,
+} from './helpers/fake-sanity'
 import { stubNetlifyEnv } from './helpers/netlify-env'
 
 const { StripeMock, stripeSessionCreateMock } = vi.hoisted(() => {
@@ -27,24 +32,11 @@ type ShippingRateEntry = NonNullable<
 	NonNullable<SITE_SETTINGS_QUERY_RESULT>['shippingRates']
 >[number]
 
-type FakeSanityConfig = {
-	products?: CHECKOUT_ITEMS_QUERY_RESULT
-	siteSettings?: SITE_SETTINGS_QUERY_RESULT
-	fetchError?: Error
-}
-
-function fakeSanity(config: FakeSanityConfig) {
-	return {
-		fetch: vi.fn(async (_query: string, params?: { ids?: string[] }) => {
-			if (config.fetchError) throw config.fetchError
-			if (params?.ids) return config.products ?? []
-			return config.siteSettings ?? null
-		}),
-	}
-}
+let sanity: FakeSanity
 
 function mockSanity(config: FakeSanityConfig = {}) {
-	createSanityClientMock.mockImplementation(() => fakeSanity(config) as unknown as SanityClient)
+	sanity = fakeSanity(config)
+	createSanityClientMock.mockImplementation(() => asSanityClient(sanity))
 }
 
 function postProduct(
