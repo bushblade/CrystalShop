@@ -1,6 +1,7 @@
 ---
 import type { ShippingRate } from '../../lib/shipping'
 import CartDrawer from '../CartDrawer'
+import MobileNav from '../MobileNav'
 import NavLink from './NavLink.astro'
 
 interface Props {
@@ -11,15 +12,21 @@ const { shippingRates } = Astro.props
 ---
 
 <header class="border-b border-stone-200/80">
-	<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-		<a href="/" class="font-display text-2xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800">
+	<nav class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
+		<a
+			href="/"
+			class="whitespace-nowrap font-display text-xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800 sm:text-2xl"
+		>
 			Eclipsia Crystals
 		</a>
-		<div class="flex items-center gap-7 text-xs font-medium uppercase tracking-[0.14em] text-stone-600">
-			<NavLink href="/shop">Shop</NavLink>
-			<NavLink href="/about">About</NavLink>
-			<NavLink href="/contact">Contact</NavLink>
+		<div class="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.14em] text-stone-600 sm:gap-7">
+			<div class="hidden items-center gap-7 md:flex">
+				<NavLink href="/shop">Shop</NavLink>
+				<NavLink href="/about">About</NavLink>
+				<NavLink href="/contact">Contact</NavLink>
+			</div>
 			<CartDrawer client:load shippingRates={shippingRates} />
+			<MobileNav client:load />
 		</div>
 	</nav>
 </header>
