@@ -236,7 +236,7 @@ Branch: `refactor/cart-summary`
 
 ## Stage 10: Split Cart Drawer Responsibilities
 
-Status: [ ] Pending
+Status: [x] Complete
 Branch: `refactor/cart-drawer-split`
 
 **Files:**
