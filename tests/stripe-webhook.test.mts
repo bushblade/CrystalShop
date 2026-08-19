@@ -170,9 +170,10 @@ describe('stripe-webhook guard paths', () => {
 // concurrent-race test simulates the losing delivery sequentially (fast-path
 // miss -> transaction conflict -> order found on re-check). They do NOT
 // eliminate the pre-payment checkout race, where two shoppers can both reach
-// Stripe Checkout for the last unit of a unique piece — that needs inventory
-// reservation and is deliberately deferred to Stage 14 of
-// docs/plan-code-quality-audit.md. A failed finalization returns 500 so Stripe
+// Stripe Checkout for the last unit of a unique piece. That race is an accepted
+// risk (declined inventory reservations — Stage 14 of
+// docs/plan-code-quality-audit.md); the manual resolution is to contact one
+// buyer, explain, and refund. A failed finalization returns 500 so Stripe
 // retries and the paid order is never silently dropped.
 describe('webhook fulfillment', () => {
 	it('returns duplicate for an already-recorded order without touching stock', async () => {
