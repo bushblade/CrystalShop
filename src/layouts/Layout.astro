@@ -8,9 +8,9 @@ import '@fontsource/cormorant-garamond/400-italic.css'
 import '@fontsource/cormorant-garamond/500.css'
 import '@fontsource/cormorant-garamond/600.css'
 import { sanityClient } from 'sanity:client'
-import CartDrawer from '../components/CartDrawer'
 import CartFreshnessChecker from '../components/CartFreshnessChecker'
-import NavLink from '../components/ui/NavLink.astro'
+import SiteFooter from '../components/ui/SiteFooter.astro'
+import SiteHeader from '../components/ui/SiteHeader.astro'
 import Toaster from '../components/ui/Toaster'
 import { extractShippingRates } from '../lib/siteSettings'
 import { SITE_SETTINGS_QUERY } from '../queries/sanity'
@@ -51,19 +51,7 @@ const shippingRates = extractShippingRates(siteSettings)
 		</noscript>
 	</head>
 	<body class="flex min-h-screen flex-col">
-		<header class="border-b border-stone-200/80">
-			<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-				<a href="/" class="font-display text-2xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800">
-					Eclipsia Crystals
-				</a>
-				<div class="flex items-center gap-7 text-xs font-medium uppercase tracking-[0.14em] text-stone-600">
-					<NavLink href="/shop">Shop</NavLink>
-					<NavLink href="/about">About</NavLink>
-					<NavLink href="/contact">Contact</NavLink>
-					<CartDrawer client:load shippingRates={shippingRates} />
-				</div>
-			</nav>
-		</header>
+		<SiteHeader shippingRates={shippingRates} />
 		<main
 			class:list={[
 				'mx-auto w-full flex-1 px-4',
@@ -75,28 +63,7 @@ const shippingRates = extractShippingRates(siteSettings)
 			<Toaster client:only="react" />
 			<slot />
 		</main>
-		<footer class="mt-auto border-t border-stone-200/80 py-10">
-			<div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 text-sm text-stone-500 sm:flex-row">
-				<p>© {new Date().getFullYear()} Eclipsia Crystals</p>
-				<nav class="flex gap-6">
-					<NavLink href="/shop">Shop</NavLink>
-					<NavLink href="/about">About</NavLink>
-					<NavLink href="/shipping">Shipping</NavLink>
-					<NavLink href="/contact">Contact</NavLink>
-					<NavLink href="/terms">Terms</NavLink>
-				</nav>
-			</div>
-			{contactEmail ? (
-				<div class="mx-auto max-w-6xl px-4 pt-4 text-center text-sm text-stone-500 sm:text-right">
-					<a
-						href={`mailto:${contactEmail}`}
-						class="transition-colors hover:text-violet-700"
-					>
-						{contactEmail}
-					</a>
-				</div>
-			) : null}
-		</footer>
+		<SiteFooter contactEmail={contactEmail} />
 		<script>
 			import { transitionImage } from '../utils/transitionImage'
 			const images = document.querySelectorAll<HTMLImageElement>('img[data-fade-in]')
