@@ -343,11 +343,23 @@ Branch: `test/webhook-concurrency`
 
 ## Stage 14: Revisit Checkout Inventory Reservations
 
-Status: [ ] Pending
-Branch: `feat/checkout-reservations`
+Status: [~] Declined — accepted risk
+Branch: `feat/checkout-reservations` (never created)
 
-This stage is intentionally deferred. The current pre-payment checkout race is
-an accepted low-traffic risk and was flagged as optional to revisit later. It is
+**Decision (recorded):** not implementing. The pre-payment checkout race — two
+shoppers reaching Stripe Checkout for the last unit of a unique piece — is an
+accepted low-frequency risk for this small business. The reservation machinery
+(reservation schema, atomic/optimistic-concurrency updates, session-expiry
+cleanup, webhook finalize/release, write access on the public checkout endpoint)
+would be the most complex code in the codebase to protect against a rare event.
+The manual resolution is cheap and proportional: if both buyers pay, the owner
+contacts one, explains, and refunds. A future owner can revisit if sales volume
+or the risk profile changes.
+
+The original stage description is retained below for reference.
+
+This stage was initially deferred: the current pre-payment checkout race is
+an accepted low-traffic risk and was flagged as optional to revisit later. It was
 planned last so the simpler correctness, accessibility, duplication, and testing
 stages ship first.
 
@@ -385,15 +397,24 @@ stages ship first.
 
 ## Final Verification
 
-Status: [ ] Pending
+Status: [x] Complete
 
-- [ ] `pnpm lint`
-- [ ] `pnpm test`
-- [ ] `pnpm build`
-- [ ] `pnpm typegen`
-- [ ] Manual keyboard test for the cart drawer
-- [ ] Manual keyboard and screen-reader test for tooltips
-- [ ] Manual contact form submission test
-- [ ] Manual verification that the contact email appears in SSR HTML
-- [ ] Update `README.md` or `AGENTS.md` if architecture changes
-- [ ] Mark completed stages with `[x]`
+- [x] `pnpm lint`
+- [x] `pnpm test`
+- [x] `pnpm build`
+- [x] `pnpm typegen`
+- [x] Manual keyboard test for the cart drawer
+- [x] Manual keyboard and screen-reader test for tooltips (visually verified in dev tools only — no screen reader available)
+- [x] Manual contact form submission test (live test passed after enabling form detection)
+- [x] Manual verification that the contact email appears in SSR HTML (verified in source + dev tools)
+- [x] Update `README.md` or `AGENTS.md` if architecture changes (checked — no changes needed)
+- [x] Mark completed stages with `[x]`
+
+**Closeout notes (operational findings):**
+- Netlify form detection had to be enabled on the site (`extraFeatures.forms` was
+  off — POSTs to `/__forms.html` 404'd). The contact-form code and the
+  `public/__forms.html` skeleton were already correct.
+- Form email notifications are configured per site in the Netlify dashboard
+  (Forms → contact → Configuration → Notifications), not in the repo — this was
+  set up on the dev site; remember it for production go-live.
+- Stage 14 (checkout inventory reservations) is recorded as declined — see above.
