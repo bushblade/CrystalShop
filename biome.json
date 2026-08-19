@@ -7,7 +7,15 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!!**/.astro", "!**/*.svg", "!sanity.types.ts", "!schema.json"]
+		"includes": [
+			"**",
+			"!!**/.astro",
+			"!**/*.svg",
+			"!sanity.types.ts",
+			"!schema.json",
+			"!.agents/skills",
+			"!skills-lock.json"
+		]
 	},
 	"assist": {
 		"actions": {
