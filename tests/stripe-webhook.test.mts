@@ -1,23 +1,8 @@
 import Stripe from 'stripe'
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { stubNetlifyEnv } from './helpers/netlify-env'
 
 const WH_SECRET = 'whsec_test_webhook_signing_secret_for_local_verification'
-
-function stubEnv(overrides: Record<string, string | undefined> = {}) {
-	const base = {
-		STRIPE_RESTRICTED_KEY: 'rk_test_dummy',
-		STRIPE_WEBHOOK_SECRET: WH_SECRET,
-		STRIPE_EXPECTED_MODE: 'test',
-		PUBLIC_SANITY_STUDIO_PROJECT_ID: '8jzdagyy',
-		PUBLIC_SANITY_STUDIO_DATASET: 'development',
-		SANITY_WRITE_TOKEN: 'sk_dummy',
-	}
-	vi.stubGlobal('Netlify', {
-		env: {
-			get: (key: string) => ({ ...base, ...overrides })[key],
-		},
-	})
-}
 
 function buildEvent(payload: Record<string, unknown>): { body: string; signature: string } {
 	const body = JSON.stringify(payload)
@@ -42,7 +27,7 @@ async function invoke(body: string, signature: string): Promise<{ status: number
 
 describe('stripe-webhook guard paths', () => {
 	it('rejects a request with no signature', async () => {
-		stubEnv()
+		stubNetlifyEnv()
 		const mod = await import('../netlify/functions/stripe-webhook.mts')
 		const res = await mod.default(
 			new Request('http://localhost/api/webhooks/stripe', {
@@ -55,14 +40,14 @@ describe('stripe-webhook guard paths', () => {
 	})
 
 	it('rejects a bad signature', async () => {
-		stubEnv()
+		stubNetlifyEnv()
 		const { body } = buildEvent({ id: 'evt_1' })
 		const { status } = await invoke(body, 't=1,v1=not_a_valid_signature')
 		expect(status).toBe(400)
 	})
 
 	it('ignores a livemode mismatch', async () => {
-		stubEnv({ STRIPE_EXPECTED_MODE: 'test' })
+		stubNetlifyEnv({ STRIPE_EXPECTED_MODE: 'test' })
 		const { body, signature } = buildEvent({
 			id: 'evt_live',
 			livemode: true,
@@ -74,7 +59,7 @@ describe('stripe-webhook guard paths', () => {
 	})
 
 	it('ignores async_payment_failed without touching stock', async () => {
-		stubEnv()
+		stubNetlifyEnv()
 		const { body, signature } = buildEvent({
 			id: 'evt_async_failed',
 			livemode: false,
@@ -86,7 +71,7 @@ describe('stripe-webhook guard paths', () => {
 	})
 
 	it('skips an unpaid completed event', async () => {
-		stubEnv()
+		stubNetlifyEnv()
 		const { body, signature } = buildEvent({
 			id: 'evt_unpaid',
 			livemode: false,
@@ -104,7 +89,7 @@ describe('stripe-webhook guard paths', () => {
 	})
 
 	it('returns 500 config error when webhook secret missing', async () => {
-		stubEnv({ STRIPE_WEBHOOK_SECRET: undefined })
+		stubNetlifyEnv({ STRIPE_WEBHOOK_SECRET: undefined })
 		const mod = await import('../netlify/functions/stripe-webhook.mts')
 		const res = await mod.default(
 			new Request('http://localhost/api/webhooks/stripe', {
@@ -117,7 +102,7 @@ describe('stripe-webhook guard paths', () => {
 	})
 
 	it('returns 500 for a paid event with malformed metadata (never drop a paid order)', async () => {
-		stubEnv()
+		stubNetlifyEnv()
 		const { body, signature } = buildEvent({
 			id: 'evt_badmeta',
 			livemode: false,

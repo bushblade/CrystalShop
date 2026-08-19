@@ -1,5 +1,6 @@
 import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
+import type { CHECKOUT_ITEMS_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '../../sanity.types'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
 import { getCartShipping } from '../../src/lib/shipping'
 import { extractShippingRates } from '../../src/lib/siteSettings'
@@ -55,10 +56,13 @@ export default async (req: Request): Promise<Response> => {
 		return jsonResponse(500, 'Server configuration error')
 	}
 
-	let body: { items?: unknown }
+	let body: { items?: unknown } | null
 	try {
-		body = (await req.json()) as { items?: unknown }
+		body = (await req.json()) as { items?: unknown } | null
 	} catch {
+		return jsonResponse(400, 'Invalid request body — expected { items: [{ id, quantity }] }')
+	}
+	if (body === null || typeof body !== 'object') {
 		return jsonResponse(400, 'Invalid request body — expected { items: [{ id, quantity }] }')
 	}
 
@@ -74,10 +78,17 @@ export default async (req: Request): Promise<Response> => {
 	const ids = [...quantitiesById.keys()]
 
 	const sanity = createSanityClient()
-	const [products, siteSettings] = await Promise.all([
-		sanity.fetch(CHECKOUT_ITEMS_QUERY, { ids }),
-		sanity.fetch(SITE_SETTINGS_QUERY),
-	])
+	let products: CHECKOUT_ITEMS_QUERY_RESULT
+	let siteSettings: SITE_SETTINGS_QUERY_RESULT
+	try {
+		;[products, siteSettings] = await Promise.all([
+			sanity.fetch(CHECKOUT_ITEMS_QUERY, { ids }),
+			sanity.fetch(SITE_SETTINGS_QUERY),
+		])
+	} catch (error) {
+		console.error('Failed to fetch products or site settings', error)
+		return jsonResponse(500, 'Unable to start checkout — please try again')
+	}
 
 	const productsById = new Map(products.map((product) => [product._id, product]))
 

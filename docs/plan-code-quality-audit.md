@@ -260,7 +260,7 @@ Branch: `refactor/cart-drawer-split`
 
 ## Stage 11: Add Checkout Function Tests
 
-Status: [ ] Pending
+Status: [>] In progress
 Branch: `test/checkout-function`
 
 **Files:**
