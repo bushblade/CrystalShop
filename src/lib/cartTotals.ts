@@ -28,6 +28,15 @@ export interface CartTotals {
 }
 
 // Derives the full cart summary from the current line items and shipping rates.
+/**
+ * Derives `CartTotals` from items and shipping rates.
+ * Pure function with no React/store dependencies — every value is computed
+ * from the cart's `items` plus the configured `shippingRates`.
+ *
+ * @param items - Current cart line items
+ * @param shippingRates - Configured shipping rate tiers
+ * @returns Full cart summary: count, subtotal, shipping, label, arrangement need, total
+ */
 export function computeCartTotals(items: CartItem[], shippingRates: ShippingRate[]): CartTotals {
 	const count = items.reduce((sum, item) => sum + item.quantity, 0)
 	const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)

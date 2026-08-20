@@ -16,6 +16,18 @@ export type PruneResult = {
 	removedItems: string[]
 }
 
+/**
+ * Prunes cart items based on product availability, returns removed items.
+ * Keeps items not in `requestedIds` unchanged. For requested items, clamps
+ * quantity to `stockLevel` and removes items that are out of stock.
+ * Returns `null` when no items needed removing (cart unchanged).
+ *
+ * @param items - Current cart line items
+ * @param limits - Record of max quantities per product ID
+ * @param requestedIds - IDs of products to check availability for
+ * @param availability - Product availability keyed by product ID
+ * @returns Pruned cart result, or `null` if no changes were needed
+ */
 export function pruneCartToAvailability(
 	items: CartItem[],
 	limits: Record<string, number>,
@@ -60,6 +72,14 @@ export function pruneCartToAvailability(
 	return { items: newItems, limits: newLimits, removedItems }
 }
 
+/**
+ * Fetches current product availability from Sanity and updates cart state.
+ * Gets availability for all cart items via GROQ query, prunes the cart,
+ * and updates the store. Returns array of removed item names.
+ * Returns empty array if cart is empty or no items needed pruning.
+ *
+ * @returns Promise array of removed item names, or empty array if no changes
+ */
 export async function checkCartFreshness(): Promise<string[]> {
 	const state = useCartStore.getState()
 	if (state.items.length === 0) return []

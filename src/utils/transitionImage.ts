@@ -10,6 +10,16 @@ function reveal(image: HTMLImageElement, fade: boolean) {
 	}
 }
 
+/**
+ * Reveals image with fade/scale transition, handles load/error events.
+ * If the image is already complete, reveals instantly without transition.
+ * Otherwise, adds one-time `load` and `error` event listeners that reveal
+ * the image (with fade on load, without fade on error) using a single-use
+ * listener (`{ once: true }`).
+ *
+ * @param image - Image element to reveal/transition
+ * @returns void
+ */
 export function transitionImage(image: HTMLImageElement) {
 	if (image.complete) {
 		reveal(image, false)

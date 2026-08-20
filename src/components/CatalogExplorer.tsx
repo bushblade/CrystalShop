@@ -18,6 +18,14 @@ interface CatalogExplorerProps {
 	initialSearchParamsFromAstro: string
 }
 
+/**
+ * Parses search/sort/page from Astro URL search params.
+ * Extracts the `q` search term, `sort` key (validated against available
+ * options, defaults to `'newest'`), and `page` number (minimum 1).
+ *
+ * @param initialSearchParamsFromAstro - Search params string from Astro URL
+ * @returns Object with `q` (search term), `sort` (SortKey), `page` (number)
+ */
 function readInitialState(initialSearchParamsFromAstro: string) {
 	const params = new URLSearchParams(initialSearchParamsFromAstro)
 	const q = params.get('q') ?? ''
@@ -29,6 +37,15 @@ function readInitialState(initialSearchParamsFromAstro: string) {
 	return { q, sort, page }
 }
 
+/**
+ * Sorts products by the given key.
+ * Supported sort keys: `'name-asc'` (A-Z), `'price-asc'` (low to high),
+ * `'price-desc'` (high to low), `'newest'` (newest first by `_createdAt`).
+ *
+ * @param products - Products to sort
+ * @param sort - Sort key from `SortKey` union type
+ * @returns New array of products sorted per the given key
+ */
 function sortProducts(products: ProductCardData[], sort: SortKey): ProductCardData[] {
 	switch (sort) {
 		case 'name-asc':

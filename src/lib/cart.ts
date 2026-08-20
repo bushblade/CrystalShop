@@ -31,6 +31,15 @@ type PersistedCart = Pick<CartState, 'items' | 'limits'>
 export const CART_STORAGE_KEY = 'eclipsia:cart'
 const CART_VERSION = 2
 
+/**
+ * Parses cart from localStorage JSON, validates version and structure.
+ * Expected JSON format includes `version` field (must match `CART_VERSION`),
+ * and `state` with `items` array and `limits` object. Returns `null` if
+ * the version is outdated or the structure is invalid.
+ *
+ * @param raw - JSON string from localStorage
+ * @returns Persisted cart state `{items, limits}`, or `null` if invalid
+ */
 export function parsePersistedCart(raw: string): PersistedCart | null {
 	try {
 		const parsed = JSON.parse(raw) as {
@@ -53,6 +62,16 @@ export function parsePersistedCart(raw: string): PersistedCart | null {
 	}
 }
 
+/**
+ * Syncs cart state between persisted versions.
+ * Compares `current` and `incoming` carts by JSON-stringifying both.
+ * Returns `incoming` if the carts differ, or `null` if they are identical
+ * (no sync needed).
+ *
+ * @param current - Current cart state from store
+ * @param incoming - Incoming cart state from storage event
+ * @returns `incoming` if different, `null` if identical
+ */
 export function syncCartFromStorage(
 	current: PersistedCart,
 	incoming: PersistedCart,
@@ -63,6 +82,13 @@ export function syncCartFromStorage(
 	return incoming
 }
 
+/**
+ * Creates Zustand cart store with persistence middleware.
+ *
+ * @param storage - zustand `PersistStorage` instance (typically
+ *   `createJSONStorage(() => localStorage)`)
+ * @returns Configured `CartState` store with persistence
+ */
 export function createCartStore(storage: PersistStorage<PersistedCart> | undefined) {
 	return create<CartState>()(
 		persist(

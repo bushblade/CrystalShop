@@ -1,3 +1,11 @@
+/**
+ * Locks page scroll by setting body overflow to hidden and saving scroll position.
+ * Saves the current `window.scrollY` to `document.body.dataset.scrollY` and
+ * applies `position: fixed` with negative top offset to keep the page
+ * visually in place while preventing scroll.
+ *
+ * @returns void
+ */
 export function lockScroll() {
 	const scrollY = window.scrollY
 	document.body.dataset.scrollY = String(scrollY)
@@ -11,6 +19,14 @@ export function lockScroll() {
 	document.body.style.overscrollBehavior = 'none'
 }
 
+/**
+ * Restores previous scroll position and enables scrolling.
+ * Reads the saved scroll position from `document.body.dataset.scrollY`,
+ * removes the `position: fixed` and `overflow: hidden` styles, and
+ * restores the saved scroll offset.
+ *
+ * @returns void
+ */
 export function unlockScroll() {
 	const scrollY = Number(document.body.dataset.scrollY ?? 0)
 	delete document.body.dataset.scrollY
