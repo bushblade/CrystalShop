@@ -4,6 +4,8 @@ import { SANITY_API_VERSION } from './apiVersions'
 import { type CartItem, useCartStore } from './cart'
 
 export type ProductAvailability = {
+	name: string
+	price: number
 	stockLevel: number | null
 	isUniquePiece: boolean | null
 }
@@ -38,8 +40,19 @@ export function pruneCartToAvailability(
 			continue
 		}
 		const clampedQuantity = Math.min(line.quantity, product.stockLevel ?? 0)
-		if (clampedQuantity !== line.quantity) changed = true
-		newItems.push({ ...line, quantity: clampedQuantity })
+		if (
+			clampedQuantity !== line.quantity ||
+			line.name !== product.name ||
+			line.price !== product.price
+		) {
+			changed = true
+		}
+		newItems.push({
+			...line,
+			name: product.name,
+			price: product.price,
+			quantity: clampedQuantity,
+		})
 		newLimits[line.id] = product.stockLevel ?? 0
 	}
 
@@ -63,7 +76,12 @@ export async function checkCartFreshness(): Promise<string[]> {
 	const availability: Record<string, ProductAvailability> = Object.fromEntries(
 		matches.map((match) => [
 			match._id,
-			{ stockLevel: match.stockLevel, isUniquePiece: match.isUniquePiece },
+			{
+				name: match.name,
+				price: match.price,
+				stockLevel: match.stockLevel,
+				isUniquePiece: match.isUniquePiece,
+			},
 		]),
 	)
 

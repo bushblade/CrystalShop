@@ -11,6 +11,8 @@ import { createSanityClient } from '../lib/shared-sanity-client'
 const INTEGRATION_IDENTIFIER = 'crystalshop-web'
 const CHECKOUT_SESSION_EXPIRY_SECONDS = 30 * 60
 const LOCALHOST_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
+const MAX_DISTINCT_PRODUCTS = 50
+const MAX_QUANTITY_PER_PRODUCT = 999
 
 type CheckoutRequestItem = {
 	id: string
@@ -39,7 +41,14 @@ function parseItems(raw: unknown): CheckoutRequestItem[] | null {
 		if (typeof entry !== 'object' || entry === null) return null
 		const { id, quantity } = entry as { id?: unknown; quantity?: unknown }
 		if (typeof id !== 'string' || id.length === 0) return null
-		if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) return null
+		if (
+			typeof quantity !== 'number' ||
+			!Number.isInteger(quantity) ||
+			quantity < 1 ||
+			quantity > MAX_QUANTITY_PER_PRODUCT
+		) {
+			return null
+		}
 		items.push({ id, quantity })
 	}
 	return items
@@ -83,6 +92,9 @@ export default async (req: Request): Promise<Response> => {
 	const quantitiesById = new Map<string, number>()
 	for (const item of requested) {
 		quantitiesById.set(item.id, (quantitiesById.get(item.id) ?? 0) + item.quantity)
+	}
+	if (quantitiesById.size > MAX_DISTINCT_PRODUCTS) {
+		return jsonResponse(400, 'Cart contains too many items')
 	}
 	const ids = [...quantitiesById.keys()]
 
@@ -174,6 +186,10 @@ export default async (req: Request): Promise<Response> => {
 	const stripe = new Stripe(key, { apiVersion: STRIPE_API_VERSION })
 	try {
 		const session = await stripe.checkout.sessions.create(sessionParams)
+		if (!session.url) {
+			console.error('Checkout session created without a URL', session.id)
+			return jsonResponse(500, 'Unable to start checkout — please try again')
+		}
 		return jsonResponse(200, { url: session.url })
 	} catch (error) {
 		console.error('Failed to create checkout session', error)

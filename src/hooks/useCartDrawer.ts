@@ -185,6 +185,9 @@ export function useCartDrawer(shippingRates: ShippingRate[]): UseCartDrawerRetur
 			})
 			if (!response.ok) throw new Error(`Checkout failed: ${response.status}`)
 			const data = (await response.json()) as { url: string }
+			if (typeof data.url !== 'string' || data.url.length === 0) {
+				throw new Error('Checkout failed: missing URL')
+			}
 			window.location.assign(data.url)
 		} catch {
 			setCheckoutState('error')

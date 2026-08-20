@@ -95,7 +95,7 @@ export const SITE_SETTINGS_QUERY = defineQuery(/* groq */ `
 `)
 
 export const PRODUCT_AVAILABILITY_QUERY = defineQuery(/* groq */ `
-	*[_type == "product" && _id in $ids]{ _id, stockLevel, isUniquePiece }
+	*[_type == "product" && _id in $ids]{ _id, name, price, stockLevel, isUniquePiece }
 `)
 
 export const CHECKOUT_ITEMS_QUERY = defineQuery(/* groq */ `

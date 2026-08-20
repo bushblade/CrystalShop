@@ -196,9 +196,9 @@ would be a useful follow-up, but it is not essential for this low-volume
 deployment if Stripe's notifications are reliable and the owner understands the
 workflow.
 
-### Finding 4: Add a defensive guard for a missing Checkout URL
+### Finding 4: Add a defensive guard for a missing Checkout URL [Resolved]
 
-**Severity:** Low. Cheap hardening.
+**Severity:** Low. Resolved in the current implementation; verify in deployment.
 
 **Locations:**
 
@@ -219,9 +219,16 @@ The function should return a server error if the URL is absent. The client can
 also validate that the response contains a non-empty string before calling
 `window.location.assign()`.
 
-### Finding 5: Reject oversized carts cleanly
+#### Implemented fix
 
-**Severity:** Low. Cheap hardening.
+The checkout function now returns a 500 with the standard checkout error message
+when Stripe creates a session without a URL (logging the session ID for
+debugging). The client also rejects a missing or empty URL before redirecting,
+which routes to the existing inline drawer error.
+
+### Finding 5: Reject oversized carts cleanly [Resolved]
+
+**Severity:** Low. Resolved in the current implementation; verify in deployment.
 
 **Location:** `netlify/functions/create-checkout-session.mts:31-42`
 
@@ -241,9 +248,18 @@ possibly a maximum quantity per product. This is useful for:
 The server must continue to treat Sanity stock as authoritative; client-side
 limits are not sufficient on their own.
 
-### Finding 6: Persisted cart prices can become stale
+#### Implemented fix
 
-**Severity:** Low UX inconsistency. Not a payment-security issue.
+The endpoint now enforces a maximum of 50 distinct products per checkout (a
+clean 400 before any Sanity query) and a maximum quantity of 999 per item
+(rejected as an invalid body). These bounds keep Stripe line items, Sanity
+queries, and metadata sizes in check. Tests cover both rejection paths and
+confirm Stripe is never called.
+
+### Finding 6: Persisted cart prices can become stale [Resolved]
+
+**Severity:** Low UX inconsistency. Resolved in the current implementation;
+verify in deployment.
 
 **Locations:**
 
@@ -270,6 +286,15 @@ issues.
 Include the current `name` and `price` in the availability query and update the
 persisted cart line during the freshness check. This keeps the cart display
 aligned with what checkout will charge.
+
+#### Implemented fix
+
+`PRODUCT_AVAILABILITY_QUERY` now returns `name` and `price` alongside
+`stockLevel` and `isUniquePiece`, and `pruneCartToAvailability` refreshes a
+persisted cart line's name and price whenever either differs from Sanity. The
+function's "nothing changed" contract and removed-item reporting are unchanged,
+so the existing freshness UI needs no changes. Tests cover price-only,
+name-only, and combined update passes.
 
 ### Finding 7: Refunds do not automatically restore stock
 
@@ -479,12 +504,12 @@ Before directing real customers to the site:
 Before launch, the practical order of work is:
 
 1. Verify the Stripe metadata chunking fix and large-cart test in deployment.
-2. Add the missing Checkout URL guard.
-3. Add a reasonable item-count limit and return a clean 400 for oversized
-   requests.
+2. ~~Add the missing Checkout URL guard.~~ Done.
+3. ~~Add a reasonable item-count limit and return a clean 400 for oversized
+   requests.~~ Done.
 4. Verify the 30-minute Checkout Session expiry in deployment.
-5. Decide whether to refresh persisted cart names and prices during freshness
-   checks. This is a UX improvement rather than a security fix.
+5. ~~Decide whether to refresh persisted cart names and prices during freshness
+   checks.~~ Done — the freshness check now refreshes stored names and prices.
 6. Verify Stripe owner notifications and customer receipt settings.
 7. Complete the production Sanity, Stripe, Netlify, CORS, and end-to-end
    checklist above.
@@ -496,7 +521,9 @@ security and payment-flow foundations are sound for a small low-volume trader.
 
 The cart metadata limit was the main code-level deployment blocker because it
 could prevent ordinary multi-item carts from reaching Stripe. The chunking fix
-removes that blocker; the remaining code changes are inexpensive hardening. The lack of stock
-reservation and dedicated owner notification are operational trade-offs rather
-than reasons to build a larger commerce system, provided the owner understands
-the rare oversell scenario and Stripe notification settings are confirmed.
+removes that blocker; the remaining code-level hardening (Checkout URL guard,
+oversized-cart limits, and stale-price refresh) is now also implemented. The lack
+of stock reservation and dedicated owner notification are operational trade-offs
+rather than reasons to build a larger commerce system, provided the owner
+understands the rare oversell scenario and Stripe notification settings are
+confirmed.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { CartItem } from './cart'
-import { pruneCartToAvailability } from './cartFreshness'
+import { type ProductAvailability, pruneCartToAvailability } from './cartFreshness'
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {
 	return {
@@ -17,10 +17,20 @@ function makeItem(overrides: Partial<CartItem> = {}): CartItem {
 	}
 }
 
+function makeAvailability(overrides: Partial<ProductAvailability> = {}): ProductAvailability {
+	return {
+		name: 'Amethyst Cluster',
+		price: 24,
+		stockLevel: 5,
+		isUniquePiece: false,
+		...overrides,
+	}
+}
+
 describe('pruneCartToAvailability', () => {
 	it('removes a sold-out item and records its name', () => {
 		const result = pruneCartToAvailability([makeItem()], { 'product-1': 1 }, ['product-1'], {
-			'product-1': { stockLevel: 0, isUniquePiece: true },
+			'product-1': makeAvailability({ stockLevel: 0, isUniquePiece: true }),
 		})
 		expect(result).toEqual({ items: [], limits: {}, removedItems: ['Amethyst Cluster'] })
 	})
@@ -54,11 +64,39 @@ describe('pruneCartToAvailability', () => {
 			[makeItem({ quantity: 3 })],
 			{ 'product-1': 3 },
 			['product-1'],
-			{ 'product-1': { stockLevel: 1, isUniquePiece: false } },
+			{ 'product-1': makeAvailability({ stockLevel: 1 }) },
 		)
 		expect(result).toEqual({
 			items: [makeItem({ quantity: 1 })],
 			limits: { 'product-1': 1 },
+			removedItems: [],
+		})
+	})
+
+	it('refreshes the stored price when the product price changed', () => {
+		const result = pruneCartToAvailability(
+			[makeItem({ price: 18 })],
+			{ 'product-1': 1 },
+			['product-1'],
+			{ 'product-1': makeAvailability({ price: 22 }) },
+		)
+		expect(result).toEqual({
+			items: [makeItem({ price: 22 })],
+			limits: { 'product-1': 5 },
+			removedItems: [],
+		})
+	})
+
+	it('refreshes the stored name when the product name changed', () => {
+		const result = pruneCartToAvailability(
+			[makeItem({ name: 'Amethyst' })],
+			{ 'product-1': 1 },
+			['product-1'],
+			{ 'product-1': makeAvailability({ name: 'Amethyst Cluster (2026)' }) },
+		)
+		expect(result).toEqual({
+			items: [makeItem({ name: 'Amethyst Cluster (2026)' })],
+			limits: { 'product-1': 5 },
 			removedItems: [],
 		})
 	})
@@ -68,9 +106,23 @@ describe('pruneCartToAvailability', () => {
 			[makeItem({ quantity: 2 })],
 			{ 'product-1': 2 },
 			['product-1'],
-			{ 'product-1': { stockLevel: 5, isUniquePiece: false } },
+			{ 'product-1': makeAvailability() },
 		)
 		expect(result).toBeNull()
+	})
+
+	it('updates price, name, and quantity in one pass', () => {
+		const result = pruneCartToAvailability(
+			[makeItem({ name: 'Amethyst', price: 18, quantity: 4 })],
+			{ 'product-1': 4 },
+			['product-1'],
+			{ 'product-1': makeAvailability({ name: 'Amethyst Cluster', price: 22, stockLevel: 2 }) },
+		)
+		expect(result).toEqual({
+			items: [makeItem({ name: 'Amethyst Cluster', price: 22, quantity: 2 })],
+			limits: { 'product-1': 2 },
+			removedItems: [],
+		})
 	})
 
 	it('handles a mix of removal and clamping in one pass', () => {
@@ -87,9 +139,9 @@ describe('pruneCartToAvailability', () => {
 			{ 'product-1': 1, 'product-2': 5, 'product-3': 2 },
 			['product-1', 'product-2', 'product-3'],
 			{
-				'product-1': { stockLevel: 0, isUniquePiece: true },
-				'product-2': { stockLevel: 2, isUniquePiece: false },
-				'product-3': { stockLevel: 2, isUniquePiece: false },
+				'product-1': makeAvailability({ stockLevel: 0, isUniquePiece: true }),
+				'product-2': makeAvailability({ name: 'Rose Quartz', stockLevel: 2 }),
+				'product-3': makeAvailability({ name: 'Celestite', stockLevel: 2 }),
 			},
 		)
 		expect(result).toEqual({

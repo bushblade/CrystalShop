@@ -175,11 +175,24 @@ describe('items validation', () => {
 		['non-integer quantity', checkoutBody([{ id: 'product-post', quantity: 1.5 }])],
 		['zero quantity', checkoutBody([{ id: 'product-post', quantity: 0 }])],
 		['negative quantity', checkoutBody([{ id: 'product-post', quantity: -1 }])],
+		['quantity above the maximum', checkoutBody([{ id: 'product-post', quantity: 1000 }])],
 	])('rejects %s with 400', async (_label, body) => {
 		stubNetlifyEnv()
 		const { status, body: responseBody } = await invoke(body)
 		expect(status).toBe(400)
 		expect(responseBody).toContain('Invalid request body')
+	})
+
+	it('rejects a cart with too many distinct products with 400', async () => {
+		stubNetlifyEnv()
+		const items = Array.from({ length: 51 }, (_, index) => ({
+			id: `product-${index}`,
+			quantity: 1,
+		}))
+		const { status, body } = await invoke(checkoutBody(items))
+		expect(status).toBe(400)
+		expect(body).toBe('Cart contains too many items')
+		expect(stripeSessionCreateMock).not.toHaveBeenCalled()
 	})
 })
 
@@ -358,6 +371,15 @@ describe('failure handling', () => {
 		stubNetlifyEnv()
 		mockSanity({ products: [postProduct()] })
 		stripeSessionCreateMock.mockRejectedValue(new Error('stripe down'))
+		const { status, body } = await invoke(checkoutBody([{ id: 'product-post', quantity: 1 }]))
+		expect(status).toBe(500)
+		expect(body).toBe('Unable to start checkout — please try again')
+	})
+
+	it('returns 500 when Stripe creates a session without a URL', async () => {
+		stubNetlifyEnv()
+		mockSanity({ products: [postProduct()] })
+		stripeSessionCreateMock.mockResolvedValue({ url: null })
 		const { status, body } = await invoke(checkoutBody([{ id: 'product-post', quantity: 1 }]))
 		expect(status).toBe(500)
 		expect(body).toBe('Unable to start checkout — please try again')
