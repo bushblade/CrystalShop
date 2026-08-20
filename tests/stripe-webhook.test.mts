@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { createCheckoutMetadata } from '../netlify/lib/checkout-metadata'
 import { createSanityClient } from '../netlify/lib/shared-sanity-client'
 import {
 	asSanityClient,
@@ -164,6 +165,30 @@ describe('stripe-webhook guard paths', () => {
 		const { status } = await invoke(body, signature)
 		expect(status).toBe(500)
 	})
+
+	it('returns 500 for a paid event with an incomplete metadata chunk sequence', async () => {
+		stubNetlifyEnv()
+		mockSanity()
+		const metadata = createCheckoutMetadata([
+			{
+				id: 'product-post',
+				name: 'x'.repeat(800),
+				unitPrice: 20,
+				quantity: 1,
+			},
+		])
+		if (!metadata?.items1) throw new Error('expected metadata to use multiple chunks')
+		metadata.items2 = metadata.items1
+		delete metadata.items1
+		const { body, signature } = paidSessionEvent('checkout.session.completed', {
+			id: 'cs_test_badchunks',
+			metadata,
+		})
+
+		const { status } = await invoke(body, signature)
+		expect(status).toBe(500)
+		expect(sanity.transaction).not.toHaveBeenCalled()
+	})
 })
 
 // Fulfillment-path tests. These are unit-level and concurrency-*adjacent*: the
@@ -299,6 +324,38 @@ describe('webhook fulfillment', () => {
 		})
 		expect(sanity.patches).toEqual({ 'product-post': { stockLevel: 3 } })
 		expect(sanity.commit).toHaveBeenCalledTimes(1)
+	})
+
+	it('reassembles chunked metadata and records the order', async () => {
+		stubNetlifyEnv()
+		mockSanity({ stockLevels: [{ _id: 'product-post', stockLevel: 5 }] })
+		const metadata = createCheckoutMetadata([
+			{
+				id: 'product-post',
+				name: 'Clear Quartz with a long checkout snapshot name '.repeat(20),
+				unitPrice: 20,
+				quantity: 2,
+			},
+		])
+		if (!metadata) throw new Error('expected checkout metadata')
+		const { body, signature } = paidSessionEvent('checkout.session.completed', {
+			id: 'cs_test_chunked',
+			metadata,
+		})
+
+		const { status, body: responseBody } = await invoke(body, signature)
+		expect(status).toBe(200)
+		expect(responseBody).toEqual({ received: true })
+		expect(sanity.createdDoc?.items).toEqual([
+			{
+				_key: 'product-post',
+				productId: 'product-post',
+				productName: 'Clear Quartz with a long checkout snapshot name '.repeat(20),
+				quantity: 2,
+				unitPrice: 20,
+			},
+		])
+		expect(sanity.patches).toEqual({ 'product-post': { stockLevel: 3 } })
 	})
 
 	it('fulfills an async_payment_succeeded event', async () => {

@@ -5,6 +5,7 @@ import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
 import { getCartShipping } from '../../src/lib/shipping'
 import { extractShippingRates } from '../../src/lib/siteSettings'
 import { CHECKOUT_ITEMS_QUERY, SITE_SETTINGS_QUERY } from '../../src/queries/sanity'
+import { createCheckoutMetadata } from '../lib/checkout-metadata'
 import { createSanityClient } from '../lib/shared-sanity-client'
 
 const INTEGRATION_IDENTIFIER = 'crystalshop-web'
@@ -24,10 +25,12 @@ type EnrichedItem = {
 	quantity: number
 }
 
+/** Creates a JSON response with the endpoint's status code. */
 function jsonResponse(status: number, body: unknown): Response {
 	return Response.json(body, { status })
 }
 
+/** Validates the browser-supplied cart item shape before querying Sanity. */
 function parseItems(raw: unknown): CheckoutRequestItem[] | null {
 	if (!Array.isArray(raw) || raw.length === 0) return null
 	const items: CheckoutRequestItem[] = []
@@ -41,6 +44,7 @@ function parseItems(raw: unknown): CheckoutRequestItem[] | null {
 	return items
 }
 
+/** Chooses the trusted site origin used for Stripe's success and cancel URLs. */
 function resolveSiteOrigin(req: Request): string {
 	const netlifyUrl = Netlify.env.get('URL')
 	if (netlifyUrl) return netlifyUrl
@@ -49,6 +53,10 @@ function resolveSiteOrigin(req: Request): string {
 	return 'http://localhost:8888'
 }
 
+/**
+ * Revalidates the cart against Sanity and creates a Stripe-hosted Checkout
+ * Session using server-authoritative prices, stock, shipping, and metadata.
+ */
 export default async (req: Request): Promise<Response> => {
 	const key = Netlify.env.get('STRIPE_RESTRICTED_KEY')
 	if (!key) {
@@ -117,6 +125,15 @@ export default async (req: Request): Promise<Response> => {
 
 	const shipping = getCartShipping(items, rates)
 	const origin = resolveSiteOrigin(req)
+	const metadata = createCheckoutMetadata(
+		items.map((item) => ({
+			id: item.id,
+			name: item.name,
+			unitPrice: item.price,
+			quantity: item.quantity,
+		})),
+	)
+	if (!metadata) return jsonResponse(400, 'Cart is too large for checkout')
 
 	const sessionParams: Stripe.Checkout.SessionCreateParams = {
 		mode: 'payment',
@@ -129,16 +146,7 @@ export default async (req: Request): Promise<Response> => {
 				product_data: { name: item.name },
 			},
 		})),
-		metadata: {
-			items: JSON.stringify(
-				items.map((item) => ({
-					id: item.id,
-					name: item.name,
-					unitPrice: item.price,
-					quantity: item.quantity,
-				})),
-			),
-		},
+		metadata,
 		success_url: `${origin}/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
 		cancel_url: `${origin}/shop/checkout/cancel`,
 		integration_identifier: INTEGRATION_IDENTIFIER,

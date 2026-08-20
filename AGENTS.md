@@ -110,6 +110,11 @@ Follow-up: `FadeInImage` currently uses a flat dominant colour backdrop only. Sa
 - **Function definitions**: Use function definitions rather than function
   expressions except for inline anonymous functions for which arrow functions
   are fine.
+- **JSDoc for functions**: Every new or modified production function declaration
+  or definition must have a concise, human-readable JSDoc comment immediately
+  above it. Explain the function's purpose and any non-obvious behavior; use
+  `@param`, `@returns`, or `@throws` tags when they add useful context. Test
+  helpers and trivial inline callbacks do not need JSDoc.
 
 ## Styling Conventions
 
@@ -134,4 +139,3 @@ Follow-up: `FadeInImage` currently uses a flat dominant colour backdrop only. Sa
   `src/pages`, `src/components`, `src/layouts`. Add new template directories
   there — never let `src/queries`, `src/schemaTypes`, or generated types into
   the scan. Do not import `global.css` on `/admin` (Studio keeps its own CSS).
-

@@ -104,12 +104,21 @@ function sessionParams(): Stripe.Checkout.SessionCreateParams {
 	return stripeSessionCreateMock.mock.calls[0][0]
 }
 
+function metadataChunks(params: Stripe.Checkout.SessionCreateParams): [string, string][] {
+	return Object.entries(params.metadata ?? {})
+		.filter(
+			(entry): entry is [string, string] =>
+				/^items\d+$/.test(entry[0]) && typeof entry[1] === 'string',
+		)
+		.sort((a, b) => Number(a[0].slice('items'.length)) - Number(b[0].slice('items'.length)))
+}
+
 function metadataItems(params: Stripe.Checkout.SessionCreateParams): unknown {
-	const items = params.metadata?.items
-	if (typeof items !== 'string') {
-		throw new Error('expected metadata.items to be a string')
-	}
-	return JSON.parse(items)
+	const legacy = params.metadata?.items
+	if (typeof legacy === 'string') return JSON.parse(legacy)
+	const chunks = metadataChunks(params)
+	if (chunks.length === 0) throw new Error('expected checkout item metadata')
+	return JSON.parse(chunks.map(([, value]) => value).join(''))
 }
 
 beforeEach(() => {
@@ -228,6 +237,37 @@ describe('product resolution and stock', () => {
 			{ id: 'product-post', name: 'Clear Quartz', unitPrice: 20, quantity: 2 },
 		])
 	})
+
+	it('chunks a large item snapshot below Stripe metadata value limits', async () => {
+		stubNetlifyEnv()
+		const products = Array.from({ length: 8 }, (_, index) =>
+			postProduct({
+				_id: `product-${index}`,
+				name: `Natural crystal specimen with a deliberately descriptive name ${index}`,
+				price: 10 + index,
+			}),
+		)
+		mockSanity({ products })
+
+		const { status } = await invoke(
+			checkoutBody(products.map((product) => ({ id: product._id, quantity: 1 }))),
+		)
+		expect(status).toBe(200)
+
+		const params = sessionParams()
+		const chunks = metadataChunks(params)
+		expect(params.metadata?.items).toBeUndefined()
+		expect(chunks.length).toBeGreaterThan(1)
+		expect(chunks.every(([, value]) => value.length < 500)).toBe(true)
+		expect(metadataItems(params)).toEqual(
+			products.map((product) => ({
+				id: product._id,
+				name: product.name,
+				unitPrice: product.price,
+				quantity: 1,
+			})),
+		)
+	})
 })
 
 describe('shipping behavior', () => {
@@ -321,6 +361,17 @@ describe('failure handling', () => {
 		const { status, body } = await invoke(checkoutBody([{ id: 'product-post', quantity: 1 }]))
 		expect(status).toBe(500)
 		expect(body).toBe('Unable to start checkout — please try again')
+	})
+
+	it('returns 400 when the checkout snapshot cannot fit in Stripe metadata', async () => {
+		stubNetlifyEnv()
+		mockSanity({
+			products: [postProduct({ name: 'x'.repeat(23_000) })],
+		})
+		const { status, body } = await invoke(checkoutBody([{ id: 'product-post', quantity: 1 }]))
+		expect(status).toBe(400)
+		expect(body).toBe('Cart is too large for checkout')
+		expect(stripeSessionCreateMock).not.toHaveBeenCalled()
 	})
 })
 

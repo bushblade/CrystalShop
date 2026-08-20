@@ -2,46 +2,18 @@ import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
 import { STOCK_LEVELS_QUERY } from '../../src/queries/sanity'
+import { type CheckoutMetadataItem, parseCheckoutMetadata } from '../lib/checkout-metadata'
 import { createSanityClient } from '../lib/shared-sanity-client'
 
-type MetadataItem = {
-	id: string
-	name: string
-	unitPrice: number
-	quantity: number
-}
-
+/** Creates a JSON response with the webhook's status code. */
 function jsonResponse(status: number, body: unknown): Response {
 	return Response.json(body, { status })
 }
 
-function parseMetadataItems(raw: string | undefined | null): MetadataItem[] | null {
-	if (!raw) return null
-	try {
-		const parsed = JSON.parse(raw) as unknown
-		if (!Array.isArray(parsed) || parsed.length === 0) return null
-		const items: MetadataItem[] = []
-		for (const entry of parsed) {
-			if (typeof entry !== 'object' || entry === null) return null
-			const { id, name, unitPrice, quantity } = entry as {
-				id?: unknown
-				name?: unknown
-				unitPrice?: unknown
-				quantity?: unknown
-			}
-			if (typeof id !== 'string' || id.length === 0) return null
-			if (typeof name !== 'string' || name.length === 0) return null
-			if (typeof unitPrice !== 'number' || !Number.isFinite(unitPrice) || unitPrice <= 0)
-				return null
-			if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 1) return null
-			items.push({ id, name, unitPrice, quantity })
-		}
-		return items
-	} catch {
-		return null
-	}
-}
-
+/**
+ * Verifies Stripe events and idempotently records paid Checkout Sessions while
+ * decrementing the corresponding Sanity product stock in the same transaction.
+ */
 export default async (req: Request): Promise<Response> => {
 	const restrictedKey = Netlify.env.get('STRIPE_RESTRICTED_KEY')
 	const webhookSecret = Netlify.env.get('STRIPE_WEBHOOK_SECRET')
@@ -119,11 +91,11 @@ export default async (req: Request): Promise<Response> => {
 
 	const session = event.data.object as Stripe.Checkout.Session
 
-	const metadataItems = parseMetadataItems(session.metadata?.items)
+	const metadataItems = parseCheckoutMetadata(session.metadata)
 	if (!metadataItems) {
 		// Never silently drop a paid order — surface it so Stripe retries and it
 		// shows up in the logs.
-		console.error(`Session ${session.id} has missing or malformed metadata.items`)
+		console.error(`Session ${session.id} has missing or malformed checkout item metadata`)
 		return jsonResponse(500, 'Order metadata missing or malformed')
 	}
 
@@ -141,7 +113,7 @@ export default async (req: Request): Promise<Response> => {
 	// Merge quantities by product id (defensive — the checkout function already
 	// dedupes, but the webhook must not trust that).
 	const quantitiesById = new Map<string, number>()
-	const itemsById = new Map<string, MetadataItem>()
+	const itemsById = new Map<string, CheckoutMetadataItem>()
 	for (const item of metadataItems) {
 		quantitiesById.set(item.id, (quantitiesById.get(item.id) ?? 0) + item.quantity)
 		itemsById.set(item.id, item)

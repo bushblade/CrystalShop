@@ -312,7 +312,10 @@ heavy-item note render.
       arrange-everything.
   - Build Checkout Session: `mode: 'payment'`, `currency: 'gbp'`,
     `line_items` with `price_data` (unit amount in pence = `round(price * 100)`),
-    `metadata: { items: JSON.stringify([{id, quantity}]) }` for the webhook,
+    chunked checkout metadata (`items0`, `items1`, …) containing the authoritative
+    `{id, name, unitPrice, quantity}` snapshot for the webhook. Each metadata value
+    stays below Stripe's 500-character limit; the webhook also accepts the legacy
+    single `items` value for sessions created before the chunking fix,
     `success_url` → `/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     `cancel_url` → `/shop/checkout/cancel`.
   - `apiVersion: '2026-07-29.dahlia'` on the `Stripe` client instance.
