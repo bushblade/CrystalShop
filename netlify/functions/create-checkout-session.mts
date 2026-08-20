@@ -9,6 +9,7 @@ import { createCheckoutMetadata } from '../lib/checkout-metadata'
 import { createSanityClient } from '../lib/shared-sanity-client'
 
 const INTEGRATION_IDENTIFIER = 'crystalshop-web'
+const CHECKOUT_SESSION_EXPIRY_SECONDS = 30 * 60
 const LOCALHOST_ORIGIN = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
 
 type CheckoutRequestItem = {
@@ -138,6 +139,7 @@ export default async (req: Request): Promise<Response> => {
 	const sessionParams: Stripe.Checkout.SessionCreateParams = {
 		mode: 'payment',
 		currency: 'gbp',
+		expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_EXPIRY_SECONDS,
 		line_items: items.map((item) => ({
 			quantity: item.quantity,
 			price_data: {

@@ -376,6 +376,22 @@ describe('failure handling', () => {
 })
 
 describe('successful session creation', () => {
+	it('expires the Checkout Session after 30 minutes', async () => {
+		const createdAt = new Date('2026-08-20T12:00:00.000Z')
+		vi.useFakeTimers()
+		vi.setSystemTime(createdAt)
+		try {
+			stubNetlifyEnv()
+			mockSanity({ products: [postProduct()] })
+
+			const { status } = await invoke(checkoutBody([{ id: 'product-post', quantity: 1 }]))
+			expect(status).toBe(200)
+			expect(sessionParams().expires_at).toBe(Math.floor(createdAt.getTime() / 1000) + 30 * 60)
+		} finally {
+			vi.useRealTimers()
+		}
+	})
+
 	it('returns the checkout URL and builds session params from the cart', async () => {
 		stubNetlifyEnv()
 		mockSanity({

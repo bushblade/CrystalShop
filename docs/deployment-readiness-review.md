@@ -149,12 +149,13 @@ risk should be understood.
 
 #### Recommended mitigation
 
-Set an explicit short `expires_at` on Checkout Sessions. Stripe allows a
-minimum expiry of 30 minutes. This reduces the default abandoned-session window
-and makes stale checkout links less problematic.
+The checkout function now sets an explicit 30-minute `expires_at` on Checkout
+Sessions, which is Stripe's minimum allowed expiry. This reduces the default
+abandoned-session window and makes stale checkout links less problematic.
 
-This does not eliminate the race between two active sessions, but it reduces
-the amount of time inventory can be tied up by abandoned checkouts.
+This does not reserve stock or eliminate the race between two active sessions,
+but it limits how long an abandoned session can later be completed with a stale
+cart snapshot.
 
 The owner should also have a reliable sale notification so any oversell is
 noticed quickly.
@@ -481,7 +482,7 @@ Before launch, the practical order of work is:
 2. Add the missing Checkout URL guard.
 3. Add a reasonable item-count limit and return a clean 400 for oversized
    requests.
-4. Add a short Checkout Session expiry to reduce abandoned-session exposure.
+4. Verify the 30-minute Checkout Session expiry in deployment.
 5. Decide whether to refresh persisted cart names and prices during freshness
    checks. This is a UX improvement rather than a security fix.
 6. Verify Stripe owner notifications and customer receipt settings.
