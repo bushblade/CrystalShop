@@ -2,6 +2,7 @@
 import type { ShippingRate } from '../../lib/shipping'
 import CartDrawer from '../CartDrawer'
 import MobileNav from '../MobileNav'
+import LogoMark from './LogoMark.astro'
 import NavLink from './NavLink.astro'
 
 interface Props {
@@ -15,8 +16,9 @@ const { shippingRates } = Astro.props
 	<nav class="relative mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
 		<a
 			href="/"
-			class="whitespace-nowrap font-display text-xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800 sm:text-2xl"
+			class="flex items-center gap-2 whitespace-nowrap font-display text-xl font-semibold tracking-tight text-stone-950 transition-colors hover:text-violet-800 sm:gap-2.5 sm:text-2xl"
 		>
+			<LogoMark class="h-7 w-7 shrink-0 sm:h-8 sm:w-8" />
 			Eclipsia Crystals
 		</a>
 		<div class="flex items-center gap-3 text-xs font-medium uppercase tracking-[0.14em] text-stone-600 sm:gap-7">
