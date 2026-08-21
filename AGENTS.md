@@ -39,7 +39,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 
 ## Core Tech Stack
 
-- **Framework:** Astro (SSR / Hybrid mode with React islands) [Sanity Astro
+- **Framework:** Astro (SSR `output: 'server'` with React islands) [Sanity Astro
   integration](https://raw.githubusercontent.com/sanity-io/sanity-astro/refs/heads/main/packages/sanity-astro/README.md)
 - **CMS:** Embedded Sanity Studio inside Astro at `/admin` 
 - **Package Manager:** `pnpm` (DO NOT use npm or yarn)
@@ -50,7 +50,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 
 ## Architecture Rules
 
-1. **Embedded Studio:** 
+1. **Embedded Studio:** Sanity Studio is embedded via `@sanity/astro` at `studioBasePath: '/admin'` (see `astro.config.ts:21`). Keep `src/styles/global.css` off `/admin` (Studio owns its CSS) and do not create a standalone Studio deployment.
 2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`. After any schema change, run `pnpm typegen` to regenerate `sanity.types.ts` (and `schema.json`) before committing.
 3. **Product Queries:** Use `src/queries/sanity.ts` for type-safe GROQ queries.
 4. **`sanity.config.ts` runs in two environments — never read env vars with a
@@ -82,10 +82,12 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 - **`/shop`** — All in-stock products, server-rendered, embedding the `CatalogExplorer` React island (`src/components/CatalogExplorer.tsx`). Search / sort / pagination are client-side; state syncs to the URL via `history.replaceState` (`?q=&sort=&page=`).
 - **`/shop/categories/[slug]`** — Server-rendered filtered list for one category (`PRODUCTS_BY_CATEGORY_QUERY`), embedding the same island. Category is a **path**, never a query param. Unknown slug → `Astro.redirect('/shop')`.
 - **`/shop/product/[slug]`** — PDP: gallery, specs, Add to cart button (or "Sold out" badge when `stockLevel === 0`). Sold-out items stay reachable here but are filtered out of listings. Unknown slug → redirect to `/shop`.
-- **`/about`, `/terms`** — Server-rendered from the `siteSettings` singleton's `aboutBody` / `termsBody` portable text. **`/contact`** — Static, with the email link pulled from `siteSettings.contactEmail` (same field feeds the footer via `Layout.astro`). Unknown content renders the page heading only.
+- **`/about`, `/terms`** — Server-rendered from the `siteSettings` singleton's `aboutBody` / `termsBody` portable text. **`/contact`** — Server-rendered; email link fetched from `siteSettings.contactEmail` (same field feeds the footer via `Layout.astro`) and rendered as `mailto:` when present. Also hosts the Netlify Forms contact form (`src/components/ui/ContactForm.tsx` + static skeleton `public/__forms.html` for build-time detection; honeypot `bot-field`). Unknown content renders the page heading only.
+- **`/shipping`** — Server-rendered delivery page listing `siteSettings.shippingRates` tiers (name, weight band, price) and the heavy-item / arrange-everything policy. Empty rates → fallback contact CTA. Linked from PDP and footer.
+- **`/shop/checkout/success`**, **`/shop/checkout/cancel`** — Post-checkout pages. `success` is the Stripe `success_url` (`?session_id={CHECKOUT_SESSION_ID}`); `cancel` confirms the cart is intact. Stock updates via webhook and can lag the redirect — do not show stock-sensitive claims on `success`.
 - **`/admin`** — Embedded Sanity Studio (reserved, from the sanity integration).
 
-Routing rules: product URLs are flat (never nested under category), so re-categorising never breaks links. All listing queries must filter `coalesce(stockLevel, 0) > 0`.
+Routing rules: product URLs are flat (never nested under category), so re-categorising never breaks links. All listing queries must filter `coalesce(stockLevel, 0) > 0`. Checkout sessions expire after 30 minutes (`CHECKOUT_SESSION_EXPIRY_SECONDS` in `netlify/functions/create-checkout-session.mts:12`).
 
 Note: `ProductCard` uses the same `FadeInImage` placeholder pattern as `ProductGallery`. Because cards render in two hydration contexts, reveal needs two mechanisms: (1) inside the `CatalogExplorer client:load` island, the React `useEffect` in `FadeInImage` reveals images; (2) SSR-only pages (`/`) are covered by the bundled `<script>` in `Layout.astro` that queries `img[data-fade-in]` and calls `transitionImage`. Don't drop either. `transitionImage` reveals cached/already-loaded images instantly and fades only fresh loads — deliberate (matches WillAdamsDotDev), don't "simplify" it back to always-fade.
 

@@ -18,7 +18,11 @@ A low-cost, low-maintenance e-commerce store for an artisan crystal seller. Mana
 | `/shop` | All in-stock products with client-side search, sort and pagination (`?q=&sort=&page=`) |
 | `/shop/categories/[slug]` | Server-rendered list for one category |
 | `/shop/product/[slug]` | Product detail — gallery, specs, Add to cart button (or "Sold out" badge) |
-| `/about`, `/contact`, `/terms` | About & Terms render `siteSettings` portable text; Contact links to `siteSettings.contactEmail` (also in the footer) |
+| `/about`, `/terms` | Server-rendered from `siteSettings` `aboutBody` / `termsBody` portable text |
+| `/contact` | Server-rendered; email link from `siteSettings.contactEmail` (also in footer) as `mailto:` + Netlify Forms contact form (honeypot `bot-field`; build-time detection via `public/__forms.html`) |
+| `/shipping` | Server-rendered delivery page listing `siteSettings.shippingRates` tiers and the heavy-item / arrange-everything policy. Linked from PDP and footer |
+| `/shop/checkout/success` | Stripe `success_url` (`?session_id={CHECKOUT_SESSION_ID}`) — order confirmation. Stock updates via webhook and can lag the redirect, so no stock-sensitive claims |
+| `/shop/checkout/cancel` | Stripe `cancel_url` — confirms the cart is intact and checkout was abandoned |
 | `/admin` | Sanity Studio |
 
 Many pieces are unique 1-of-1 items (`isUniquePiece`). When a piece sells out (`stockLevel === 0`) it stays visible on its product page with a "Sold out" badge, but is filtered out of `/shop` and category listings — no backorders.
@@ -39,10 +43,11 @@ Cart (Zustand, localStorage) → POST /api/checkout → Stripe hosted Checkout
 - **`/api/checkout`** — `netlify/functions/create-checkout-session.mts`. Re-fetches
   price/stock/shipping from Sanity (never trusts browser-sent prices), rejects
   out-of-stock items (409), clamps quantities, and returns a Stripe Checkout URL.
+  Guards: rejects unknown ids (400), enforces max 50 distinct products / max 999 per line, splits cart snapshot into chunked `items0…` metadata (Stripe 500-char limit — `netlify/lib/checkout-metadata.ts`), validates the session `url` exists, and sets `expires_at` to 30 min (`CHECKOUT_SESSION_EXPIRY_SECONDS`).
 - **`/api/webhooks/stripe`** — `netlify/functions/stripe-webhook.mts`. Verifies the
   Stripe signature, writes the `order` doc, and atomically decrements stock
   (`max(0, current - quantity)`) in one Sanity transaction. Idempotent — Stripe
-  retries are at-least-once, and a duplicate delivery is ignored.
+  retries are at-least-once, and a duplicate delivery is ignored (deterministic `order-<sessionId>` + transaction + concurrent-create fallback).
 - **Webhook events subscribed:** `checkout.session.completed`,
   `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`.
   These are also the exact three to select when registering the webhook on a new
@@ -57,6 +62,7 @@ Cart (Zustand, localStorage) → POST /api/checkout → Stripe hosted Checkout
   server use the same rule). Any `arrange` item, an overweight total, or unset
   rates means the whole order is arranged with the owner — no shipping step at
   checkout, buyer pays the item total online and the owner contacts them.
+- **Cart freshness:** `src/lib/cartFreshness.ts` re-fetches `PRODUCT_AVAILABILITY_QUERY` (`name`, `price`, `stockLevel`, `isUniquePiece`) before checkout; stale names/prices are refreshed, sold-out or over-limit lines are pruned.
 
 ### Setting up Stripe on a new account (handover)
 
@@ -72,10 +78,12 @@ Endpoint URL: `https://<your-site>/api/webhooks/stripe`
 
 Then in Netlify env set: `STRIPE_WEBHOOK_SECRET` (the `whsec_` the dashboard
 issues for that endpoint — *not* the local `stripe listen` value),
-`STRIPE_RESTRICTED_KEY` and `STRIPE_PUBLISHABLE_KEY` (live keys),
-`STRIPE_EXPECTED_MODE=live`, and `PUBLIC_SANITY_STUDIO_DATASET=production`.
+`STRIPE_RESTRICTED_KEY` (live `rk_…`), `STRIPE_EXPECTED_MODE=live`, and
+`PUBLIC_SANITY_STUDIO_DATASET=production`. `STRIPE_PUBLISHABLE_KEY` (`pk_…`) is
+reserved for a future Stripe.js integration and is not required by the current
+hosted-Checkout flow (server creates the session and returns `session.url`).
 The webhook only processes events whose `livemode` matches `STRIPE_EXPECTED_MODE`,
-so every one of these must flip together.
+so every one of these must flip together. See `docs/deployment-readiness-review.md` for the full production checklist (Sanity CORS, datasets, and end-to-end verification).
 
 ### Testing the webhook locally
 
@@ -97,10 +105,13 @@ CLI forwards the event to `localhost:8888/api/webhooks/stripe`, which creates th
 
 | Command | Action |
 | --- | --- |
-| `pnpm dev` | Start the local dev server |
+| `pnpm dev` | Start the local dev server (Astro only, no functions) |
+| `pnpm dev:netlify` | Run `netlify dev` at `localhost:8888` — serves Astro + Functions for webhook testing |
 | `pnpm build` | Build the production site to `dist/` |
 | `pnpm preview` | Preview the build locally |
 | `pnpm lint` | Run Biome checks |
+| `pnpm test` | Run Vitest suite (cart, shipping, checkout/webhook functions) |
+| `pnpm test:watch` | Vitest in watch mode |
 | `pnpm typegen` | Regenerate `sanity.types.ts` after schema changes |
 | `pnpm seed:dummy` | Create ~60 dummy products in the local dataset (Amethyst/Agate/Citrine) to test catalog pagination, search and sorting |
 | `pnpm seed:dummy:delete` | Remove all dummy products created by the seed script |
@@ -115,8 +126,19 @@ CLI forwards the event to `localhost:8888/api/webhooks/stripe`, which creates th
 | `PUBLIC_SANITY_STUDIO_DATASET` | Yes | Sanity dataset (`development` locally, `production` on Netlify). Must match the livemode gate: `test` keys → `development`, `live` keys → `production` |
 | `SANITY_WRITE_TOKEN` | Yes (functions) | Sanity writer token for `pnpm seed:dummy` **and** the webhook (writes `order` docs + decrements stock) |
 | `STRIPE_RESTRICTED_KEY` | Yes (functions) | Restricted Stripe key (`rk_...`). Server-only — never `PUBLIC_`-prefixed. Used by `/api/checkout` and to verify webhook signatures |
-| `STRIPE_PUBLISHABLE_KEY` | No (frontend) | Stripe publishable key (`pk_...`) — safe to expose to the client; used by Stripe.js |
+| `STRIPE_PUBLISHABLE_KEY` | No — reserved | Stripe publishable key (`pk_...`). Not required by the current hosted-Checkout flow (server creates the session and returns `session.url`). Reserved for a future Stripe.js/Payment Element integration — safe to expose if added |
 | `STRIPE_WEBHOOK_SECRET` | Yes (webhook) | Webhook signing secret (`whsec_...`). Local testing: the value printed by `stripe listen` (see above). Production: the value the dashboard issues when the webhook endpoint is registered — use that one, not the `stripe listen` value |
 | `STRIPE_EXPECTED_MODE` | Yes (webhook) | `test` or `live`. Gates which Stripe events the webhook processes — must match the dataset |
 
-See `.env.example` for a template.
+See `.env.example` for a template. For production CORS, datasets, and end-to-end checks see `docs/deployment-readiness-review.md`.
+
+## Docs
+
+- `docs/deployment-readiness-review.md` — deployment checklist (Sanity production dataset & CORS, Stripe live keys, Netlify env, and end-to-end verification).
+- `docs/plan-c-stripe-migration.md` — archived Stripe Checkout migration plan (11 stages, all complete).
+- `docs/plan-code-quality-audit.md` — archived code-quality audit plan (14 stages, 13 complete + 1 declined as accepted risk).
+
+## Contact form & CORS notes
+
+- **Contact form:** Netlify Forms. `public/__forms.html` is the static skeleton Netlify needs at build time (field names must match `src/components/ui/ContactForm.tsx`); the React island posts to `/__forms.html`. Honeypot is `bot-field`. Form notifications are configured in the Netlify dashboard per site (Forms → contact → Notifications), not in code.
+- **CORS:** the deployed site origin must be allow-listed in Sanity (Manage → CORS) with “Allow credentials” so the embedded Studio at `/admin` and `checkCartFreshness()` (browser-side Sanity fetch in `src/lib/cartFreshness.ts`) work against the production dataset.
