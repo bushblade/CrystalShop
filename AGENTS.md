@@ -1,6 +1,6 @@
 # Project Architectural Guidelines
 
-**Dev environment:** Herdr · Fish shell · Ghostty terminal · Neovim
+**Dev environment:** Herdr · Fish shell · Ghostty terminal · Neovim · Stripe CLI (`stripe listen`) + Netlify CLI (`netlify dev`)
 
 ## Project Goal
 

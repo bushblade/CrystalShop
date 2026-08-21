@@ -2,6 +2,20 @@
 
 A low-cost, low-maintenance e-commerce store for an artisan crystal seller. Managed by the owner via Sanity Studio, fast for shoppers (server-rendered Astro pages with client-side search/filtering), and hosted on Netlify at zero fixed monthly cost.
 
+## Prerequisites
+
+- **Node** `>=22.12.0` (see `package.json:engines`) + **pnpm** (do not use npm/yarn for the project itself)
+- **Stripe CLI** — required to run the project locally with a working checkout/webhook. Install globally:
+
+  ```bash
+  npm install --global @stripe/cli
+  stripe --version
+  stripe login
+  ```
+
+  Without it, `pnpm dev` / browsing still works, but `stripe listen` cannot forward `checkout.session.*` events to `localhost:8888/api/webhooks/stripe`, so no `order` doc is created and stock is never decremented locally.
+- **Netlify CLI** — already in `devDependencies` (`netlify-cli`); runs as `pnpm dev:netlify` (`netlify dev` at `localhost:8888`).
+
 ## Stack
 
 - **Framework:** Astro (SSR) with React islands
@@ -86,6 +100,8 @@ The webhook only processes events whose `livemode` matches `STRIPE_EXPECTED_MODE
 so every one of these must flip together. See `docs/deployment-readiness-review.md` for the full production checklist (Sanity CORS, datasets, and end-to-end verification).
 
 ### Testing the webhook locally
+
+Requires Stripe CLI (see Prerequisites). In two terminals:
 
 ```bash
 # Terminal 1 — forward Stripe events to your local function
