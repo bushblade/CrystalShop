@@ -124,8 +124,8 @@ low sales volume.
 
 **Locations:**
 
-- `netlify/functions/create-checkout-session.mts:95-109`
-- `netlify/functions/stripe-webhook.mts:154-165`
+- `netlify/functions/create-checkout-session.mts:114-130`
+- `netlify/functions/stripe-webhook.mts:161-166`
 
 The checkout function verifies current stock and creates a Stripe Checkout
 Session, but it does not reserve the stock. Stock is only decremented after a
@@ -165,7 +165,7 @@ noticed quickly.
 **Severity:** Medium operational gap. Not necessarily a launch blocker if Stripe
 notifications are verified.
 
-**Location:** `netlify/functions/stripe-webhook.mts:210-210`
+**Location:** `netlify/functions/stripe-webhook.mts:182-183`
 
 The webhook currently records the order and logs a message, but owner dispatch
 notification is still deferred:
@@ -202,8 +202,8 @@ workflow.
 
 **Locations:**
 
-- `netlify/functions/create-checkout-session.mts:166-167`
-- `src/hooks/useCartDrawer.ts:186-188`
+- `netlify/functions/create-checkout-session.mts:189-193`
+- `src/hooks/useCartDrawer.ts:188-190`
 
 The function returns `session.url` directly:
 
@@ -230,7 +230,7 @@ which routes to the existing inline drawer error.
 
 **Severity:** Low. Resolved in the current implementation; verify in deployment.
 
-**Location:** `netlify/functions/create-checkout-session.mts:31-42`
+**Location:** `netlify/functions/create-checkout-session.mts:37-55`
 
 `parseItems()` validates the shape of each item, but there is no explicit limit
 on the number of entries. Stripe Checkout has a maximum number of line items.
@@ -264,7 +264,7 @@ verify in deployment.
 **Locations:**
 
 - `src/lib/cart.ts:9-18`
-- `src/lib/cartFreshness.ts:17-47`
+- `src/lib/cartFreshness.ts:31-73`
 - `src/queries/sanity.ts:97-99`
 
 Cart lines persist the product name and price in local storage. The freshness

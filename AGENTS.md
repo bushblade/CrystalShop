@@ -50,7 +50,7 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
 
 ## Architecture Rules
 
-1. **Embedded Studio:** Sanity Studio is embedded via `@sanity/astro` at `studioBasePath: '/admin'` (see `astro.config.ts:21`). Keep `src/styles/global.css` off `/admin` (Studio owns its CSS) and do not create a standalone Studio deployment.
+1. **Embedded Studio:** Sanity Studio is embedded via `@sanity/astro` at `studioBasePath: '/admin'` (see `astro.config.ts:27`). Keep `src/styles/global.css` off `/admin` (Studio owns its CSS) and do not create a standalone Studio deployment.
 2. **Sanity Schemas:** Store schema definitions in `src/schemaTypes/`. After any schema change, run `pnpm typegen` to regenerate `sanity.types.ts` (and `schema.json`) before committing.
 3. **Product Queries:** Use `src/queries/sanity.ts` for type-safe GROQ queries.
 4. **`sanity.config.ts` runs in two environments — never read env vars with a
@@ -93,7 +93,7 @@ Note: `ProductCard` uses the same `FadeInImage` placeholder pattern as `ProductG
 
 The `data-fade-in` attribute also drives the `<noscript>` fallback in `Layout.astro` (`img[data-fade-in] { opacity: 1 !important; }`) — keep the attribute on every SSR image. The img's fade classes are `opacity-0 motion-safe:transition-[opacity,transform,scale] motion-safe:duration-300`; the transition list must retain `scale` (Tailwind v4's `scale-*` uses the `scale` property, not `transform`) or `ProductCard`'s `group-hover:scale-105` stops animating. Queries feeding cards/gallery must project `dominantColor` (`asset->metadata.palette.dominant.background`); absent it, `FadeInImage` falls back to `bg-stone-100`.
 
-Follow-up: `FadeInImage` currently uses a flat dominant colour backdrop only. Sanity also provides `asset->metadata.lqip` (base64 LQIP, zero deps — matches the Cloudinary `blur:100` trick from WillAdamsDotDev's `ProjectCard`) and `blurHash` (needs a decode lib) per image. Consider layering one of these under the fade as a blurred backdrop — explore on a separate branch.
+Placeholder layering: `FadeInImage` renders a blurred LQIP backdrop (`placeholderLqip`) over a flat dominant-colour fallback — both projected by the shared image projection in `src/queries/sanity.ts` (`asset->metadata.lqip`, `asset->metadata.palette.dominant.background`) and passed by both `ProductCard` and `ProductGallery`. Keep projecting both fields; absent LQIP the dominant colour still shows, and with neither the wrapper falls back to `bg-stone-100`. Sanity also provides `blurHash` per image, but that needs a decode lib — not worth it while LQIP is free.
 
 ## Code Style
 

@@ -356,7 +356,8 @@ when shipping applies.
 **Files:**
 - `netlify/functions/stripe-webhook.mts` — `config = { path: '/api/webhooks/stripe', method: ['POST'] }`.
   - Verify the `STRIPE_SIGNATURE` header with `STRIPE_WEBHOOK_SECRET` before doing
-    anything else. Defense in depth: allowlist Stripe's webhook IPs on the endpoint.
+    anything else. (An IP allowlist was also considered here, but not implemented —
+    the verified signature is the endpoint's trust boundary.)
   - Read env via `Netlify.env.get()`: `STRIPE_RESTRICTED_KEY`, `STRIPE_WEBHOOK_SECRET`,
     Sanity project/dataset, `SANITY_WRITE_TOKEN`.
   - Fulfill on **both** `checkout.session.completed` **and**
