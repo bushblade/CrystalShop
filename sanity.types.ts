@@ -419,12 +419,13 @@ export type PRODUCT_AVAILABILITY_QUERY_RESULT = Array<{
 
 // Source: src/queries/sanity.ts
 // Variable: CHECKOUT_ITEMS_QUERY
-// Query: *[_type == "product" && _id in $ids]{		_id,		name,		price,		stockLevel,		weightInGrams,		deliveryMethod	}
+// Query: *[_type == "product" && _id in $ids]{		_id,		name,		price,		stockLevel,		isUniquePiece,		weightInGrams,		deliveryMethod	}
 export type CHECKOUT_ITEMS_QUERY_RESULT = Array<{
   _id: string;
   name: string;
   price: number;
   stockLevel: number | null;
+  isUniquePiece: boolean | null;
   weightInGrams: number;
   deliveryMethod: "arrange" | "post";
 }>;
@@ -449,7 +450,7 @@ declare module "@sanity/client" {
     '\n\t*[_type == "product" && slug.current == $slug][0]{\n\t\t_id,\n\t\tname,\n\t\t"slug": slug.current,\n\t\tdescription,\n\t\tprice,\n\t\tweightInGrams,\n\t\tdeliveryMethod,\n\t\tcountryOfOrigin,\n\t\tisUniquePiece,\n\t\tstockLevel,\n\t\t"category": category->{ name, "slug": slug.current },\n\t\t"images": images[]{\n\t\t\t\n\t"url": asset->url,\n\t"alt": alt,\n\t"width": asset->metadata.dimensions.width,\n\t"height": asset->metadata.dimensions.height,\n\t"dominantColor": asset->metadata.palette.dominant.background,\n\t"lqip": asset->metadata.lqip\n\n\t\t}\n\t}\n': PRODUCT_BY_SLUG_QUERY_RESULT;
     '\n\t*[_type == "siteSettings"][0]{\n\t\taboutBody,\n\t\ttermsBody,\n\t\tcontactEmail,\n\t\tshippingRates[]{\n\t\t\tname,\n\t\t\tmaxWeightGrams,\n\t\t\tprice\n\t\t}\n\t}\n': SITE_SETTINGS_QUERY_RESULT;
     '\n\t*[_type == "product" && _id in $ids]{ _id, name, price, stockLevel, isUniquePiece }\n': PRODUCT_AVAILABILITY_QUERY_RESULT;
-    '\n\t*[_type == "product" && _id in $ids]{\n\t\t_id,\n\t\tname,\n\t\tprice,\n\t\tstockLevel,\n\t\tweightInGrams,\n\t\tdeliveryMethod\n\t}\n': CHECKOUT_ITEMS_QUERY_RESULT;
+    '\n\t*[_type == "product" && _id in $ids]{\n\t\t_id,\n\t\tname,\n\t\tprice,\n\t\tstockLevel,\n\t\tisUniquePiece,\n\t\tweightInGrams,\n\t\tdeliveryMethod\n\t}\n': CHECKOUT_ITEMS_QUERY_RESULT;
     '\n\t*[_type == "product" && _id in $ids]{ _id, stockLevel }\n': STOCK_LEVELS_QUERY_RESULT;
   }
 }

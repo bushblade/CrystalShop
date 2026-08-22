@@ -2,6 +2,7 @@ import { createClient } from '@sanity/client'
 import { PRODUCT_AVAILABILITY_QUERY } from '../queries/sanity'
 import { SANITY_API_VERSION } from './apiVersions'
 import { type CartItem, useCartStore } from './cart'
+import { maxPurchasableQuantity } from './purchasableQuantity'
 
 export type ProductAvailability = {
 	name: string
@@ -19,7 +20,8 @@ export type PruneResult = {
 /**
  * Prunes cart items based on product availability, returns removed items.
  * Keeps items not in `requestedIds` unchanged. For requested items, clamps
- * quantity to `stockLevel` and removes items that are out of stock.
+ * quantity to the product's purchasable quantity (unique pieces cap at 1)
+ * and removes items that are out of stock.
  * Returns `null` when no items needed removing (cart unchanged).
  *
  * @param items - Current cart line items
@@ -46,12 +48,13 @@ export function pruneCartToAvailability(
 			continue
 		}
 		const product = availability[line.id]
-		if (!product || (product.stockLevel ?? 0) <= 0) {
+		const maxQuantity = product ? maxPurchasableQuantity(product) : 0
+		if (!product || maxQuantity <= 0) {
 			removedItems.push(line.name)
 			changed = true
 			continue
 		}
-		const clampedQuantity = Math.min(line.quantity, product.stockLevel ?? 0)
+		const clampedQuantity = Math.min(line.quantity, maxQuantity)
 		if (
 			clampedQuantity !== line.quantity ||
 			line.name !== product.name ||
@@ -65,7 +68,7 @@ export function pruneCartToAvailability(
 			price: product.price,
 			quantity: clampedQuantity,
 		})
-		newLimits[line.id] = product.stockLevel ?? 0
+		newLimits[line.id] = maxQuantity
 	}
 
 	if (!changed) return null

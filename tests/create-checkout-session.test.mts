@@ -47,6 +47,7 @@ function postProduct(
 		name: 'Clear Quartz',
 		price: 20,
 		stockLevel: 5,
+		isUniquePiece: false,
 		weightInGrams: 200,
 		deliveryMethod: 'post',
 		...overrides,
@@ -248,6 +249,18 @@ describe('product resolution and stock', () => {
 		expect(params.line_items?.[0].price_data?.unit_amount).toBe(2000)
 		expect(metadataItems(params)).toEqual([
 			{ id: 'product-post', name: 'Clear Quartz', unitPrice: 20, quantity: 2 },
+		])
+	})
+
+	it('clamps a unique piece to a single unit even when stock is higher', async () => {
+		stubNetlifyEnv()
+		mockSanity({ products: [postProduct({ isUniquePiece: true, stockLevel: 4 })] })
+		const { status } = await invoke(checkoutBody([{ id: 'product-post', quantity: 2 }]))
+		expect(status).toBe(200)
+		const params = sessionParams()
+		expect(params.line_items?.[0].quantity).toBe(1)
+		expect(metadataItems(params)).toEqual([
+			{ id: 'product-post', name: 'Clear Quartz', unitPrice: 20, quantity: 1 },
 		])
 	})
 

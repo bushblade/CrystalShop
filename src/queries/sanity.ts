@@ -104,6 +104,7 @@ export const CHECKOUT_ITEMS_QUERY = defineQuery(/* groq */ `
 		name,
 		price,
 		stockLevel,
+		isUniquePiece,
 		weightInGrams,
 		deliveryMethod
 	}

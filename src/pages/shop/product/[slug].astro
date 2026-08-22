@@ -27,7 +27,6 @@ const shipping = getCartShipping(
 	shippingRates,
 )
 
-const maxQuantity = product.isUniquePiece ? 1 : (product.stockLevel ?? 0)
 const heroImage = product.images?.[0]
 const cartItem = {
 	id: product._id,
@@ -108,7 +107,6 @@ const cartItem = {
 						<AddToCartButton
 							client:load
 							item={cartItem}
-							maxQuantity={maxQuantity}
 							stockLevel={product.stockLevel ?? 0}
 							isUniquePiece={product.isUniquePiece === true}
 						/>

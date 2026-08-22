@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { type CartItem, useCartStore } from '../lib/cart'
+import { maxPurchasableQuantity } from '../lib/purchasableQuantity'
 import { primaryButtonClasses, primaryButtonSizeClasses } from './ui/buttonClasses'
 import QuantityStepper from './ui/QuantityStepper'
 import Tooltip from './ui/Tooltip'
 
 interface AddToCartButtonProps {
 	item: Omit<CartItem, 'quantity'>
-	maxQuantity: number
 	stockLevel: number
 	isUniquePiece: boolean
 }
@@ -15,12 +15,7 @@ const LOW_STOCK_THRESHOLD = 3
 
 const addToCartButtonClasses = [primaryButtonClasses, primaryButtonSizeClasses.md].join(' ')
 
-export default function AddToCartButton({
-	item,
-	maxQuantity,
-	stockLevel,
-	isUniquePiece,
-}: AddToCartButtonProps) {
+export default function AddToCartButton({ item, stockLevel, isUniquePiece }: AddToCartButtonProps) {
 	const addMany = useCartStore((state) => state.addMany)
 	const inCart = useCartStore(
 		(state) => state.items.find((line) => line.id === item.id)?.quantity ?? 0,
@@ -28,6 +23,8 @@ export default function AddToCartButton({
 	const [selected, setSelected] = useState(1)
 	const [added, setAdded] = useState(false)
 	const timeoutRef = useRef<number | undefined>(undefined)
+
+	const maxQuantity = maxPurchasableQuantity({ isUniquePiece, stockLevel })
 
 	const available = Math.max(0, maxQuantity - inCart)
 	const atMax = inCart >= maxQuantity
