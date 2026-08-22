@@ -7,7 +7,8 @@ const priceFormatter = new Intl.NumberFormat('en-GB', {
  * Formats a number as GBP currency string using en-GB locale.
  * Uses `Intl.NumberFormat` with `style: 'currency'` and `currency: 'GBP'`.
  *
- * @param price - Price in smallest currency units (pence)
+ * @param price - Price in pounds sterling (major units, e.g. 12.5 for £12.50).
+ * Stripe's minor-unit conversion (×100) happens server-side at checkout.
  * @returns Formatted GBP string (e.g., "£12.50")
  */
 export function formatPrice(price: number): string {
