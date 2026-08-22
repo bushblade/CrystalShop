@@ -73,6 +73,20 @@ describe('pruneCartToAvailability', () => {
 		})
 	})
 
+	it('caps a unique piece at one even when stock is higher', () => {
+		const result = pruneCartToAvailability(
+			[makeItem({ quantity: 2 })],
+			{ 'product-1': 2 },
+			['product-1'],
+			{ 'product-1': makeAvailability({ isUniquePiece: true, stockLevel: 5 }) },
+		)
+		expect(result).toEqual({
+			items: [makeItem({ quantity: 1 })],
+			limits: { 'product-1': 1 },
+			removedItems: [],
+		})
+	})
+
 	it('refreshes the stored price when the product price changed', () => {
 		const result = pruneCartToAvailability(
 			[makeItem({ price: 18 })],

@@ -2,6 +2,7 @@ import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
 import type { CHECKOUT_ITEMS_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '../../sanity.types'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
+import { maxPurchasableQuantity } from '../../src/lib/purchasableQuantity'
 import { getCartShipping } from '../../src/lib/shipping'
 import { extractShippingRates } from '../../src/lib/siteSettings'
 import { CHECKOUT_ITEMS_QUERY, SITE_SETTINGS_QUERY } from '../../src/queries/sanity'
@@ -117,15 +118,15 @@ export default async (req: Request): Promise<Response> => {
 	for (const [id, requestedQuantity] of quantitiesById) {
 		const product = productsById.get(id)
 		if (!product) return jsonResponse(400, `Unknown product: ${id}`)
-		const stockLevel = product.stockLevel ?? 0
-		if (stockLevel <= 0) return jsonResponse(409, `Out of stock: ${product.name}`)
+		const maxQuantity = maxPurchasableQuantity(product)
+		if (maxQuantity <= 0) return jsonResponse(409, `Out of stock: ${product.name}`)
 		items.push({
 			id: product._id,
 			name: product.name,
 			price: product.price,
 			weightInGrams: product.weightInGrams,
 			deliveryMethod: product.deliveryMethod,
-			quantity: Math.min(requestedQuantity, stockLevel),
+			quantity: Math.min(requestedQuantity, maxQuantity),
 		})
 	}
 
