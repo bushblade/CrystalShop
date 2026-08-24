@@ -1,10 +1,5 @@
-import {
-	type PickAnimated,
-	type TransitionFn,
-	useReducedMotion,
-	useTransition,
-} from '@react-spring/web'
-import { type RefObject, useEffect, useMemo, useRef, useState } from 'react'
+import type { PickAnimated, TransitionFn } from '@react-spring/web'
+import { type RefObject, useMemo, useState } from 'react'
 // `CheckoutState` lives in the component that renders it (`CartTotals`);
 // importing the type here lets the hook own the state without duplicating the
 // union in a second place.
@@ -13,24 +8,14 @@ import type { CartItem } from '../lib/cart'
 import { useCartStore } from '../lib/cart'
 import { type CartTotals, computeCartTotals } from '../lib/cartTotals'
 import type { ShippingRate } from '../lib/shipping'
-import { lockScroll, unlockScroll } from '../utils/scrollLock'
+import { useOverlay } from './useOverlay'
 
-// Selector for every element inside the drawer that keyboard users can Tab to.
-// Disabled controls are skipped, and [tabindex="-1"] elements (the backdrop) are
-// deliberately excluded so Tab never lands on the invisible full-screen overlay.
-const FOCUSABLE_SELECTOR =
-	'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+// The exact spring shape the drawer animates (slide-in x + fade). Naming the
+// concrete transition type lets `CartDrawerPanel` accept the same type the hook
+// produces, so the animated `style` values stay fully typed there too.
+export type DrawerSpringState = { x: number; opacity: number }
+export type DrawerTransitions = TransitionFn<boolean, PickAnimated<DrawerSpringState>>
 
-// Returns every focusable element inside the drawer in DOM order, used by both
-// the initial-focus and focus-trap effects.
-function getFocusableElements(container: HTMLElement): HTMLElement[] {
-	return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
-}
-
-// The complete contract between the hook and the UI layer. `CartDrawer` wires
-// these into the trigger (triggerRef, totals.count, openCart) and hands the rest
-// to `CartDrawerPanel` (transitions, drawerRef, items, limits, quantity/remove
-// handlers, totals, checkoutState, closeCart, handleCheckout).
 export interface UseCartDrawerReturn {
 	open: boolean
 	openCart: () => void
@@ -47,16 +32,13 @@ export interface UseCartDrawerReturn {
 	remove: (id: string) => void
 }
 
-// The exact spring shape the drawer animates (slide-in x + fade). Naming the
-// concrete transition type lets `CartDrawerPanel` accept the same type the hook
-// produces, so the animated `style` values stay fully typed there too.
-export type DrawerSpringState = { x: number; opacity: number }
-export type DrawerTransitions = TransitionFn<boolean, PickAnimated<DrawerSpringState>>
-
 /**
- * Owns the entire cart drawer lifecycle — open/close, Escape handling, scroll
- * locking, focus management, the spring animation, and cart totals — plus the
- * checkout flow.
+ * Owns the cart drawer's own concerns — open/close wiring, cart items/limits
+ * with their mutators, derived totals, and the checkout flow.
+ *
+ * Everything generic to floating panels (animation, focus management, Escape,
+ * focus trap, scroll lock) lives in {@link useOverlay}; this hook only adapts
+ * its output to the drawer's vocabulary and layers checkout on top.
  *
  * The component layer stays presentational: `CartDrawer` wires this hook's
  * output into `CartTrigger` and hands the rest to `CartDrawerPanel`, neither of
@@ -74,99 +56,31 @@ export function useCartDrawer(shippingRates: ShippingRate[]): UseCartDrawerRetur
 	const limits = useCartStore((state) => state.limits)
 	const setQuantity = useCartStore((state) => state.setQuantity)
 	const remove = useCartStore((state) => state.remove)
-	const [open, setOpen] = useState(false)
 	const [checkoutState, setCheckoutState] = useState<CheckoutState>('idle')
 
-	const triggerRef = useRef<HTMLButtonElement>(null)
-	const drawerRef = useRef<HTMLDivElement>(null)
-	// The element focus should return to when the drawer closes (the Cart button).
-	const restoreFocusRef = useRef<HTMLElement | null>(null)
-	// Keeps the latest `open` value readable inside the spring's onRest callback,
-	// which is a closure that would otherwise capture a stale value.
-	const openRef = useRef(open)
-	openRef.current = open
-
-	const reduceMotion = useReducedMotion()
-	const transitions: DrawerTransitions = useTransition(open, {
-		// The drawer slides in from the right (x: 384px) and fades.
-		from: { x: 384, opacity: 0 },
-		enter: { x: 0, opacity: 1 },
-		leave: { x: 384, opacity: 0 },
-		config: reduceMotion ? { duration: 0 } : { tension: 210, friction: 26 },
-		// onRest fires every time an animation settles. When the leave animation
-		// finishes (open is now false), the drawer node is about to unmount — this
-		// is the right moment to hand focus back to the Cart button so it isn't
-		// lost when the drawer tears down. The guard skips the enter animation.
-		onRest: () => {
-			if (openRef.current) return
-			restoreFocusRef.current?.focus()
-			restoreFocusRef.current = null
-		},
-	})
+	// The drawer slides in from the right (x: 384px) and fades; it traps focus
+	// and locks page scroll while open — both are drawer-specific behaviours.
+	const { open, openOverlay, closeOverlay, transitions, triggerRef, panelRef } = useOverlay<
+		DrawerSpringState,
+		HTMLDivElement
+	>(
+		{ from: { x: 384, opacity: 0 }, enter: { x: 0, opacity: 1 }, leave: { x: 384, opacity: 0 } },
+		{ trapFocus: true, lockScroll: true },
+	)
 
 	// All cart arithmetic (count, subtotal, shipping, total) lives in the pure
 	// `computeCartTotals` helper so it's independently testable; this memo just
 	// recomputes it when the cart or shipping rates change.
 	const totals = useMemo(() => computeCartTotals(items, shippingRates), [items, shippingRates])
 
-	// On open: remember where focus was (the Cart button) and move focus into the
-	// drawer — the first focusable element is the ✕ close button.
-	useEffect(() => {
-		if (!open) return
-		restoreFocusRef.current = triggerRef.current
-		const container = drawerRef.current
-		if (!container) return
-		const focusables = getFocusableElements(container)
-		;(focusables[0] ?? container).focus()
-	}, [open])
-
-	// While open: trap keyboard focus inside the drawer, lock page scroll, and
-	// close on Escape. The Tab handler wraps focus between the first and last
-	// focusable elements, and also pulls focus back in if it ever ends up
-	// outside the drawer.
-	useEffect(() => {
-		if (!open) return
-		function onKeyDown(event: KeyboardEvent) {
-			if (event.key === 'Escape') {
-				setOpen(false)
-				return
-			}
-			if (event.key !== 'Tab') return
-			const container = drawerRef.current
-			if (!container) return
-			const focusables = getFocusableElements(container)
-			if (focusables.length === 0) return
-			const first = focusables[0]
-			const last = focusables[focusables.length - 1]
-			const current = document.activeElement
-			if (event.shiftKey) {
-				// Shift+Tab from the first element (or when focus escaped) → last.
-				if (current === first || !container.contains(current)) {
-					event.preventDefault()
-					last.focus()
-				}
-			} else if (current === last || !container.contains(current)) {
-				// Tab from the last element (or when focus escaped) → first.
-				event.preventDefault()
-				first.focus()
-			}
-		}
-		document.addEventListener('keydown', onKeyDown)
-		lockScroll()
-		return () => {
-			document.removeEventListener('keydown', onKeyDown)
-			unlockScroll()
-		}
-	}, [open])
-
 	function openCart() {
-		setOpen(true)
+		openOverlay()
 	}
 
 	// Closes the drawer and resets checkout state so a failed attempt isn't
 	// replayed the next time it opens.
 	function closeCart() {
-		setOpen(false)
+		closeOverlay()
 		setCheckoutState('idle')
 	}
 
@@ -200,9 +114,9 @@ export function useCartDrawer(shippingRates: ShippingRate[]): UseCartDrawerRetur
 		closeCart,
 		checkoutState,
 		handleCheckout,
-		transitions,
+		transitions: transitions as DrawerTransitions,
 		triggerRef,
-		drawerRef,
+		drawerRef: panelRef,
 		totals,
 		items,
 		limits,
