@@ -2,6 +2,7 @@ import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
 import type { CHECKOUT_ITEMS_QUERY_RESULT, SITE_SETTINGS_QUERY_RESULT } from '../../sanity.types'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
+import { toPence } from '../../src/lib/money'
 import { maxPurchasableQuantity } from '../../src/lib/purchasableQuantity'
 import { getCartShipping } from '../../src/lib/shipping'
 import { extractShippingRates } from '../../src/lib/siteSettings'
@@ -157,7 +158,7 @@ export default async (req: Request): Promise<Response> => {
 			quantity: item.quantity,
 			price_data: {
 				currency: 'gbp',
-				unit_amount: Math.round(item.price * 100),
+				unit_amount: toPence(item.price),
 				product_data: { name: item.name },
 			},
 		})),
@@ -172,7 +173,7 @@ export default async (req: Request): Promise<Response> => {
 							shipping_rate_data: {
 								type: 'fixed_amount',
 								fixed_amount: {
-									amount: Math.round(shipping.rate.price * 100),
+									amount: toPence(shipping.rate.price),
 									currency: 'gbp',
 								},
 								display_name: shipping.rate.name,

@@ -24,3 +24,15 @@ hook under `src/hooks/`; panel-specific extras live with each overlay (the
 drawer adds a full focus trap and scroll lock; the mobile menu adds
 click-outside dismissal). Never hand-roll the shared lifecycle inside an
 individual overlay hook.
+
+## Money units
+
+Money is held in pounds sterling — 2dp doubles — everywhere user-facing:
+Sanity docs, cart state, display, order records. Stripe's APIs take integer
+pence instead. The two conventions meet at exactly one crossing point,
+`src/lib/money.ts` (`toPence`/`toPounds`), which rounds once per scalar at
+that seam so floating-point representation error never reaches a charge.
+Display formatting stays in `src/lib/format.ts`; charged totals are computed
+by Stripe from per-line amounts, never summed from floats client-side. Never
+multiply/divide by 100 inline, and never accumulate or re-round amounts in
+pence space.

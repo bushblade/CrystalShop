@@ -1,6 +1,7 @@
 import type { Config } from '@netlify/functions'
 import Stripe from 'stripe'
 import { STRIPE_API_VERSION } from '../../src/lib/apiVersions'
+import { toPounds } from '../../src/lib/money'
 import { STOCK_LEVELS_QUERY } from '../../src/queries/sanity'
 import { type CheckoutMetadataItem, parseCheckoutMetadata } from '../lib/checkout-metadata'
 import { createSanityClient } from '../lib/shared-sanity-client'
@@ -142,7 +143,7 @@ export default async (req: Request): Promise<Response> => {
 		sessionId: session.id,
 		paymentIntentId: typeof session.payment_intent === 'string' ? session.payment_intent : null,
 		livemode: event.livemode,
-		total: (session.amount_total ?? 0) / 100,
+		total: toPounds(session.amount_total ?? 0),
 		currency: session.currency,
 		items: [...quantitiesById.keys()].map((id) => {
 			const item = itemsById.get(id)
