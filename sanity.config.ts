@@ -1,26 +1,22 @@
 import { visionTool } from '@sanity/vision'
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
-
+import { resolveSanityCredentials } from './src/lib/sanityEnvironment'
 import { schemaTypes } from './src/schemaTypes'
 import { structure } from './src/structure'
 
-function getRequiredEnvVar(name: string): string {
-	const value = typeof process !== 'undefined' ? process.env[name] : import.meta.env[name]
-	if (!value) {
-		throw new Error(`Missing required environment variable: ${name}`)
-	}
-	return value
-}
-
-const projectId = getRequiredEnvVar('PUBLIC_SANITY_STUDIO_PROJECT_ID')
-const dataset = getRequiredEnvVar('PUBLIC_SANITY_STUDIO_DATASET')
+// The Studio bundle runs this config in the browser (no `process`) while
+// `pnpm typegen` runs it in Node (no `import.meta.env`), so the env reader
+// itself has to work in both — see AGENTS.md.
+const credentials = resolveSanityCredentials((name) =>
+	typeof process !== 'undefined' ? process.env[name] : import.meta.env[name],
+)
 
 export default defineConfig({
 	name: 'crystal-shop',
 	title: 'Crystal Shop',
-	projectId,
-	dataset,
+	projectId: credentials.projectId,
+	dataset: credentials.dataset,
 	plugins: [structureTool({ structure }), visionTool()],
 	schema: {
 		types: schemaTypes,

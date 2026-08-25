@@ -7,12 +7,10 @@ import { defineConfig } from 'astro/config'
 import { loadEnv } from 'vite'
 
 import { SANITY_API_VERSION } from './src/lib/apiVersions'
+import { resolveSanityCredentials } from './src/lib/sanityEnvironment'
 
-const { PUBLIC_SANITY_STUDIO_PROJECT_ID, PUBLIC_SANITY_STUDIO_DATASET } = loadEnv(
-	process.env.NODE_ENV ?? 'development',
-	process.cwd(),
-	'',
-)
+const env = loadEnv(process.env.NODE_ENV ?? 'development', process.cwd(), '')
+const credentials = resolveSanityCredentials((name) => env[name])
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,8 +18,8 @@ export default defineConfig({
 	adapter: netlify(),
 	integrations: [
 		sanity({
-			projectId: PUBLIC_SANITY_STUDIO_PROJECT_ID,
-			dataset: PUBLIC_SANITY_STUDIO_DATASET,
+			projectId: credentials.projectId,
+			dataset: credentials.dataset,
 			apiVersion: SANITY_API_VERSION,
 			useCdn: true,
 			studioBasePath: '/admin',

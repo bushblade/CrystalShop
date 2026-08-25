@@ -58,19 +58,16 @@ Build a low-cost, low-maintenance e-commerce store for an artisan crystal seller
    via the `sanity:studio` virtual module, while `pnpm typegen` executes it in
    Node. `process` doesn't exist in the browser and `import.meta.env` doesn't
    exist in Node, so a plain `process.env` or `import.meta.env` read breaks one
-   of them. Always use the dual guard:
+   of them. The canonical variable names, validation, error message, and the
+   server-trust client options (`useCdn: false`, `perspective: 'published'`)
+   live in `src/lib/sanityEnvironment.ts`. Never hand-roll them at a call site.
+   Each runtime supplies its own env reader to `resolveSanityCredentials` —
+   e.g. `sanity.config.ts` still needs the dual guard *in its reader*:
 
    ```ts
-   function getRequiredEnvVar(name: string): string {
-     const value =
-       typeof process !== 'undefined'
-         ? process.env[name]
-         : import.meta.env[name]
-     if (!value) {
-       throw new Error(`Missing required environment variable: ${name}`)
-     }
-     return value
-   }
+   const credentials = resolveSanityCredentials((name) =>
+     typeof process !== 'undefined' ? process.env[name] : import.meta.env[name],
+   )
    ```
 
    Do not "simplify" this to either single form — commit a5c06e0 did and broke

@@ -3,6 +3,11 @@ import { PRODUCT_AVAILABILITY_QUERY } from '../queries/sanity'
 import { SANITY_API_VERSION } from './apiVersions'
 import { type CartItem, useCartStore } from './cart'
 import { maxPurchasableQuantity } from './purchasableQuantity'
+import {
+	resolveSanityCredentials,
+	type SanityCredentials,
+	serverTrustClientOptions,
+} from './sanityEnvironment'
 
 export type ProductAvailability = {
 	name: string
@@ -76,27 +81,29 @@ export function pruneCartToAvailability(
 }
 
 /**
- * Fetches current product availability from Sanity and updates cart state.
- * Gets availability for all cart items via GROQ query, prunes the cart,
- * and updates the store. Returns array of removed item names.
- * Returns empty array if cart is empty or no items needed pruning.
+ * Fetches current product availability for the given product IDs.
  *
- * @returns Promise array of removed item names, or empty array if no changes
+ * @param ids - Product IDs to look up
+ * @returns Availability keyed by product ID (missing IDs are simply absent)
  */
-export async function checkCartFreshness(): Promise<string[]> {
-	const state = useCartStore.getState()
-	if (state.items.length === 0) return []
+export type FetchAvailability = (ids: string[]) => Promise<Record<string, ProductAvailability>>
 
-	const requestedIds = [...new Set(state.items.map((line) => line.id))]
-	const client = createClient({
-		projectId: import.meta.env.PUBLIC_SANITY_STUDIO_PROJECT_ID,
-		dataset: import.meta.env.PUBLIC_SANITY_STUDIO_DATASET,
-		apiVersion: SANITY_API_VERSION,
-		useCdn: false,
-	})
-
-	const matches = await client.fetch(PRODUCT_AVAILABILITY_QUERY, { ids: requestedIds })
-	const availability: Record<string, ProductAvailability> = Object.fromEntries(
+/**
+ * Maps Sanity query rows into the availability record used by pruning.
+ *
+ * @param matches - Rows returned by `PRODUCT_AVAILABILITY_QUERY`
+ * @returns Availability keyed by product ID
+ */
+function toAvailabilityRecord(
+	matches: Array<{
+		_id: string
+		name: string
+		price: number
+		stockLevel: number | null
+		isUniquePiece: boolean | null
+	}>,
+): Record<string, ProductAvailability> {
+	return Object.fromEntries(
 		matches.map((match) => [
 			match._id,
 			{
@@ -107,6 +114,48 @@ export async function checkCartFreshness(): Promise<string[]> {
 			},
 		]),
 	)
+}
+
+/**
+ * Fetches availability from Sanity using browser env vars. Reads published
+ * content fresh from the API (never CDN, never drafts) so cart trimming can't
+ * be driven by stale or unpublished data — same trust policy as checkout.
+ *
+ * @param ids - Product IDs to look up
+ * @returns Availability keyed by product ID
+ */
+async function fetchAvailabilityFromSanity(
+	ids: string[],
+): Promise<Record<string, ProductAvailability>> {
+	const credentials: SanityCredentials = resolveSanityCredentials((name) => import.meta.env[name])
+	const client = createClient({
+		...credentials,
+		apiVersion: SANITY_API_VERSION,
+		...serverTrustClientOptions,
+	})
+	const matches = await client.fetch(PRODUCT_AVAILABILITY_QUERY, { ids })
+	return toAvailabilityRecord(matches)
+}
+
+/**
+ * Fetches current product availability from Sanity and updates cart state.
+ * Gets availability for all cart items via GROQ query, prunes the cart,
+ * and updates the store. Returns array of removed item names.
+ * Returns empty array if cart is empty or no items needed pruning.
+ * The fetch step is injectable so tests can supply canned answers without
+ * a network or env vars; production callers use the default unchanged.
+ *
+ * @param fetchAvailability - Availability source; defaults to live Sanity
+ * @returns Promise array of removed item names, or empty array if no changes
+ */
+export async function checkCartFreshness(
+	fetchAvailability: FetchAvailability = fetchAvailabilityFromSanity,
+): Promise<string[]> {
+	const state = useCartStore.getState()
+	if (state.items.length === 0) return []
+
+	const requestedIds = [...new Set(state.items.map((line) => line.id))]
+	const availability = await fetchAvailability(requestedIds)
 
 	const current = useCartStore.getState()
 	const result = pruneCartToAvailability(current.items, current.limits, requestedIds, availability)

@@ -1,7 +1,38 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { CartItem } from './cart'
-import { type ProductAvailability, pruneCartToAvailability } from './cartFreshness'
+import { type CartItem, useCartStore } from './cart'
+import {
+	checkCartFreshness,
+	type ProductAvailability,
+	pruneCartToAvailability,
+} from './cartFreshness'
+
+/**
+ * Installs an in-memory localStorage stand-in before any import runs. The
+ * cart store resolves its persist storage eagerly at module load, so the
+ * stand-in must already be on `globalThis` by then — Node's built-in
+ * localStorage exists but is unusable without `--localstorage-file`.
+ */
+// Runs before imports so the store's eager storage resolution finds it.
+vi.hoisted(() => {
+	const data: Record<string, string> = {}
+	globalThis.localStorage = {
+		getItem: (key: string) => data[key] ?? null,
+		setItem: (key: string, value: string) => {
+			data[key] = value
+		},
+		removeItem: (key: string) => {
+			delete data[key]
+		},
+		clear: () => {
+			for (const key of Object.keys(data)) delete data[key]
+		},
+		key: (index: number) => Object.keys(data)[index] ?? null,
+		get length() {
+			return Object.keys(data).length
+		},
+	} as Storage
+})
 
 function makeItem(overrides: Partial<CartItem> = {}): CartItem {
 	return {
@@ -166,5 +197,68 @@ describe('pruneCartToAvailability', () => {
 			limits: { 'product-2': 2, 'product-3': 2 },
 			removedItems: ['Amethyst Cluster'],
 		})
+	})
+})
+
+describe('checkCartFreshness', () => {
+	beforeEach(() => {
+		globalThis.localStorage.clear()
+		useCartStore.setState({ items: [], limits: {} })
+	})
+
+	it('returns no removals and skips fetching when the cart is empty', async () => {
+		let fetchCalls = 0
+		const removed = await checkCartFreshness(async () => {
+			fetchCalls++
+			return {}
+		})
+		expect(removed).toEqual([])
+		expect(fetchCalls).toBe(0)
+	})
+
+	it('fetches once per distinct id and trims the store to availability', async () => {
+		useCartStore.setState({
+			items: [makeItem(), makeItem({ id: 'product-2', name: 'Rose Quartz', quantity: 3 })],
+			limits: { 'product-1': 1, 'product-2': 3 },
+		})
+		const requestedIds: string[][] = []
+		const removed = await checkCartFreshness(async (ids) => {
+			requestedIds.push(ids)
+			return {
+				'product-1': makeAvailability({ stockLevel: 0 }),
+				'product-2': makeAvailability({ name: 'Rose Quartz', stockLevel: 2 }),
+			}
+		})
+		expect(requestedIds).toEqual([['product-1', 'product-2']])
+		expect(removed).toEqual(['Amethyst Cluster'])
+		expect(useCartStore.getState().items).toEqual([
+			makeItem({ id: 'product-2', name: 'Rose Quartz', quantity: 2 }),
+		])
+		expect(useCartStore.getState().limits).toEqual({ 'product-2': 2 })
+	})
+
+	it('leaves the store untouched and reports nothing when everything matches', async () => {
+		useCartStore.setState({ items: [makeItem()], limits: { 'product-1': 5 } })
+		const removed = await checkCartFreshness(async () => ({
+			'product-1': makeAvailability(),
+		}))
+		expect(removed).toEqual([])
+		expect(useCartStore.getState().items).toEqual([makeItem()])
+		expect(useCartStore.getState().limits).toEqual({ 'product-1': 5 })
+	})
+
+	it('keeps items added while the fetch was in flight', async () => {
+		useCartStore.setState({ items: [makeItem()], limits: { 'product-1': 1 } })
+		const freshAdd = makeItem({ id: 'product-2', name: 'Rose Quartz' })
+		const removed = await checkCartFreshness(async () => {
+			useCartStore.setState({
+				items: [makeItem(), freshAdd],
+				limits: { 'product-1': 1, 'product-2': 2 },
+			})
+			return {}
+		})
+		expect(removed).toEqual(['Amethyst Cluster'])
+		expect(useCartStore.getState().items).toEqual([freshAdd])
+		expect(useCartStore.getState().limits).toEqual({ 'product-2': 2 })
 	})
 })

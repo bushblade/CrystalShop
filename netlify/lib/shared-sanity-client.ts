@@ -1,26 +1,19 @@
 import { createClient } from '@sanity/client'
 import { SANITY_API_VERSION } from '../../src/lib/apiVersions'
+import { resolveSanityCredentials, serverTrustClientOptions } from '../../src/lib/sanityEnvironment'
 
 // Shared functions-side Sanity client, distinct from Astro's `sanity:client`
-// used in pages. Reads env via the Netlify runtime global so it works under
-// both `netlify dev` and deployed functions. Always reads fresh, published
-// content — never the CDN, never drafts — so checkout can't be priced or
-// stocked from stale or unpublished data.
+// used in pages. Thin adapter: which project/dataset and the trust policy
+// live in `src/lib/sanityEnvironment.ts`; all this adds is how a Netlify
+// function reads env vars (via the Netlify runtime global, working under
+// both `netlify dev` and deployed functions) plus optional write token.
 export function createSanityClient(token?: string) {
-	const projectId = Netlify.env.get('PUBLIC_SANITY_STUDIO_PROJECT_ID')
-	const dataset = Netlify.env.get('PUBLIC_SANITY_STUDIO_DATASET')
-	if (!projectId) {
-		throw new Error('Missing required environment variable: PUBLIC_SANITY_STUDIO_PROJECT_ID')
-	}
-	if (!dataset) {
-		throw new Error('Missing required environment variable: PUBLIC_SANITY_STUDIO_DATASET')
-	}
+	const { projectId, dataset } = resolveSanityCredentials((name) => Netlify.env.get(name))
 	return createClient({
 		projectId,
 		dataset,
 		apiVersion: SANITY_API_VERSION,
-		useCdn: false,
-		perspective: 'published',
+		...serverTrustClientOptions,
 		token,
 	})
 }
