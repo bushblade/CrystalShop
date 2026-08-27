@@ -19,6 +19,13 @@
 			"type": "remote",
 			"url": "https://netlify-mcp.netlify.app/mcp",
 			"enabled": true
+		},
+		"stripe": {
+			"type": "remote",
+			"url": "https://mcp.stripe.com",
+			"headers": {
+				"Authorization": "{file:~/SyncThing/.secrets/stripe-api-key}"
+			}
 		}
 	}
 }
